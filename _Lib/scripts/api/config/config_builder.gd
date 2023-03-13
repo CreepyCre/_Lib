@@ -544,9 +544,16 @@ class ForwardedDictionaryConfig:
 
     func _init(owner: Control, nodes: Array):
         _owner = owner
+        add_entries(nodes)
+        
+    
+    func add_entries(nodes: Array):
         for node in nodes:
             if node.has_method("get_config_access"):
-                _entries[node.get_save_entry()] = node.get_config_access()
+                if node.has_method("is_flattened") and node.is_flattened():
+                    add_entries(_get_target(node).get_children())
+                else:
+                    _entries[node.get_save_entry()] = node.get_config_access()
     
     func _get(property: String):
         return _entries[property].get_config_value()
@@ -563,3 +570,9 @@ class ForwardedDictionaryConfig:
     
     func get_config_value():
         return self
+    
+    static func _get_target(node: Control):
+        if node.has_method("get_target"):
+            return node.get_target()
+        else:
+            return node
