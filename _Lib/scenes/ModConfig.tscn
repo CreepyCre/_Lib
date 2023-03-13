@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0.717647, 1, 0.376471 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.25098 )
+
+[node name="ModConfig" type="VBoxContainer"]
+margin_top = 35.0
+margin_right = 616.0
+margin_bottom = 420.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 0
+
+[node name="TitlePanel" type="PanelContainer" parent="."]
+margin_right = 616.0
+margin_bottom = 31.0
+size_flags_horizontal = 3
+custom_styles/panel = SubResource( 1 )
+
+[node name="Title" type="Label" parent="TitlePanel"]
+margin_right = 616.0
+margin_bottom = 31.0
+text = "Title"
+align = 1
+
+[node name="ConfigPanel" type="PanelContainer" parent="."]
+margin_top = 31.0
+margin_right = 616.0
+margin_bottom = 385.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = SubResource( 2 )
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ConfigPanel"]
+margin_right = 616.0
+margin_bottom = 354.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Config" type="VBoxContainer" parent="ConfigPanel/ScrollContainer"]
+margin_right = 616.0
+size_flags_horizontal = 3

@@ -1,0 +1,28 @@
+[gd_scene format=2]
+
+[node name="Mods" type="VBoxContainer"]
+visible = false
+margin_top = 35.0
+margin_right = 616.0
+margin_bottom = 420.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 0
+
+[node name="ModPanel" type="HBoxContainer" parent="."]
+margin_right = 616.0
+margin_bottom = 385.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ModList" type="ItemList" parent="ModPanel"]
+margin_right = 608.0
+margin_bottom = 385.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VSeparator" type="VSeparator" parent="ModPanel"]
+margin_left = 612.0
+margin_right = 616.0
+margin_bottom = 385.0
+size_flags_vertical = 3
