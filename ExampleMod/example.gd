@@ -5,20 +5,59 @@ func start():
         return
     Engine.emit_signal("_lib_register_mod", self)
 
-    var config = self.Global.API.ModConfigApi.create_config("CreepyCre.ExampleMod", "Example Mod Config", self.Global.Root + "config.json")\
-                .check_button("key1", false, "Some Option IDK")\
-                .check_box("key2", false, "Some other Option IDK")\
+    # Can't do comments inbetween the lines here, sadge
+    # we can use enter() and exit() to go into and out of any nodes created
+    # creating an unnamed container will automatically flatten it's config nodes into the parent container:
+    #   .h_box_container().enter()
+    # a named container will get a subsection in the config:
+    #   .v_box_container("sub_section").enter()
+    var builder = self.Global.API.ModConfigApi.create_config("CreepyCre.ExampleMod", "Example Mod Config", self.Global.Root + "config.json")
+    var config = builder\
+                .h_box_container().enter()\
+                    .check_button("key1", false, "Some Option IDK")\
+                    .v_separator()\
+                    .check_box("key2", false, "Some other Option IDK").size_flags_h(Control.SIZE_EXPAND_FILL)\
+                .exit()\
                 .h_separator()\
-                .label("TEXT\n\n\n\n\n\nTEST\n\n\n\nTEST\n\n\n\nscroll?")\
-                .spin_box("key3", 69)\
-                .h_slider("key4", 42)\
+                .label("LABEL")\
+                .option_button("option", 2, ["a", "b", {"label": "c", "icon": load("res://icon.png"), "meta": {"this_is": "a_dict"}}])\
+                .line_edit("line_edit", "This is the default text.")\
+                .scroll_container().rect_min_y(100).rect_y(100).enter()\
+                    .text_edit("text_edit", "A\nB\nC").size_expand_fill()\
+                .exit()\
+                .v_box_container("sub_section").enter()\
+                    .spin_box("key1", 69)\
+                    .h_box_container().enter()\
+                        .label().ref("slider_label")\
+                        .h_slider("slider_val", 42).size_flags_h(Control.SIZE_EXPAND_FILL)\
+                            .connect_to_prop("loaded", builder.get_ref("slider_label"), "text")\
+                            .connect_to_prop("value_changed", builder.get_ref("slider_label"), "text")\
+                    .exit()\
+                .exit()\
+                .h_box_container().enter()\
+                    .color_picker("color1", Color(0, 0, 0, 1))\
+                    .color_picker_button("color2", Color(1, 1, 1, 1)).size_flags_h(Control.SIZE_EXPAND_FILL)\
+                .exit()\
             .build()
+    # builder is freed sometime after build() is called, dereference
+    builder = null
 
     print(JSON.print(config.serialize(), "\t"))
     print(config.key1)
+    # we can also access the node itself by prepending the key with an underscore
+    print(config._key1)
     print(config.key2)
-    print(config.key3)
-    print(config.key4)
+    print(config.color1)
+    print(config.color2)
+    print(config.option)
+    print(config.sub_section.key1)
+    print(config.sub_section.slider_val)
 
+    config.option = "c"
 
-    self.Global.API.PreferencesWindowApi.create_category("CATEGORY")
+    # short example of the PreferencesWindowApi
+    var label = Label.new()
+    label.text = "TESTO"
+    var config_container = self.Global.API.PreferencesWindowApi.create_category("CATEGORY")
+    config_container.add_child(label)
+    label.owner = config_container

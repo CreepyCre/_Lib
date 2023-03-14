@@ -1,6 +1,13 @@
 {
 	"key1": false,
-	"key2": false,
-	"key3": 64,
-	"key4": 42
+	"key2": true,
+	"option": 0,
+	"line_edit": "This is the default text.",
+	"text_edit": "Hello there!",
+	"sub_section": {
+		"key1": 69,
+		"slider_val": 41
+	},
+	"color1": "#ffa3c8b0",
+	"color2": "#fff82828"
 }
