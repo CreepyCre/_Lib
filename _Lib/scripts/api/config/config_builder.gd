@@ -16,8 +16,7 @@ func _init(root: Control, config_file: String):
 static func config(title: String, config_file: String, mod_config_scene, self_script: Script) -> ConfigBuilder:
     var mod_config = mod_config_scene.instance()
     mod_config.get_node("TitlePanel/Title").text = title
-    var v_box = mod_config.get_node("ConfigPanel/ScrollContainer/Config")
-    var wrapped = WrappedControlConfigNode.new("", mod_config, v_box)
+    var wrapped = WrappedControlConfigNode.new("", mod_config, "ConfigPanel/ScrollContainer/Config")
     wrapped.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     wrapped.size_flags_vertical = Control.SIZE_EXPAND_FILL
     return self_script.new(wrapped, config_file)
@@ -25,7 +24,8 @@ static func config(title: String, config_file: String, mod_config_scene, self_sc
 func enter() -> ConfigBuilder:
     _node_stack.append(_current_node)
     _current_node = _last_child_node
-    _last_child_node = _get_target(_last_child_node).get_children().back()
+    var children = _get_target(_last_child_node).get_children()
+    _last_child_node = children.back() if children.size() > 0 else null
     return self
 
 func exit() -> ConfigBuilder:
@@ -57,6 +57,41 @@ func with(property: String, value) -> ConfigBuilder:
         _last_child_node.set(property, value)
     return self
 
+func size_flags_h(flags: int) -> ConfigBuilder:
+    _last_child_node.size_flags_horizontal = flags
+    return self
+
+func size_flags_v(flags: int) -> ConfigBuilder:
+    _last_child_node.size_flags_vertical = flags
+    return self
+
+func size_expand_fill() -> ConfigBuilder:
+    return size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_EXPAND_FILL)
+
+func rect_min_size(min_size: Vector2) -> ConfigBuilder:
+    _last_child_node.rect_min_size = min_size
+    return self
+
+func rect_min_x(min_x: float) -> ConfigBuilder:
+    _last_child_node.rect_min_size = Vector2(min_x, _last_child_node.rect_min_size.y)
+    return self
+
+func rect_min_y(min_y: float) -> ConfigBuilder:
+    _last_child_node.rect_min_size = Vector2(_last_child_node.rect_min_size.x, min_y)
+    return self
+
+func rect_size(min_size: Vector2) -> ConfigBuilder:
+    _last_child_node.rect_min_size = min_size
+    return self
+
+func rect_x(min_x: float) -> ConfigBuilder:
+    _last_child_node.rect_size = Vector2(min_x, _last_child_node.rect_size.y)
+    return self
+
+func rect_y(min_y: float) -> ConfigBuilder:
+    _last_child_node.rect_size = Vector2(_last_child_node.rect_size.x, min_y)
+    return self
+
 func flatten(value: bool = true) -> ConfigBuilder:
     if _last_child_node.has_method("flatten"):
         _last_child_node.flatten(value)
@@ -73,56 +108,82 @@ func get_ref(reference_name: String) -> Control:
     return _references[reference_name]
 
 func call_on(method_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null) -> ConfigBuilder:
-    if (arg9 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    elif (arg8 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-    elif (arg7 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-    elif (arg6 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    elif (arg5 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5)
-    elif (arg4 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2, arg3, arg4)
-    elif (arg3 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2, arg3)
-    elif (arg2 != null):
-        _last_child_node.call(method_name, arg0, arg1, arg2)
-    elif (arg1 != null):
-        _last_child_node.call(method_name, arg0, arg1)
-    elif (arg0 != null):
-        _last_child_node.call(method_name, arg0)
-    else:
-        _last_child_node.call(method_name)
-    return self
+    return _call_on(_last_child_node, method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 
 func call_on_ref(reference_name: String, method_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null) -> ConfigBuilder:
     var ref = _references[reference_name]
     if ref == null:
         return self
-    if (arg9 != null):
-        ref.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    elif (arg8 != null):
-        ref.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-    elif (arg7 != null):
-        ref.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-    elif (arg6 != null):
-        ref.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    elif (arg5 != null):
-        ref.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5)
-    elif (arg4 != null):
-        ref.call(method_name, arg0, arg1, arg2, arg3, arg4)
-    elif (arg3 != null):
-        ref.call(method_name, arg0, arg1, arg2, arg3)
-    elif (arg2 != null):
-        ref.call(method_name, arg0, arg1, arg2)
-    elif (arg1 != null):
-        ref.call(method_name, arg0, arg1)
-    elif (arg0 != null):
-        ref.call(method_name, arg0)
     else:
-        ref.call(method_name)
+        return _call_on(ref, method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+
+func _call_on(target, method_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null) -> ConfigBuilder:
+    if (arg9 != null):
+        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    elif (arg8 != null):
+        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    elif (arg7 != null):
+        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+    elif (arg6 != null):
+        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+    elif (arg5 != null):
+        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5)
+    elif (arg4 != null):
+        target.call(method_name, arg0, arg1, arg2, arg3, arg4)
+    elif (arg3 != null):
+        target.call(method_name, arg0, arg1, arg2, arg3)
+    elif (arg2 != null):
+        target.call(method_name, arg0, arg1, arg2)
+    elif (arg1 != null):
+        target.call(method_name, arg0, arg1)
+    elif (arg0 != null):
+        target.call(method_name, arg0)
+    else:
+        target.call(method_name)
+    return self
+
+func connect_current(signal_name: String, target: Object, method_name: String, binds: Array = [], flags: int = 0) -> ConfigBuilder:
+    _last_child_node.connect(signal_name, target, method_name, binds, flags)
+    return self
+
+func connect_ref(reference_name:String, signal_name: String, target: Object, method_name: String, binds: Array = [], flags: int = 0) -> ConfigBuilder:
+    var ref = _references[reference_name]
+    if ref != null:
+        ref.connect(signal_name, target, method_name, binds, flags)
+    return self
+
+func connect_to_prop(signal_name: String, target, property: String) -> ConfigBuilder:
+    _last_child_node.connect(signal_name, _agent, "_forward_prop", [target, property])
+    return self
+
+func connect_ref_to_prop(reference_name: String, signal_name: String, target, property: String) -> ConfigBuilder:
+    var ref = _references[reference_name]
+    if ref != null:
+        ref.connect(signal_name, _agent, "_forward_prop", [target, property])
+    return self
+
+func add_color_override(name: String, color: Color) -> ConfigBuilder:
+    _last_child_node.add_color_override(name, color)
+    return self
+
+func add_constant_override(name: String, constant: int) -> ConfigBuilder:
+    _last_child_node.add_constant_override(name, constant)
+    return self
+
+func add_font_override(name: String, font: Font) -> ConfigBuilder:
+    _last_child_node.add_font_override(name, font)
+    return self
+
+func add_icon_override(name: String, texture: Texture) -> ConfigBuilder:
+    _last_child_node.add_icon_override(name, texture)
+    return self
+
+func add_shader_override(name: String, shader: Shader) -> ConfigBuilder:
+    _last_child_node.add_shader_override(name, shader)
+    return self
+
+func add_stylebox_override(name: String, stylebox: StyleBox) -> ConfigBuilder:
+    _last_child_node.add_stylebox_override(name, stylebox)
     return self
 
 func wrap(save_entry: String, root_node: Control, target_node = null) -> ConfigBuilder:
@@ -130,6 +191,12 @@ func wrap(save_entry: String, root_node: Control, target_node = null) -> ConfigB
         return add_node(WrappedControlConfigNode.new(save_entry, root_node, target_node)).flatten()
     else:
         return add_node(WrappedControlConfigNode.new(save_entry, root_node, target_node))
+
+func extend(save_entry: String, node: Control) -> ConfigBuilder:
+    if (save_entry == ""):
+        return add_node(ContainerExtensionConfigNode.extend(save_entry, node)).flatten()
+    else:
+        return add_node(ContainerExtensionConfigNode.extend(save_entry, node))
 
 func check_button(save_entry: String, default_value: bool, text: String = "") -> ConfigBuilder:
     return add_node(CheckButtonConfigNode.new(save_entry, default_value)).with("text", text)
@@ -146,44 +213,59 @@ func v_slider(save_entry: String, default_value: float) -> ConfigBuilder:
 func spin_box(save_entry: String, default_value: float) -> ConfigBuilder:
     return add_node(SpinBoxConfigNode.new(save_entry, default_value))
 
+func color_picker(save_entry: String, default_value: Color) -> ConfigBuilder:
+    return add_node(ColorPickerConfigNode.new(save_entry, default_value))
+
+func color_picker_button(save_entry: String, default_value: Color) -> ConfigBuilder:
+    return add_node(ColorPickerButtonConfigNode.new(save_entry, default_value))
+
+func option_button(save_entry: String, default_value: int, options: Array) -> ConfigBuilder:
+    return add_node(OptionButtonConfigNode.new(save_entry, default_value, options))
+
+func line_edit(save_entry: String, default_value: String, require_hit_enter: bool = true) -> ConfigBuilder:
+    return add_node(LineEditConfigNode.new(save_entry, default_value, require_hit_enter))
+
+func text_edit(save_entry: String, default_value: String) -> ConfigBuilder:
+    return add_node(TextEditConfigNode.new(save_entry, default_value))
+    
 func aspect_ratio_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, AspectRatioContainer.new())
+    return extend(save_entry, AspectRatioContainer.new())
 
 func center_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, CenterContainer.new())
+    return extend(save_entry, CenterContainer.new())
 
 func h_box_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, HBoxContainer.new())
+    return extend(save_entry, HBoxContainer.new())
 
 func v_box_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, VBoxContainer.new())
+    return extend(save_entry, VBoxContainer.new())
 
 func grid_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, GridContainer.new())
+    return extend(save_entry, GridContainer.new())
 
 #func h_flow_container(save_entry: String = "") -> ConfigBuilder:
-#    return wrap(save_entry, HFlowContainer.new())
+#    return extend(save_entry, HFlowContainer.new())
 
 #func v_flow_container(save_entry: String = "") -> ConfigBuilder:
-#    return wrap(save_entry, VFlowContainer.new())
+#    return extend(save_entry, VFlowContainer.new())
 
 func h_split_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, HSplitContainer.new())
+    return extend(save_entry, HSplitContainer.new())
 
 func v_split_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, VSplitContainer.new())
+    return extend(save_entry, VSplitContainer.new())
 
 func margin_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, MarginContainer.new())
+    return extend(save_entry, MarginContainer.new())
 
 func panel_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, PanelContainer.new())
+    return extend(save_entry, PanelContainer.new())
 
 func scroll_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, ScrollContainer.new())
+    return extend(save_entry, ScrollContainer.new())
 
 func tab_container(save_entry: String = "") -> ConfigBuilder:
-    return wrap(save_entry, TabContainer.new())
+    return extend(save_entry, TabContainer.new())
 
 # TODO
 func color_rect() -> ConfigBuilder:
@@ -214,10 +296,12 @@ func rich_text_label() -> ConfigBuilder:
 func texture_rect(texture: Texture) -> ConfigBuilder:
     return add_node(TextureRect.new()).with("texture", texture)
 
-func build(should_load: bool = true) -> ConfigAgent:
+func build(should_load: bool = true, should_free: bool = true) -> ConfigAgent:
     if should_load:
         _agent.load_cfg()
     _agent._build_config_access()
+    if should_free:
+        self.call_deferred("free")
     return _agent
 
 func get_agent() -> ConfigAgent:
@@ -277,6 +361,58 @@ class ConfigAgent:
     
     func _build_config_access():
         _config_access = _root.get_config_access()
+    
+    func _forward_prop(value, target, key):
+        target.set(key, value)
+
+class ContainerExtensionConfigNode:
+    extends Control
+
+    var _parent_config_node
+    var _save_entry: String
+    var _flatten: bool = false
+
+    static func extend(save_entry: String, node: Control) -> Control:
+        node.set_script(ContainerExtensionConfigNode)
+        node._save_entry = save_entry
+        return node
+
+    func set_parent_config_node(parent):
+        _parent_config_node = parent
+    
+    func get_save_entry() -> String:
+        return _save_entry
+    
+    func flatten(value: bool = true):
+        _flatten = value
+    
+    func is_flattened():
+        return _flatten
+    
+    func save_cfg(data = {}):
+        for node in get_children():
+            if node.has_method("save_cfg"):
+                if node.has_method("is_flattened") and node.is_flattened():
+                    node.save_cfg(data)
+                else:
+                    data[node.get_save_entry()] = node.save_cfg()
+        return data
+    
+    func load_cfg(data):
+        if data == null or not data is Dictionary:
+            data = {}
+        for node in get_children():
+            if node.has_method("load_cfg"):
+                if node.has_method("is_flattened") and node.is_flattened():
+                    node.load_cfg(data)
+                else:
+                    data[node.get_save_entry()] = node.load_cfg(data[node.get_save_entry()] if data.has(node.get_save_entry()) else null)
+    
+    func get_config_access():
+        return ForwardedDictionaryConfig.new(self, get_children())
+    
+    func mark_dirty():
+        _parent_config_node.mark_dirty()
 
 class WrappedControlConfigNode:
     extends MarginContainer
@@ -344,6 +480,8 @@ class WrappedControlConfigNode:
 class CheckButtonConfigNode:
     extends CheckButton
 
+    signal loaded(value)
+
     var _parent_config_node
     var _save_entry: String
 
@@ -363,6 +501,7 @@ class CheckButtonConfigNode:
     func load_cfg(data):
         if (data != null):
             set_pressed_no_signal(data)
+            emit_signal("loaded", data)
     
     func get_config_access():
         return self
@@ -382,6 +521,8 @@ class CheckButtonConfigNode:
 class CheckBoxConfigNode:
     extends CheckBox
 
+    signal loaded(value)
+
     var _parent_config_node
     var _save_entry: String
 
@@ -401,6 +542,7 @@ class CheckBoxConfigNode:
     func load_cfg(data):
         if (data != null):
             set_pressed_no_signal(data)
+            emit_signal("loaded", data)
     
     func get_config_access():
         return self
@@ -421,6 +563,8 @@ class CheckBoxConfigNode:
 class HSliderConfigNode:
     extends HSlider
 
+    signal loaded(value)
+
     var _parent_config_node
     var _save_entry: String
 
@@ -441,6 +585,7 @@ class HSliderConfigNode:
     func load_cfg(data):
         if (data != null):
             value = data
+            emit_signal("loaded", data)
     
     func get_config_access():
         return self
@@ -461,6 +606,8 @@ class HSliderConfigNode:
 class VSliderConfigNode:
     extends VSlider
 
+    signal loaded(value)
+
     var _parent_config_node
     var _save_entry: String
 
@@ -481,6 +628,7 @@ class VSliderConfigNode:
     func load_cfg(data):
         if (data != null):
             value = data
+            emit_signal("loaded", data)
     
     func get_config_access():
         return self
@@ -501,6 +649,8 @@ class VSliderConfigNode:
 class SpinBoxConfigNode:
     extends SpinBox
 
+    signal loaded(value)
+
     var _parent_config_node
     var _save_entry: String
 
@@ -521,6 +671,7 @@ class SpinBoxConfigNode:
     func load_cfg(data):
         if (data != null):
             value = data
+            emit_signal("loaded", data)
     
     func get_config_access():
         return self
@@ -538,14 +689,259 @@ class SpinBoxConfigNode:
     func mark_dirty():
         _parent_config_node.mark_dirty()
 
+class ColorPickerConfigNode:
+    extends ColorPicker
+
+    signal loaded(value)
+
+    var _parent_config_node
+    var _save_entry: String
+
+    func _init(save_entry: String, default_color: Color):
+        _save_entry = save_entry
+        color = default_color
+        connect("color_changed", self, "_color_changed")
+
+    func set_parent_config_node(parent):
+        _parent_config_node = parent
+    
+    func get_save_entry() -> String:
+        return _save_entry
+    
+    func save_cfg():
+        return "#" + color.to_html()
+    
+    func load_cfg(data):
+        if (data != null):
+            color = Color(data.lstrip("#"))
+            emit_signal("loaded", color)
+    
+    func get_config_access():
+        return self
+    
+    func get_config_value():
+        return color
+    
+    func set_config_value(val):
+        color = val
+        mark_dirty()
+    
+    func _color_changed(_ignored: Color):
+        mark_dirty()
+    
+    func mark_dirty():
+        _parent_config_node.mark_dirty()
+
+class ColorPickerButtonConfigNode:
+    extends ColorPickerButton
+
+    signal loaded(value)
+
+    var _parent_config_node
+    var _save_entry: String
+    var _picker: ColorPicker
+
+    func _init(save_entry: String, default_color: Color):
+        _save_entry = save_entry
+        _picker = get_picker()
+        _picker.color = default_color
+        connect("color_changed", self, "_color_changed")
+
+    func set_parent_config_node(parent):
+        _parent_config_node = parent
+    
+    func get_save_entry() -> String:
+        return _save_entry
+    
+    func save_cfg():
+        return "#" + _picker.color.to_html()
+    
+    func load_cfg(data):
+        if (data != null):
+            _picker.color = Color(data.lstrip("#"))
+            emit_signal("loaded", _picker.color)
+    
+    func get_config_access():
+        return self
+    
+    func get_config_value():
+        return _picker.color
+    
+    func set_config_value(val):
+        _picker.color = val
+        mark_dirty()
+    
+    func _color_changed(_ignored: Color):
+        mark_dirty()
+    
+    func mark_dirty():
+        _parent_config_node.mark_dirty()
+
+class OptionButtonConfigNode:
+    extends OptionButton
+
+    signal loaded(value)
+
+    var _parent_config_node
+    var _save_entry: String
+    var _label_to_index: Dictionary = {}
+
+    func _init(save_entry: String, default_option: int, options: Array = []):
+        _save_entry = save_entry
+        for entry in options:
+            var index = get_item_count()
+            if entry is String:
+                add_item(entry)
+                set_item_metadata(index, entry)
+            elif entry is Dictionary:
+                if entry.has("icon"):
+                    add_icon_item(entry["icon"], entry["label"])
+                    if not _label_to_index.has(entry["label"]):
+                        _label_to_index[entry["label"]] = index
+                else:
+                    add_item(entry["label"])
+                if entry.has("meta"):
+                    set_item_metadata(index, entry["meta"])
+                else:
+                    set_item_metadata(index, entry["label"])
+                if not _label_to_index.has(entry["label"]):
+                    _label_to_index[entry["label"]] = index
+        selected = default_option
+        connect("item_selected", self, "_item_selected")
+
+    func set_parent_config_node(parent):
+        _parent_config_node = parent
+    
+    func get_save_entry() -> String:
+        return _save_entry
+    
+    func save_cfg():
+        return selected
+    
+    func load_cfg(data):
+        if (data != null):
+            selected = data
+            emit_signal("loaded", data)
+    
+    func get_config_access():
+        return self
+    
+    func get_config_value():
+        return get_item_metadata(selected)
+    
+    func set_config_value(val):
+        if _label_to_index.has(val):
+            selected = _label_to_index["val"]
+            mark_dirty()
+    
+    func _item_selected(_ignored: int):
+        mark_dirty()
+    
+    func mark_dirty():
+        _parent_config_node.mark_dirty()
+
+class LineEditConfigNode:
+    extends LineEdit
+
+    signal loaded(value)
+
+    var _parent_config_node
+    var _save_entry: String
+    var _text: String
+
+    func _init(save_entry: String, default_text: String, require_hit_enter: bool = true):
+        _save_entry = save_entry
+        text = default_text
+        _text = default_text
+        if require_hit_enter:
+            connect("text_entered", self, "_text_entered")
+        else:
+            connect("text_changed", self, "_text_entered")
+
+    func set_parent_config_node(parent):
+        _parent_config_node = parent
+    
+    func get_save_entry() -> String:
+        return _save_entry
+    
+    func save_cfg():
+        return _text
+    
+    func load_cfg(data):
+        if (data != null):
+            _text = data
+            text = data
+            emit_signal("loaded", data)
+    
+    func get_config_access():
+        return self
+    
+    func get_config_value():
+        return _text
+    
+    func set_config_value(val):
+        _text = val
+        text = val
+        mark_dirty()
+    
+    func _text_entered(new_text: String):
+        _text = new_text
+        mark_dirty()
+    
+    func mark_dirty():
+        _parent_config_node.mark_dirty()
+
+class TextEditConfigNode:
+    extends TextEdit
+
+    signal loaded(value)
+
+    var _parent_config_node
+    var _save_entry: String
+
+    func _init(save_entry: String, default_text: String):
+        _save_entry = save_entry
+        text = default_text
+        connect("text_changed", self, "_text_changed")
+
+    func set_parent_config_node(parent):
+        _parent_config_node = parent
+    
+    func get_save_entry() -> String:
+        return _save_entry
+    
+    func save_cfg():
+        return text
+    
+    func load_cfg(data):
+        if (data != null):
+            text = data
+            emit_signal("loaded", data)
+    
+    func get_config_access():
+        return self
+    
+    func get_config_value():
+        return text
+    
+    func set_config_value(val):
+        text = val
+        mark_dirty()
+    
+    func _text_changed():
+        mark_dirty()
+    
+    func mark_dirty():
+        _parent_config_node.mark_dirty()
+
 class ForwardedDictionaryConfig:
-    var _entries: Dictionary = {}
-    var _owner: Control
+    var __entries: Dictionary = {}
+    var __nodes: Dictionary = {}
+    var __owner: Control
 
     func _init(owner: Control, nodes: Array):
-        _owner = owner
+        __owner = owner
         add_entries(nodes)
-        
     
     func add_entries(nodes: Array):
         for node in nodes:
@@ -553,19 +949,25 @@ class ForwardedDictionaryConfig:
                 if node.has_method("is_flattened") and node.is_flattened():
                     add_entries(_get_target(node).get_children())
                 else:
-                    _entries[node.get_save_entry()] = node.get_config_access()
+                    __entries[node.get_save_entry()] = node.get_config_access()
+                    # allows users to access a node corresponding to a config entry directly be using _<save_entry>
+                    # intended for connecting to signals
+                    __nodes["_" + node.get_save_entry()] = node
     
     func _get(property: String):
-        return _entries[property].get_config_value()
+        if __entries.has(property):
+            return __entries[property].get_config_value()
+        else:
+            return __nodes[property]
     
     func _set(property: String, value):
-        _entries[property].set_config_value(value)
-        _owner.mark_dirty()
+        __entries[property].set_config_value(value)
+        __owner.mark_dirty()
     
     func _get_property_list():
         var props = []
-        for name in _entries:
-            props.append({"name": name, "type": typeof(_entries[name].get_config_value())})
+        for name in __entries:
+            props.append({"name": name, "type": typeof(__entries[name].get_config_value())})
         return props
     
     func get_config_value():

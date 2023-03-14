@@ -131,6 +131,7 @@ func _apply_pressed():
 
 
 func _unload():
+    _apply_button.disconnect("pressed", self, "_apply_pressed")
     _back_button.disconnect("pressed", self, "_back_pressed")
     _general_button.disconnect("pressed", self, "_category_pressed")
     _interface_button.disconnect("pressed", self, "_category_pressed")
