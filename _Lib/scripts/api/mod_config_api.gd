@@ -61,7 +61,7 @@ func _init(preferences_window_api, loader):
             mod_details.get_node("DescriptionScroller/Margins/Description").append_bbcode(mod_info.get("description"))
         _details_nodes.append(mod_details)
         _mods_panel.add_child(mod_details)
-        preferences_window_api.create_category("Mods", _mod_menu)
+    preferences_window_api.create_category("Mods", _mod_menu)
     _mod_menu.connect("back_pressed", self, "_back_pressed")
 
 func create_config(mod_id: String, title: String, config_file: String):
