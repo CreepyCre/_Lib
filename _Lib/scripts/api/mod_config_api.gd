@@ -13,25 +13,25 @@ var _mod_config_buttons: Dictionary = {}
 var _mod_config_panels: Dictionary = {}
 var _active_mod_config = null
 
-func _init(_lib):
-    _preferences_window_api = _lib.api.PreferencesWindowApi
-    _config_builder_script = _lib.load_script("api/config/config_builder")
-    _mod_config_scene = _lib.load_scene("ModConfig")
+func _init(preferences_window_api, loader):
+    _preferences_window_api = preferences_window_api
+    _config_builder_script = loader.load_script("api/config/config_builder")
+    _mod_config_scene = loader.load_scene("ModConfig")
     var config: ConfigFile = ConfigFile.new()
     config.load("user://config.ini")
     var mods_dir: String = config.get_value("Mods", "mods_directory")
     var active_mods: Array = config.get_value("Mods", "active_mods")
     var ddmod_files: Array = get_all_files(mods_dir, "ddmod")
     var file: File = File.new()
-    _mod_menu = _lib.load_scene("Mods").instance()
+    _mod_menu = loader.load_scene("Mods").instance()
     _mods_panel = _mod_menu.get_node("ModPanel")
     _mod_list = _mods_panel.get_node("ModList")
     _mod_list.connect("item_selected", self, "_mod_selected")
     _mod_list.connect("nothing_selected", self, "_mod_selected")
     _mod_v_sep = _mods_panel.get_node("VSeparator")
-    var mod_details_scene = _lib.load_scene("ModDetails")
-    var texture_normal: Texture = _lib.load_icon("cog_normal.png")
-    var texture_disabled: Texture = _lib.load_icon("cog_disabled.png")
+    var mod_details_scene = loader.load_scene("ModDetails")
+    var texture_normal: Texture = loader.load_icon("cog_normal.png")
+    var texture_disabled: Texture = loader.load_icon("cog_disabled.png")
     for ddmod_file in ddmod_files:
         file.open(ddmod_file, File.READ)
         var mod_info: Dictionary = JSON.parse(file.get_as_text()).result
@@ -46,7 +46,7 @@ func _init(_lib):
         var icon_location: String = ddmod_file.get_base_dir() + "/preview.png"
         print(icon_location)
         if file.file_exists(icon_location):
-            mod_details.get_node("InfoMargins/HBoxContainer/ModIcon").texture = _lib.load_texture_full_path(icon_location)
+            mod_details.get_node("InfoMargins/HBoxContainer/ModIcon").texture = loader.load_texture_full_path(icon_location)
         if mod_info.has("name"):
             _mod_list.add_item(mod_info.get("name"))
             mod_details.get_node("InfoMargins/HBoxContainer/Info/ModName").append_bbcode("[u]" + mod_info.get("name") + "[/u]")
@@ -61,7 +61,7 @@ func _init(_lib):
             mod_details.get_node("DescriptionScroller/Margins/Description").append_bbcode(mod_info.get("description"))
         _details_nodes.append(mod_details)
         _mods_panel.add_child(mod_details)
-    _lib.api.PreferencesWindowApi.create_category("Mods", _mod_menu)
+        preferences_window_api.create_category("Mods", _mod_menu)
     _mod_menu.connect("back_pressed", self, "_back_pressed")
 
 func create_config(mod_id: String, title: String, config_file: String):
