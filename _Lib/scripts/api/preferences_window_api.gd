@@ -20,6 +20,7 @@ var _current_category = null
 signal back_pressed()
 signal apply_pressed()
 signal category_pressed(id)
+signal about_to_show()
 
 func _init(_pref: WindowDialog):
     _preferences = _pref
@@ -49,6 +50,11 @@ func _init(_pref: WindowDialog):
     _interface_button.connect("pressed", self, "_category_pressed")
     _shortcuts_button.connect("pressed", self, "_category_pressed")
     connect("category_pressed", self, "_category_pressed")
+
+    _preferences.disconnect("about_to_show", _preferences, "_on_Preferences_about_to_show")
+    _preferences.connect("about_to_show", self, "_on_preferences_about_to_show")
+
+
 
 func create_category(name: String, container: Control = _create_default_container()) -> Control:
     var id: int = _categories.size()
@@ -80,6 +86,8 @@ func _show_back():
     _close_button.hide()
     _back_button.show()
 
+func get_preferences_window() -> WindowDialog:
+    return _preferences
 
 func _create_default_container() -> VBoxContainer:
     var container: VBoxContainer = VBoxContainer.new()
@@ -129,8 +137,14 @@ func _back_pressed():
 func _apply_pressed():
     emit_signal("apply_pressed")
 
+func _on_preferences_about_to_show():
+    _preferences._on_Preferences_about_to_show()
+    emit_signal("about_to_show")
 
 func _unload():
+    _preferences.connect("about_to_show", _preferences, "_on_Preferences_about_to_show")
+    _preferences.disconnect("about_to_show", self, "_on_Preferences_about_to_show")
+
     _apply_button.disconnect("pressed", self, "_apply_pressed")
     _back_button.disconnect("pressed", self, "_back_pressed")
     _general_button.disconnect("pressed", self, "_category_pressed")

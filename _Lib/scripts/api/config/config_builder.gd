@@ -1,25 +1,27 @@
 class_name ConfigBuilder
 
 var _agent: ConfigAgent
+var _input_map_api
 var _root: Control
 var _node_stack: Array = []
 var _current_node: Control
 var _last_child_node: Control = null
 var _references: Dictionary = {}
 
-func _init(root: Control, config_file: String):
+func _init(root: Control, config_file: String, input_map_api):
     _root = root
     _current_node = root
     _agent = ConfigAgent.new(_root, config_file)
+    _input_map_api = input_map_api
     _root.set_parent_config_node(_agent)
 
-static func config(title: String, config_file: String, mod_config_scene, self_script: Script) -> ConfigBuilder:
+static func config(title: String, config_file: String, mod_config_scene, input_map_api, self_script: Script) -> ConfigBuilder:
     var mod_config = mod_config_scene.instance()
     mod_config.get_node("TitlePanel/Title").text = title
     var wrapped = WrappedControlConfigNode.new("", mod_config, "ConfigPanel/ScrollContainer/Config")
     wrapped.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     wrapped.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    return self_script.new(wrapped, config_file)
+    return self_script.new(wrapped, config_file, input_map_api)
 
 func enter() -> ConfigBuilder:
     _node_stack.append(_current_node)
@@ -227,6 +229,9 @@ func line_edit(save_entry: String, default_value: String, require_hit_enter: boo
 
 func text_edit(save_entry: String, default_value: String) -> ConfigBuilder:
     return add_node(TextEditConfigNode.new(save_entry, default_value))
+
+func shortcuts(save_entry: String, definitions: Dictionary) -> ConfigBuilder:
+    return add_node(ShortcutsConfigNode.new(save_entry, definitions, _input_map_api))
     
 func aspect_ratio_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, AspectRatioContainer.new())
@@ -341,14 +346,16 @@ class ConfigAgent:
     func load_cfg():
         var file = File.new()
         if (not file.file_exists(_config_file)):
+            if _root.has_method("_on_preferences_about_to_show"):
+                _root._on_preferences_about_to_show()
             save_cfg(true)
             return
         file.open(_config_file, File.READ)
         _root.load_cfg(JSON.parse(file.get_as_text()).result)
         _dirty = false
     
-    func serialize():
-        return _root.save_cfg()
+    #func serialize():
+    #    return _root.save_cfg()
     
     func _get(property: String):
         return _config_access.get(property)
@@ -413,6 +420,11 @@ class ContainerExtensionConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        for node in get_children():
+            if node.has_method("_on_preferences_about_to_show"):
+                node._on_preferences_about_to_show()
 
 class WrappedControlConfigNode:
     extends MarginContainer
@@ -476,6 +488,11 @@ class WrappedControlConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        for node in _target_node.get_children():
+            if node.has_method("_on_preferences_about_to_show"):
+                node._on_preferences_about_to_show()
 
 class CheckButtonConfigNode:
     extends CheckButton
@@ -484,10 +501,12 @@ class CheckButtonConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: bool
 
     func _init(save_entry: String, default_value: bool):
         _save_entry = save_entry
         set_pressed_no_signal(default_value)
+        _cached_value = default_value
 
     func set_parent_config_node(parent):
         _parent_config_node = parent
@@ -496,27 +515,33 @@ class CheckButtonConfigNode:
         return _save_entry
     
     func save_cfg():
-        return pressed
+        _cached_value = pressed
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             set_pressed_no_signal(data)
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return pressed
+        return _cached_value
     
     func set_config_value(value):
         set_pressed_no_signal(value)
+        _cached_value = value
     
     func _pressed():
         mark_dirty()
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        set_pressed_no_signal(_cached_value)
 
 class CheckBoxConfigNode:
     extends CheckBox
@@ -525,10 +550,12 @@ class CheckBoxConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: bool
 
     func _init(save_entry: String, default_value: bool):
         _save_entry = save_entry
         set_pressed_no_signal(default_value)
+        _cached_value = default_value
 
     func set_parent_config_node(parent):
         _parent_config_node = parent
@@ -537,21 +564,24 @@ class CheckBoxConfigNode:
         return _save_entry
     
     func save_cfg():
-        return pressed
+        _cached_value = pressed
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             set_pressed_no_signal(data)
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return pressed
+        return _cached_value
     
     func set_config_value(value):
         set_pressed_no_signal(value)
+        _cached_value = value
         mark_dirty()
     
     func _pressed():
@@ -559,6 +589,9 @@ class CheckBoxConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        set_pressed_no_signal(_cached_value)
 
 class HSliderConfigNode:
     extends HSlider
@@ -567,10 +600,12 @@ class HSliderConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: float
 
     func _init(save_entry: String, default_value: float):
         _save_entry = save_entry
         value = default_value
+        _cached_value = default_value
         connect("value_changed", self, "_value_changed")
 
     func set_parent_config_node(parent):
@@ -580,21 +615,24 @@ class HSliderConfigNode:
         return _save_entry
     
     func save_cfg():
-        return value
+        _cached_value = value
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             value = data
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return value
+        return _cached_value
     
     func set_config_value(val):
         value = val
+        _cached_value = val
         mark_dirty()
     
     func _value_changed(_ignored: float):
@@ -602,6 +640,9 @@ class HSliderConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        value = _cached_value
 
 class VSliderConfigNode:
     extends VSlider
@@ -610,10 +651,12 @@ class VSliderConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: float
 
     func _init(save_entry: String, default_value: float):
         _save_entry = save_entry
         value = default_value
+        _cached_value = default_value
         connect("value_changed", self, "_value_changed")
 
     func set_parent_config_node(parent):
@@ -623,28 +666,34 @@ class VSliderConfigNode:
         return _save_entry
     
     func save_cfg():
-        return value
+        _cached_value = value
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             value = data
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return value
+        return _cached_value
     
     func set_config_value(val):
         value = val
+        _cached_value = val
         mark_dirty()
     
     func _value_changed(_ignored: float):
         mark_dirty()
-
+    
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        value = _cached_value
 
 class SpinBoxConfigNode:
     extends SpinBox
@@ -653,10 +702,12 @@ class SpinBoxConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: float
 
     func _init(save_entry: String, default_value: float):
         _save_entry = save_entry
         value = default_value
+        _cached_value = default_value
         connect("value_changed", self, "_value_changed")
 
     func set_parent_config_node(parent):
@@ -666,21 +717,24 @@ class SpinBoxConfigNode:
         return _save_entry
     
     func save_cfg():
-        return value
+        _cached_value = value
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             value = data
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return value
+        return _cached_value
     
     func set_config_value(val):
         value = val
+        _cached_value = val
         mark_dirty()
     
     func _value_changed(_ignored: float):
@@ -688,6 +742,9 @@ class SpinBoxConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        value = _cached_value
 
 class ColorPickerConfigNode:
     extends ColorPicker
@@ -696,10 +753,12 @@ class ColorPickerConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: Color
 
     func _init(save_entry: String, default_color: Color):
         _save_entry = save_entry
         color = default_color
+        _cached_value = default_color
         connect("color_changed", self, "_color_changed")
 
     func set_parent_config_node(parent):
@@ -709,21 +768,24 @@ class ColorPickerConfigNode:
         return _save_entry
     
     func save_cfg():
-        return "#" + color.to_html()
+        _cached_value = color
+        return "#" + _cached_value.to_html()
     
     func load_cfg(data):
         if (data != null):
             color = Color(data.lstrip("#"))
+            _cached_value = color
             emit_signal("loaded", color)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return color
+        return _cached_value
     
     func set_config_value(val):
         color = val
+        _cached_value = val
         mark_dirty()
     
     func _color_changed(_ignored: Color):
@@ -731,6 +793,9 @@ class ColorPickerConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        color = _cached_value
 
 class ColorPickerButtonConfigNode:
     extends ColorPickerButton
@@ -740,11 +805,13 @@ class ColorPickerButtonConfigNode:
     var _parent_config_node
     var _save_entry: String
     var _picker: ColorPicker
+    var _cached_value: Color
 
     func _init(save_entry: String, default_color: Color):
         _save_entry = save_entry
         _picker = get_picker()
         _picker.color = default_color
+        _cached_value = default_color
         connect("color_changed", self, "_color_changed")
 
     func set_parent_config_node(parent):
@@ -754,21 +821,23 @@ class ColorPickerButtonConfigNode:
         return _save_entry
     
     func save_cfg():
-        return "#" + _picker.color.to_html()
+        return "#" + _cached_value.to_html()
     
     func load_cfg(data):
         if (data != null):
             _picker.color = Color(data.lstrip("#"))
+            _cached_value = _picker.color
             emit_signal("loaded", _picker.color)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return _picker.color
+        return _cached_value
     
     func set_config_value(val):
         _picker.color = val
+        _cached_value = val
         mark_dirty()
     
     func _color_changed(_ignored: Color):
@@ -776,6 +845,9 @@ class ColorPickerButtonConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        _picker.color = _cached_value
 
 class OptionButtonConfigNode:
     extends OptionButton
@@ -784,6 +856,7 @@ class OptionButtonConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: int
     var _label_to_index: Dictionary = {}
 
     func _init(save_entry: String, default_option: int, options: Array = []):
@@ -793,11 +866,11 @@ class OptionButtonConfigNode:
             if entry is String:
                 add_item(entry)
                 set_item_metadata(index, entry)
+                if not _label_to_index.has(entry):
+                    _label_to_index[entry] = index
             elif entry is Dictionary:
                 if entry.has("icon"):
                     add_icon_item(entry["icon"], entry["label"])
-                    if not _label_to_index.has(entry["label"]):
-                        _label_to_index[entry["label"]] = index
                 else:
                     add_item(entry["label"])
                 if entry.has("meta"):
@@ -807,6 +880,7 @@ class OptionButtonConfigNode:
                 if not _label_to_index.has(entry["label"]):
                     _label_to_index[entry["label"]] = index
         selected = default_option
+        _cached_value = default_option
         connect("item_selected", self, "_item_selected")
 
     func set_parent_config_node(parent):
@@ -816,29 +890,38 @@ class OptionButtonConfigNode:
         return _save_entry
     
     func save_cfg():
-        return selected
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             selected = data
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return get_item_metadata(selected)
+        return get_item_metadata(_cached_value)
     
     func set_config_value(val):
-        if _label_to_index.has(val):
-            selected = _label_to_index["val"]
-            mark_dirty()
+        if val is int:
+            selected = val
+            _cached_value = val
+        elif _label_to_index.has(val):
+            var index: int = _label_to_index[val]
+            selected = index
+            _cached_value = index
+        mark_dirty()
     
     func _item_selected(_ignored: int):
         mark_dirty()
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+
+    func _on_preferences_about_to_show():
+        selected = _cached_value
 
 class LineEditConfigNode:
     extends LineEdit
@@ -848,11 +931,13 @@ class LineEditConfigNode:
     var _parent_config_node
     var _save_entry: String
     var _text: String
+    var _cached_value: String
 
     func _init(save_entry: String, default_text: String, require_hit_enter: bool = true):
         _save_entry = save_entry
         text = default_text
         _text = default_text
+        _cached_value = default_text
         if require_hit_enter:
             connect("text_entered", self, "_text_entered")
         else:
@@ -865,23 +950,26 @@ class LineEditConfigNode:
         return _save_entry
     
     func save_cfg():
-        return _text
+        _cached_value = _text
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             _text = data
             text = data
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return _text
+        return _cached_value
     
     func set_config_value(val):
         _text = val
         text = val
+        _cached_value = val
         mark_dirty()
     
     func _text_entered(new_text: String):
@@ -891,6 +979,10 @@ class LineEditConfigNode:
     func mark_dirty():
         _parent_config_node.mark_dirty()
 
+    func _on_preferences_about_to_show():
+        text = _cached_value
+        _text = _cached_value
+
 class TextEditConfigNode:
     extends TextEdit
 
@@ -898,10 +990,12 @@ class TextEditConfigNode:
 
     var _parent_config_node
     var _save_entry: String
+    var _cached_value: String
 
     func _init(save_entry: String, default_text: String):
         _save_entry = save_entry
         text = default_text
+        _cached_value = default_text
         connect("text_changed", self, "_text_changed")
 
     func set_parent_config_node(parent):
@@ -911,21 +1005,24 @@ class TextEditConfigNode:
         return _save_entry
     
     func save_cfg():
-        return text
+        _cached_value = text
+        return _cached_value
     
     func load_cfg(data):
         if (data != null):
             text = data
+            _cached_value = data
             emit_signal("loaded", data)
     
     func get_config_access():
         return self
     
     func get_config_value():
-        return text
+        return _cached_value
     
     func set_config_value(val):
         text = val
+        _cached_value = val
         mark_dirty()
     
     func _text_changed():
@@ -933,6 +1030,349 @@ class TextEditConfigNode:
     
     func mark_dirty():
         _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        text = _cached_value
+
+class ShortcutsConfigNode:
+    extends Tree
+
+    var _parent_config_node
+    var _save_entry: String
+    var _definitions: Dictionary
+    var _blocker: Control = Control.new()
+    var _input_map_api
+    var _waiting_for_input: bool = false
+    var _pressed_item: TreeItem = null
+    var _action_to_item: Dictionary = {}
+    var _busy: bool = false
+
+    var _edit_icon: Texture
+    var _add_icon: Texture
+    var _remove_icon: Texture
+
+    func _init(save_entry: String, definitions: Dictionary, input_map_api):
+        var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
+        _edit_icon = theme.get_icon("Edit", "EditorIcons")
+        _add_icon = theme.get_icon("Add", "EditorIcons")
+        _remove_icon = theme.get_icon("Remove", "EditorIcons")
+
+        _save_entry = save_entry
+        _definitions = definitions
+        _blocker.hide()
+        add_child(_blocker)
+        _blocker.owner = self
+        _input_map_api = input_map_api
+
+        set_hide_root(true)
+        set_columns(4)
+        set_column_title(0, "Action")
+        set_column_title(1, "Key")
+        set_column_expand(2, false)
+        set_column_min_width(2, 28)
+        set_column_expand(3, false)
+        set_column_min_width(3, 28)
+        set_column_titles_visible(true)
+        connect("button_pressed", self, "_on_tree_button_pressed")
+
+        _make_actions_save(definitions)
+        
+        
+
+    func _make_actions_save(definitions):
+        for key in definitions:
+            var def = definitions[key]
+            if def is Dictionary:
+                _make_actions_save(def)
+                continue
+            if def is Array:
+                def = def[0]
+            _input_map_api.get_or_create_agent(def)._saved = true
+
+    func set_parent_config_node(parent):
+        _parent_config_node = parent
+    
+    func get_save_entry() -> String:
+        return _save_entry
+    
+    func save_cfg():
+        return _save_cfg(_definitions)
+    
+    func _save_cfg(definitions):
+        var out: Dictionary = {}
+        for key in definitions:
+            var config_key: String = key.to_lower().replace(" ", "_")
+            var def = definitions[key]
+            if def is Dictionary:
+                out[config_key] = _save_cfg(def)
+                continue
+            if def is Array:
+                def = def[0]
+            if not _action_to_item.has(def):
+                continue
+            var values: Array = []
+            var item: TreeItem = _action_to_item[def]
+            InputMap.action_erase_events(def)
+            var event: InputEventKey = item.get_meta("event") if item.has_meta("event") else null
+            if not event == null and not InputMap.action_has_event(def, event):
+                InputMap.action_add_event(def, event)
+                values.append(_serialize_event(event))
+            item = item.get_children()
+            while item != null:
+                event = item.get_meta("event") if item.has_meta("event") else null
+                if not event == null and not InputMap.action_has_event(def, event):
+                    InputMap.action_add_event(def, event)
+                    values.append(_serialize_event(event))
+                item = item.get_next()
+            out[config_key] = values
+        return out
+    
+    func load_cfg(data):
+        if data is Dictionary:
+            _load_cfg(data, _definitions)
+    
+    func _load_cfg(data, definitions):
+        for key in definitions:
+            var config_key: String = key.to_lower().replace(" ", "_")
+            if not data.has(config_key):
+                continue
+            var dat = data[config_key]
+            var def = definitions[key]
+            if def is Dictionary:
+                if dat is Dictionary:
+                    _load_cfg(dat, def)
+                else:
+                    continue
+            if def is Array:
+                def = def[0]
+            if dat is String:
+                InputMap.action_erase_events(def)
+                InputMap.action_add_event(def, _deserialize_event(dat))
+            elif dat is Array:
+                InputMap.action_erase_events(def)
+                for event in dat:
+                    InputMap.action_add_event(def, _deserialize_event(event))
+            
+    func _deserialize_event(string: String) -> InputEventKey:
+        var codes: Array = string.to_lower().split("+")
+        var event: InputEventKey = InputEventKey.new()
+        var key_string = codes.pop_back()
+        var alt: int = KEY_MASK_ALT if codes.has("alt") else 0
+        var ctrl: int = KEY_MASK_CTRL if codes.has("ctrl") else 0
+        var cmd: int = KEY_MASK_META if codes.has("cmd") else 0
+        var shift: int = KEY_MASK_SHIFT if codes.has("shift") else 0
+        var key: int = int(key_string) if key_string.is_valid_integer() else OS.find_scancode_from_string(key_string.capitalize())
+        event.set_scancode(alt + ctrl + cmd + shift + key)
+        return event
+    
+    func _serialize_event(event: InputEventKey) -> String:
+        var code: int = event.get_scancode_with_modifiers()
+        return ("Alt+" if code & KEY_MASK_ALT != 0 else "")\
+            + ("Ctrl+" if code & KEY_MASK_CTRL != 0 else "")\
+            + ("Cmd+" if code & KEY_MASK_META != 0 else "")\
+            + ("Shift+" if code & KEY_MASK_SHIFT != 0 else "")\
+            + str(code & KEY_CODE_MASK)
+
+
+    func _event_as_string(event: InputEventKey) -> String:
+        var code: int = event.get_scancode_with_modifiers()
+        return ("Alt+" if code & KEY_MASK_ALT != 0 else "")\
+            + ("Ctrl+" if code & KEY_MASK_CTRL != 0 else "")\
+            + ("Cmd+" if code & KEY_MASK_META != 0 else "")\
+            + ("Shift+" if code & KEY_MASK_SHIFT != 0 else "")\
+            + OS.get_scancode_string(code & KEY_CODE_MASK)
+
+
+    func mark_dirty():
+        _parent_config_node.mark_dirty()
+    
+    func _on_preferences_about_to_show():
+        clear()
+        for action in _action_to_item:
+            var agent = _input_map_api.get_or_create_agent(action)
+            agent.disconnect("switched", self, "_switched")
+            agent.disconnect("added", self, "_added_item")
+            agent.disconnect("deleted", self, "_deleted_item")
+        _action_to_item.clear()
+        var root: TreeItem = create_item()
+        _add_actions_to_tree(root, _definitions)
+
+    func _add_actions_to_tree(root: TreeItem, actions: Dictionary):
+        for name in actions:
+            var entry = actions[name]
+            if entry is Dictionary:
+                var category: TreeItem = create_item(root)
+                category.set_text(0, name)
+                category.set_selectable(0, false)
+                category.set_selectable(1, false)
+                category.set_selectable(2, false)
+                category.set_selectable(3, false)
+                _add_actions_to_tree(category, entry)
+            else:
+                if entry is Array:
+                    entry = entry[0]
+                var agent = _input_map_api.get_agent(entry)
+                var action_list: Array = InputMap.get_action_list(entry).duplicate()
+    
+                var action_item: TreeItem = create_item(root)
+                agent.connect("switched", self, "_switched", [action_item])
+                agent.connect("added", self, "_added_item", [action_item])
+                agent.connect("deleted", self, "_deleted_item", [action_item])
+                _action_to_item[entry] = action_item
+                action_item.set_meta("agent", agent)
+                action_item.set_meta("index", 0)
+                action_item.set_text(0, name)
+                action_item.set_selectable(0, false)
+                action_item.set_selectable(1, false)
+                if action_list.size() == 0:
+                    action_item.set_meta("event", null)
+                    if agent.is_saved():
+                        action_item.add_button(2, _edit_icon)
+                    else:
+                        action_item.set_selectable(2, false)
+                    action_item.set_selectable(3, false)
+                else:
+                    var first_event = action_list.pop_front()
+                    action_item.set_meta("event", first_event)
+                    action_item.set_text(1, _event_as_string(first_event))
+                    if agent.is_saved():
+                        action_item.add_button(2, _edit_icon)
+                        action_item.add_button(3, _add_icon)
+                    else:
+                        action_item.set_selectable(2, false)
+                        action_item.set_selectable(3, false)
+                    var index: int = 1
+                    for event in action_list:
+                        var event_item: TreeItem = create_item(action_item)
+                        # probably want to move the agent.clear() to somewhere that is called when closing the preferences window
+                        agent.clear()
+                        event_item.set_meta("agent", agent)
+                        event_item.set_meta("index", index)
+                        event_item.set_meta("event", event)
+                        event_item.set_selectable(0, false)
+                        event_item.set_text(1, _event_as_string(event))
+                        event_item.set_selectable(1, false)
+                        if agent.is_saved():
+                            event_item.add_button(2, _edit_icon)
+                            event_item.add_button(3, _remove_icon)
+                        else:
+                            event_item.set_selectable(2, false)
+                            event_item.set_selectable(3, false)
+                        index += 1
+    
+    func _switched(from: InputEventKey, to: InputEventKey, index: int, item: TreeItem):
+        if _busy:
+            return
+        mark_dirty()
+        if index == 0:
+            item.set_text(1, _event_as_string(to) if to != null else "")
+            item.set_meta("event", to)
+            if from == null:
+                item.set_selectable(3, true)
+                item.add_button(3, _add_icon)
+        else:
+            var sub_item: TreeItem = item.get_children()
+            while sub_item != null:
+                if sub_item.get_meta("index") == index:
+                    sub_item.set_text(1, _event_as_string(to) if to != null else "")
+                    sub_item.set_meta("event", to)
+                    break
+                sub_item = sub_item.get_next()
+
+    func _on_tree_button_pressed(item: TreeItem, column: int, id: int):
+        var agent = item.get_meta("agent")
+        if column == 2:
+            _pressed_item = item
+            _waiting_for_input = true
+            item.set_selectable(1, true)
+            item.select(1)
+            item.set_text(1, "--- press new shortcut key ---")
+        elif column == 3:
+            _busy = true
+            var index: int = item.get_meta("index")
+            if index == 0:
+                item.set_collapsed(false)
+                var new_item: TreeItem = create_item(item)
+                new_item.set_meta("agent", agent)
+                new_item.set_selectable(0, false)
+                new_item.set_selectable(1, true)
+                new_item.select(1)
+                new_item.set_text(1, "--- press new shortcut key ---")
+                new_item.add_button(2, _edit_icon)
+                new_item.add_button(3, _remove_icon)
+                var child_item: TreeItem = item.get_children()
+                var new_index = 1
+                while child_item != null:
+                    new_index += 1
+                    child_item = child_item.get_next()
+                new_item.set_meta("index", new_index)
+                agent.added_item()
+                _pressed_item = new_item
+                _waiting_for_input = true
+            else:
+                var child_item: TreeItem = item.get_next()
+                item.free()
+                var next_index = index + 1
+                while child_item != null:
+                    child_item.set_meta("index", next_index)
+                    next_index += 1
+                    child_item = child_item.get_next()
+                agent.deleted_item(index)
+            _busy = false
+    
+    func _added_item(root: TreeItem):
+        var agent = root.get_meta("agent")
+        if _busy:
+            return
+        var new_item: TreeItem = create_item(root)
+        new_item.set_meta("agent", agent)
+        new_item.set_selectable(0, false)
+        new_item.set_selectable(1, false)
+        new_item.add_button(2, _edit_icon)
+        new_item.add_button(3, _remove_icon)
+        var child_item: TreeItem = root.get_children()
+        var new_index = 1
+        while child_item != null:
+            new_index += 1
+            child_item = child_item.get_next()
+        new_item.set_meta("index", new_index)
+
+    func _deleted_item(index: int, root: TreeItem):
+        if _busy:
+            return
+        var item = root.get_children()
+        while (item != null and item.get_meta("index") != index):
+            item = item.get_next()
+        if (item == null):
+            return
+        var child_item: TreeItem = item.get_next()
+        item.free()
+        var next_index = index + 1
+        while child_item != null:
+            child_item.set_meta("index", next_index)
+            next_index += 1
+            child_item = child_item.get_next()
+    
+    func _unhandled_key_input(event: InputEventKey):
+        if (_waiting_for_input and not event.is_pressed()):
+            _busy = true
+            _pressed_item.set_selectable(1, false)
+            _pressed_item.deselect(1)
+            _pressed_item.set_text(1, _event_as_string(event))
+            _waiting_for_input = false
+            var agent = _pressed_item.get_meta("agent")
+            var prev_event = _pressed_item.get_meta("event") if _pressed_item.has_meta("event") else null
+            event.pressed = true
+            _pressed_item.set_meta("event", event)
+            var index: int = _pressed_item.get_meta("index")
+            agent.switch(prev_event, event, index)
+            if prev_event == null and index == 0:
+                _pressed_item.set_selectable(3, true)
+                _pressed_item.add_button(3, _add_icon)
+            get_tree().set_input_as_handled()
+            mark_dirty()
+            _busy = false
+
 
 class ForwardedDictionaryConfig:
     var __entries: Dictionary = {}
