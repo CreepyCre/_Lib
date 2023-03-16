@@ -1,13 +1,28 @@
 {
-	"key1": false,
+	"shortcuts": {
+		"release_the_kraken": [
+			"Ctrl+80",
+			"65",
+			"59"
+		],
+		"some_category": {
+			"unscrew_lightbulbs": [
+				"65"
+			],
+			"put_in_complaints": [
+				"67"
+			]
+		}
+	},
+	"key1": true,
 	"key2": true,
-	"option": 0,
+	"option": 2,
 	"line_edit": "This is the default text.",
-	"text_edit": "Hello there!",
+	"text_edit": "A\nB\nC",
 	"sub_section": {
 		"key1": 69,
-		"slider_val": 41
+		"slider_val": 42
 	},
-	"color1": "#ffa3c8b0",
-	"color2": "#fff82828"
+	"color1": "#ff000000",
+	"color2": "#ffffffff"
 }

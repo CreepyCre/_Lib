@@ -4,6 +4,15 @@ func start():
     if (not Engine.has_signal("_lib_register_mod")):
         return
     Engine.emit_signal("_lib_register_mod", self)
+    
+    var input_definitions: Dictionary = {
+        "Release the Kraken": ["release_kraken", "Ctrl+P", "L"],
+        "Some Category":{
+            "Unscrew Lightbulbs": "unscrew_lightbulbs",
+            "Put in Complaints": "put_complaints"
+        }
+    }
+    self.Global.API.InputMapApi.define_actions("Example Mod", input_definitions)
 
     # Can't do comments inbetween the lines here, sadge
     # we can use enter() and exit() to go into and out of any nodes created
@@ -13,10 +22,11 @@ func start():
     #   .v_box_container("sub_section").enter()
     var builder = self.Global.API.ModConfigApi.create_config("CreepyCre.ExampleMod", "Example Mod Config", self.Global.Root + "config.json")
     var config = builder\
+                .shortcuts("shortcuts", input_definitions).rect_min_y(330)\
                 .h_box_container().enter()\
-                    .check_button("key1", false, "Some Option IDK")\
+                    .check_button("key1", true, "Some Option IDK")\
                     .v_separator()\
-                    .check_box("key2", false, "Some other Option IDK").size_flags_h(Control.SIZE_EXPAND_FILL)\
+                    .check_box("key2", true, "Some other Option IDK").size_flags_h(Control.SIZE_EXPAND_FILL)\
                 .exit()\
                 .h_separator()\
                 .label("LABEL")\
@@ -41,8 +51,6 @@ func start():
             .build()
     # builder is freed sometime after build() is called, dereference
     builder = null
-
-    print(JSON.print(config.serialize(), "\t"))
     print(config.key1)
     # we can also access the node itself by prepending the key with an underscore
     print(config._key1)
@@ -50,10 +58,12 @@ func start():
     print(config.color1)
     print(config.color2)
     print(config.option)
+    print(config.sub_section)
     print(config.sub_section.key1)
     print(config.sub_section.slider_val)
 
-    config.option = "c"
+    config.option = 0 # this works
+    config.option = "c" # this also works
 
     # short example of the PreferencesWindowApi
     var label = Label.new()
