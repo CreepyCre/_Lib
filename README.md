@@ -27,4 +27,4 @@ if not Engine.has_signal("_lib_register_mod"):
 Engine.emit_signal("_lib_register_mod", self)
 ```
 
-After registering your mod with _Lib you will now have an entry `Global.API` available that contains all of the _Lib APIs. For more info on how to use them check out the [wiki]([wiki](https://github.com/CreepyCre/_Lib/wiki)).
+After registering your mod with _Lib you will now have an entry `Global.API` available that contains all of the _Lib APIs. For more info on how to use them check out the [wiki](https://github.com/CreepyCre/_Lib/wiki).
