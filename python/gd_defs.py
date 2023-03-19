@@ -278,7 +278,7 @@ class ClassMemberPreprocessor(Preprocessor):
                     signature = {}
                     signal = re.search("^[a-zA-Z _]*", meta_signal).group().strip()
                     signature["signal"] = self.build_signal_name(signal)
-                    params = re.search(r"\(([a-zA-Z0-9_ ,]*)\)", meta_signal).group(1).split(",")
+                    params = re.search(r"\(([a-zA-Z0-9_ ,:]*)\)", meta_signal).group(1).split(",")
                     param_sigs = []
                     for param in params:
                         if ":" in param:
