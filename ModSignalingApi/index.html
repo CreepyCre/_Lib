@@ -9,17 +9,17 @@
       
       
       
-        <link rel="prev" href="../InputMapApi/InputEventEmitterNode/">
+        <link rel="prev" href="../ModConfigApi/ConfigBuilder/">
       
       
-        <link rel="next" href="ConfigBuilder/">
+        <link rel="next" href="../PreferencesWindowApi/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.3">
     
     
       
-        <title>ModConfigApi - _Lib Docs</title>
+        <title>ModSignalingApi - _Lib Docs</title>
       
     
     
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ModConfigApi
+              ModSignalingApi
             
           </span>
         </div>
@@ -281,16 +281,14 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
       
       
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
       
       
       
@@ -299,7 +297,7 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_4">
           <span class="md-nav__icon md-icon"></span>
           ModConfigApi
@@ -308,6 +306,42 @@
           
             
               
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ModConfigApi/" class="md-nav__link">
+        ModConfigApi
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ModConfigApi/ConfigBuilder/" class="md-nav__link">
+        ConfigBuilder
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
   
   
     
@@ -320,12 +354,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          ModConfigApi
+          ModSignalingApi
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        ModConfigApi
+        ModSignalingApi
       </a>
       
         
@@ -356,6 +390,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    Signals
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#method-descriptions" class="md-nav__link">
     Method Descriptions
   </a>
@@ -366,42 +407,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="ConfigBuilder/" class="md-nav__link">
-        ConfigBuilder
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../ModSignalingApi/" class="md-nav__link">
-        ModSignalingApi
-      </a>
     </li>
   
 
@@ -460,6 +465,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    Signals
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#method-descriptions" class="md-nav__link">
     Method Descriptions
   </a>
@@ -481,24 +493,37 @@
                   
 
 
-  <h1>ModConfigApi</h1>
+  <h1>ModSignalingApi</h1>
 
-<p>An Api that enables creating a mod config accessible from the "Mods" menu.</p>
+<p>Enables inter-mod communication.</p>
 <h2 id="description">Description</h2>
-<p>The ModConfigApi manages mod configs. It's only method creates a <a href="../ModConfigApi/ConfigBuilder">ConfigBuilder</a> that offers methods for building a mod config that is automatically saved into a given file by the ModConfigApi.</p>
+<p>The ModSignalingApi is intended to be used for inter-mod communication. It uses the existing signal system but offers <a href="#connect_deffered">connect_deffered</a> to connect to a signal either immediately or whenever it actually becomes available. It furthermore emits <span><a href="#signal_registered"><span class="signal">signal_registered</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span> <span class="bracket">)</span></span> when a new user signal is added to it.</p>
 <h2 id="methods">Methods</h2>
 <p>
 <table>
 <tr>
-<td><a href="../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#create_config"><span class="method">create_config</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">mod_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">title</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">config_file</span> <span class="bracket">)</span></td>
+<td><span class="void">void</span></td>
+<td><a href="#connect_deferred"><span class="method">connect_deferred</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><span class="void">void</span></td>
+<td><a href="#add_user_signal"><span class="method">add_user_signal</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">arguments</span> <span class="bracket">)</span></td>
 </tr>
 </table>
 </p>
-<h2 id="method-descriptions">Method Descriptions</h2>
-<p><span id="create_config"><a href="../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a> <a href="#create_config"><span class="method">create_config</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">mod_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">title</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">config_file</span> <span class="bracket">)</span></span>:</p>
+<h2 id="signals">Signals</h2>
+<p><span id="signal_registered"><a href="#signal_registered"><span class="signal">signal_registered</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span> <span class="bracket">)</span></span>:</p>
 <p><span class="indent">
-Creates a new <a href="../ModConfigApi/ConfigBuilder">ConfigBuilder</a> for the mod with id <span class="param">mod_id</span>. The mod config will automatically be saved into and loaded from <span class="param">config_file</span>.
+Emitted whenever a new user signal is added to the ModSignalingAPi.
+</span></p>
+<h2 id="method-descriptions">Method Descriptions</h2>
+<p><span id="connect_deferred"><span class="void">void</span> <a href="#connect_deferred"><span class="method">connect_deferred</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></span>:</p>
+<p><span class="indent">
+Forwards the call directly to <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html#connect">Object#connect</a> if a signal <span class="param">signal_id</span> exists. Otherwise queues the call and runs it when a user signal <span class="param">signal_id</span> is added.
+</span></p>
+<p><span id="add_user_signal"><span class="void">void</span> <a href="#add_user_signal"><span class="method">add_user_signal</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">arguments</span> <span class="bracket">)</span></span>:</p>
+<p><span class="indent">
+Overrides <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html#add_user_signal">Object#add_user_signal</a>. Additionally emits <span><a href="#signal_registered"><span class="signal">signal_registered</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span> <span class="bracket">)</span></span> after the user signal has been added.
 </span></p>
 
 
