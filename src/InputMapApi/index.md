@@ -11,8 +11,6 @@ methods:    void define_actions(category: String, actions: Dictionary)
             InputEventEmitterNode get_or_append_event_emitter(node: Node)
             InputEventEmitterNode master_event_emitter()
 
-<link rel="stylesheet" href="../../wiki.css">
-
 An Api for attaching :link:`InputEventEmitterNode`s that emit signals for cancellable input events.
 
 ## Description
@@ -25,10 +23,9 @@ The InputMapApi makes it possible to attach an :link:`InputEventEmitterNode` as 
 
 ## Method Descriptions
 
-:method:anchor:`define_actions`:
-
+:method:anchor:`define_actions`: <br>
 <span class="indent">
-Registers actions to the :link:`InputMap` from a :Link:`Dictionary` and adds them to the Shortcuts menu. :param:`actions` may consist of nested dictionaries to define categories inside the Shortcuts menu. Shortcut entries can either be a :link:`String` defining the action name or an :link:`Array`. The arrays first entry defines the action name while the following entries define the default shortcuts, either as a :link:`String` denoting the shortcut or a :link:`InputEventKey`.
+Registers actions to the :link:`InputMap` from a :link:`Dictionary` and adds them to the Shortcuts menu. :param:`actions` may consist of nested dictionaries to define categories inside the Shortcuts menu. Shortcut entries can either be a :link:`String` defining the action name or an :link:`Array`. The arrays first entry defines the action name while the following entries define the default shortcuts, either as a :link:`String` denoting the shortcut or a :link:`InputEventKey`.
 Example:
 
 ```gdscript
@@ -43,44 +40,37 @@ self.Global.API.InputMapApi.define_actions("Example Mod", input_definitions)
 ```
 </span>
 
-:method:anchor:`deserialize_event`:
-
+:method:anchor:`deserialize_event`: <br>
 <span class="indent">
 Deserializes an :link:`InputEventKey` from :param:`string`.
 </span>
 
-:method:anchor:`serialize_event`:
-
+:method:anchor:`serialize_event`: <br>
 <span class="indent">
 Serializes :param:`event` into a :link:`String`.
 </span>
 
-:method:anchor:`event_as_string`:
-
+:method:anchor:`event_as_string`: <br>
 <span class="indent">
 Turns :param:`event` into a human readable :link:`String` representation.
 </span>
 
-:method:anchor:`get_agent`:
-
+:method:anchor:`get_agent`: <br>
 <span class="indent">
-W.I.P.
+Gets the :link:`ActionConfigSyncAgent` for :param:`action`.
 </span>
 
-:method:anchor:`get_or_create_agent`:
-
+:method:anchor:`get_or_create_agent`: <br>
 <span class="indent">
-W.I.P.
+Gets or creates the :link:`ActionConfigSyncAgent` for :param:`action`.
 </span>
 
-:method:anchor:`get_or_append_event_emitter`:
-
+:method:anchor:`get_or_append_event_emitter`: <br>
 <span class="indent">
-W.I.P.
+Gets the :link:`InputEventEmitterNode` attached to :param:`node` or creates one if necessary.
 </span>
 
-:method:anchor:`master_event_emitter`:
-
+:method:anchor:`master_event_emitter`: <br>
 <span class="indent">
-W.I.P.
+Gets the :link:`InputEventEmitterNode` attached to the Master node (owner of Editor & World) or creates one if necessary.
 </span>

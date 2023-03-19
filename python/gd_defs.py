@@ -37,6 +37,8 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
                 return self.build_methods_table()
             case "signal":
                 return self.build_signal(parameter)
+            case "signal:anchor":
+                return self.build_signal(parameter, outer_attributes = {"id": parameter})
             case "param":
                 return self.build_parameter(parameter)
             case "link":
@@ -117,9 +119,9 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
         return builder.close()
 
     
-    def build_signal(self, signal: str) -> Element:
+    def build_signal(self, signal: str, outer_attributes: dict = {}) -> Element:
         builder: TreeBuilder = TreeBuilder()
-        builder.start("span", {})
+        builder.start("span", outer_attributes)
         sig = self.md.class_members["signals"][signal]
         self.build_node(builder, sig["signal"])
         builder.data(" ")
@@ -276,7 +278,7 @@ class ClassMemberPreprocessor(Preprocessor):
                     signature = {}
                     signal = re.search("^[a-zA-Z _]*", meta_signal).group().strip()
                     signature["signal"] = self.build_signal_name(signal)
-                    params = re.search(r"\(([a-zA-Z0-9_ ,]*)\)", meta_method).group(1).split(",")
+                    params = re.search(r"\(([a-zA-Z0-9_ ,]*)\)", meta_signal).group(1).split(",")
                     param_sigs = []
                     for param in params:
                         if ":" in param:

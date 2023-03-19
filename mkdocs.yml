@@ -25,3 +25,8 @@ nav:
   - InputMapApi:
     - InputMapApi: InputMapApi/index.md
     - InputEventEmitterNode: InputMapApi/InputEventEmitterNode.md
+  - ModConfigApi:
+    - ModConfigApi: ModConfigApi/index.md
+    - ConfigBuilder: ModConfigApi/ConfigBuilder.md
+  - ModSignalingApi: ModSignalingApi.md
+  - PreferencesWindowApi: PreferencesWindowApi.md

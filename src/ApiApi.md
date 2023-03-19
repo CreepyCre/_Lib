@@ -5,8 +5,6 @@ root: ..
 methods: void register(String api, Object api)
 signals: api_registered(String api_id, Object api)
 
-<link rel="stylesheet" href="../wiki.css">
-
 A Registry for all _Lib APIs.
 
 ## Description
@@ -27,14 +25,14 @@ Global.API.ModApi.some_method()
 
 ## Signals
 
-:signal:`api_registered`
-
-- Emitted when an API is registered.
+:signal:anchor:`api_registered`: <br>
+<span class="indent">
+Emitted when an API is registered.
+</span>
 
 ## Method Descriptions
 
-:method:anchor:`register`:
-
+:method:anchor:`register`: <br>
 <span class="indent">
 Registers an API under the name :param:`api`
 </span>

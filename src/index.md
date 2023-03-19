@@ -3,6 +3,7 @@ Welcome to the _Lib wiki!
 _Lib is a Dungeondraft mod that offers additional API to simplify implementing certain features like configs and improve mod compatibility.
 
 ## Using _Lib
+
 To be able to access _Lib's Api put the following at the top of your mods `start()` method:
 ```gdscript
 Engine.emit_signal("_lib_register_mod", self)
