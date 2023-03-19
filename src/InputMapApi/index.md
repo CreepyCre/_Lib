@@ -1,6 +1,7 @@
 ---
 _: _
 ---
+root: ..
 methods:    void define_actions(category: String, actions: Dictionary)
             InputEventKey deserialize_event(string: String)
             String serialize_event(event: InputEventKey)

@@ -23,8 +23,6 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
     def handleMatch(self, m, data):
         command = m.group("command")
         parameter = m.group("parameter")
-        print(command)
-        print(parameter)
         return self.handleCommand(command, parameter), m.start(0), m.end(0)
     
     def handleCommand(self, command, parameter) -> Element:
@@ -53,10 +51,10 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
             builder.start("a", {"href": target})
             builder.data(target[1:])
         elif len(parts) == 1:
-            builder.start("a", {"href": self.class_url_provider.get_href(target)})
+            builder.start("a", {"href": self.md.Meta["root"][0] + "/" + self.class_url_provider.get_href(target)})
             builder.data(target)
         else:
-            builder.start("a", {"href": self.class_url_provider.get_href(parts[0]) + "#" + parts[1]})
+            builder.start("a", {"href": self.md.Meta["root"][0] + "/" + self.class_url_provider.get_href(parts[0]) + "#" + parts[1]})
             builder.data(target)
         builder.end("a")
         return builder.close()
@@ -241,7 +239,6 @@ class ClassMemberPreprocessor(Preprocessor):
                         method_name = returntype_method[1]
                         signature["return_type"] = self.build_type(returntype_method[0])
                         signature["method"] = self.build_method_name(method_name)
-                    print(meta_method)
                     params = re.search(r"\(([a-zA-Z0-9_ ,:]*)\)", meta_method).group(1).split(",")
                     param_sigs = []
                     for param in params:
@@ -306,7 +303,7 @@ class ClassMemberPreprocessor(Preprocessor):
             definition["class"] = "void"
         else:
             definition["class"] = "type"
-            definition["href"] = self.class_url_provider.get_href(type)
+            definition["href"] = self.md.Meta["root"][0] + "/" + self.class_url_provider.get_href(type)
         return definition
     
     def build_method_name(self, method: str) -> dict:

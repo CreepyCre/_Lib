@@ -725,4 +725,4 @@ class ClassUrlProvider:
     
     def register(self, *clazzes):
         for clazz_path in clazzes:
-            self.urlDict[clazz_path.split("/")[-1]] = "/" + clazz_path
+            self.urlDict[clazz_path.split("/")[-1]] = clazz_path

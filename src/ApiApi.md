@@ -1,6 +1,7 @@
 ---
 _: _
 ---
+root: ..
 methods: void register(String api, Object api)
 signals: api_registered(String api_id, Object api)
 

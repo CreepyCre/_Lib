@@ -1,6 +1,7 @@
 ---
 _: _
 ---
+root: ../..
 methods:    void accept_event()
 signals:    input(InputEvent event, InputEventEmitterNode emitter)
             unhandled_input(InputEvent event, InputEventEmitterNode emitter)
