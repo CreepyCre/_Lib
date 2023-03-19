@@ -9,11 +9,11 @@ _Lib<br>
 This mod offers additional API to simplify implementing certain features like configs and improve mod compatibility.
 
 Current API:
-- [ApiApi](https://github.com/CreepyCre/_Lib/wiki/ApiApi)
-- [InputMapApi](https://github.com/CreepyCre/_Lib/wiki/InputMapApi)
-- [ModConfigApi](https://github.com/CreepyCre/_Lib/wiki/ModConfigApi)
-- [ModSignalingApi](https://github.com/CreepyCre/_Lib/wiki/ModSignalingApi)
-- [PreferencesWindowApi](https://github.com/CreepyCre/_Lib/wiki/PreferencesWindowApi)
+- [ApiApi](https://creepycre.github.io/_Lib/ApiApi/)
+- [InputMapApi](https://creepycre.github.io/_Lib/wiki/InputMapApi)
+- [ModConfigApi](https://creepycre.github.io/_Lib/wiki/ModConfigApi)
+- [ModSignalingApi](https://creepycre.github.io/_Lib/wiki/ModSignalingApi)
+- [PreferencesWindowApi](https://creepycre.github.io/_Lib/wiki/PreferencesWindowApi)
 
 ## Using _Lib
 To be able to access _Lib's Api put the following at the top of your mods `start()` method:
