@@ -68,6 +68,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#description" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -265,9 +270,59 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          InputEventEmitterNode
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         InputEventEmitterNode
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    Methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    Signals
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method-descriptions" class="md-nav__link">
+    Method Descriptions
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -391,6 +446,42 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    Description
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    Methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    Signals
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method-descriptions" class="md-nav__link">
+    Method Descriptions
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -406,7 +497,36 @@
 
   <h1>InputEventEmitterNode</h1>
 
-<p><link rel="stylesheet" href="../../wiki.css"></p>
+<p>A Node that emits cancellable input event signals.</p>
+<h2 id="description">Description</h2>
+<p>An InputEventEmitterNode can be attached as the child of any node via the <a href="../../InputMapApi">InputMapApi</a>. Any time the <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_input">Node#_input</a>, <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_input">Node#_unhandled_input</a> or <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_key_input">Node#_unhandled_key_input</a> method is called on it it will emit a signal accordingly. The signals provide the InputEventEmitterNode whose <span><a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></span> method can then be called to prevent further propagation of the <a href="https://docs.godotengine.org/en/3.5/classes/class_inputevent.html">InputEvent</a>.</p>
+<h2 id="methods">Methods</h2>
+<p>
+<table>
+<tr>
+<td><span class="void">void</span></td>
+<td><a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></td>
+</tr>
+</table>
+</p>
+<h2 id="signals">Signals</h2>
+<p><span id="input"><a href="#input"><span class="signal">input</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_inputevent.html"><span class="type">InputEvent</span></a> <span class="param">event</span>, <a href="../../InputMapApi/InputEventEmitterNode"><span class="type">InputEventEmitterNode</span></a> <span class="param">emitter</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
+Emitted when <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_input">Node#_input</a> is called on this Node.
+</span></p>
+<p><span id="unhandled_input"><a href="#unhandled_input"><span class="signal">unhandled_input</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_inputevent.html"><span class="type">InputEvent</span></a> <span class="param">event</span>, <a href="../../InputMapApi/InputEventEmitterNode"><span class="type">InputEventEmitterNode</span></a> <span class="param">emitter</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
+Emitted when <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_input">Node#_unhandled_input</a> is called on this Node.
+</span></p>
+<p><span id="unhandled_key_input"><a href="#unhandled_key_input"><span class="signal">unhandled_key_input</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html"><span class="type">InputEventKey</span></a> <span class="param">event</span>, <a href="../../InputMapApi/InputEventEmitterNode"><span class="type">InputEventEmitterNode</span></a> <span class="param">emitter</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
+Emitted when <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_key_input">Node#_unhandled_key_input</a> is called on this Node.
+</span></p>
+<h2 id="method-descriptions">Method Descriptions</h2>
+<p><span id="accept_event"><span class="void">void</span> <a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
+Call to prevent further propagation of the received <a href="https://docs.godotengine.org/en/3.5/classes/class_inputevent.html">InputEvent</a>.
+</span></p>
 
 
 

@@ -483,7 +483,6 @@
 
   <h1>InputMapApi</h1>
 
-<p><link rel="stylesheet" href="../../wiki.css"></p>
 <p>An Api for attaching <a href="../InputMapApi/InputEventEmitterNode">InputEventEmitterNode</a>s that emit signals for cancellable input events.</p>
 <h2 id="description">Description</h2>
 <p>The InputMapApi makes it possible to attach an <a href="../InputMapApi/InputEventEmitterNode">InputEventEmitterNode</a> as a child of a node using <span><a href="#get_or_append_event_emitter"><span class="method">get_or_append_event_emitter</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html"><span class="type">Node</span></a> <span class="param">node</span> <span class="bracket">)</span></span>. It additionally handles synchronization of ShortcutConfigNodes and has some methods for serializing and deserializing <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html">InputEventKey</a>s.</p>
@@ -525,8 +524,8 @@
 </table>
 </p>
 <h2 id="method-descriptions">Method Descriptions</h2>
-<p><span id="define_actions"><span class="void">void</span> <a href="#define_actions"><span class="method">define_actions</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">category</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_dictionary.html"><span class="type">Dictionary</span></a> <span class="param">actions</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="define_actions"><span class="void">void</span> <a href="#define_actions"><span class="method">define_actions</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">category</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_dictionary.html"><span class="type">Dictionary</span></a> <span class="param">actions</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Registers actions to the <a href="https://docs.godotengine.org/en/3.5/classes/class_inputmap.html">InputMap</a> from a <a href="https://docs.godotengine.org/en/3.5/classes/class_dictionary.html">Dictionary</a> and adds them to the Shortcuts menu. <span class="param">actions</span> may consist of nested dictionaries to define categories inside the Shortcuts menu. Shortcut entries can either be a <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a> defining the action name or an <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html">Array</a>. The arrays first entry defines the action name while the following entries define the default shortcuts, either as a <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a> denoting the shortcut or a <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html">InputEventKey</a>.
 Example:</p>
 <p><div class="language-gdscript highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">var</span><span class="w"> </span><span class="n">input_definitions</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">Dictionary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
@@ -539,32 +538,32 @@ Example:</p>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="bp">self</span><span class="o">.</span><span class="n">Global</span><span class="o">.</span><span class="n">API</span><span class="o">.</span><span class="n">InputMapApi</span><span class="o">.</span><span class="n">define_actions</span><span class="p">(</span><span class="s2">&quot;Example Mod&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">input_definitions</span><span class="p">)</span>
 </span></code></pre></div>
 </span></p>
-<p><span id="deserialize_event"><a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html"><span class="type">InputEventKey</span></a> <a href="#deserialize_event"><span class="method">deserialize_event</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">string</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="deserialize_event"><a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html"><span class="type">InputEventKey</span></a> <a href="#deserialize_event"><span class="method">deserialize_event</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">string</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Deserializes an <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html">InputEventKey</a> from <span class="param">string</span>.
 </span></p>
-<p><span id="serialize_event"><a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <a href="#serialize_event"><span class="method">serialize_event</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html"><span class="type">InputEventKey</span></a> <span class="param">event</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="serialize_event"><a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <a href="#serialize_event"><span class="method">serialize_event</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html"><span class="type">InputEventKey</span></a> <span class="param">event</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Serializes <span class="param">event</span> into a <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a>.
 </span></p>
-<p><span id="event_as_string"><a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <a href="#event_as_string"><span class="method">event_as_string</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html"><span class="type">InputEventKey</span></a> <span class="param">event</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="event_as_string"><a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <a href="#event_as_string"><span class="method">event_as_string</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_inputeventkey.html"><span class="type">InputEventKey</span></a> <span class="param">event</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Turns <span class="param">event</span> into a human readable <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a> representation.
 </span></p>
-<p><span id="get_agent"><a href="../InputMapApi/ActionConfigSyncAgent"><span class="type">ActionConfigSyncAgent</span></a> <a href="#get_agent"><span class="method">get_agent</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">action</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="get_agent"><a href="../InputMapApi/ActionConfigSyncAgent"><span class="type">ActionConfigSyncAgent</span></a> <a href="#get_agent"><span class="method">get_agent</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">action</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Gets the <a href="../InputMapApi/ActionConfigSyncAgent">ActionConfigSyncAgent</a> for <span class="param">action</span>.
 </span></p>
-<p><span id="get_or_create_agent"><a href="../InputMapApi/ActionConfigSyncAgent"><span class="type">ActionConfigSyncAgent</span></a> <a href="#get_or_create_agent"><span class="method">get_or_create_agent</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">action</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">deadzone</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="get_or_create_agent"><a href="../InputMapApi/ActionConfigSyncAgent"><span class="type">ActionConfigSyncAgent</span></a> <a href="#get_or_create_agent"><span class="method">get_or_create_agent</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">action</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">deadzone</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Gets or creates the <a href="../InputMapApi/ActionConfigSyncAgent">ActionConfigSyncAgent</a> for <span class="param">action</span>.
 </span></p>
-<p><span id="get_or_append_event_emitter"><a href="../InputMapApi/InputEventEmitterNode"><span class="type">InputEventEmitterNode</span></a> <a href="#get_or_append_event_emitter"><span class="method">get_or_append_event_emitter</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html"><span class="type">Node</span></a> <span class="param">node</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="get_or_append_event_emitter"><a href="../InputMapApi/InputEventEmitterNode"><span class="type">InputEventEmitterNode</span></a> <a href="#get_or_append_event_emitter"><span class="method">get_or_append_event_emitter</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html"><span class="type">Node</span></a> <span class="param">node</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Gets the <a href="../InputMapApi/InputEventEmitterNode">InputEventEmitterNode</a> attached to <span class="param">node</span> or creates one if necessary.
 </span></p>
-<p><span id="master_event_emitter"><a href="../InputMapApi/InputEventEmitterNode"><span class="type">InputEventEmitterNode</span></a> <a href="#master_event_emitter"><span class="method">master_event_emitter</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="master_event_emitter"><a href="../InputMapApi/InputEventEmitterNode"><span class="type">InputEventEmitterNode</span></a> <a href="#master_event_emitter"><span class="method">master_event_emitter</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Gets the <a href="../InputMapApi/InputEventEmitterNode">InputEventEmitterNode</a> attached to the Master node (owner of Editor &amp; World) or creates one if necessary.
 </span></p>
 

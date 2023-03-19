@@ -512,17 +512,17 @@
 </table>
 </p>
 <h2 id="signals">Signals</h2>
-<p><span id="signal_registered"><a href="#signal_registered"><span class="signal">signal_registered</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="signal_registered"><a href="#signal_registered"><span class="signal">signal_registered</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Emitted whenever a new user signal is added to the ModSignalingAPi.
 </span></p>
 <h2 id="method-descriptions">Method Descriptions</h2>
-<p><span id="connect_deferred"><span class="void">void</span> <a href="#connect_deferred"><span class="method">connect_deferred</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="connect_deferred"><span class="void">void</span> <a href="#connect_deferred"><span class="method">connect_deferred</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Forwards the call directly to <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html#connect">Object#connect</a> if a signal <span class="param">signal_id</span> exists. Otherwise queues the call and runs it when a user signal <span class="param">signal_id</span> is added.
 </span></p>
-<p><span id="add_user_signal"><span class="void">void</span> <a href="#add_user_signal"><span class="method">add_user_signal</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">arguments</span> <span class="bracket">)</span></span>:</p>
-<p><span class="indent">
+<p><span id="add_user_signal"><span class="void">void</span> <a href="#add_user_signal"><span class="method">add_user_signal</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">arguments</span> <span class="bracket">)</span></span>: <br>
+<span class="indent">
 Overrides <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html#add_user_signal">Object#add_user_signal</a>. Additionally emits <span><a href="#signal_registered"><span class="signal">signal_registered</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_id</span> <span class="bracket">)</span></span> after the user signal has been added.
 </span></p>
 
