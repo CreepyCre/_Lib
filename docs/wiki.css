@@ -1,0 +1,28 @@
+.method {
+    color: #DCDCAA;
+}
+
+.signal {
+    color: #DCDCAA;
+}
+
+.bracket {
+    color: yellow;
+}
+
+.type {
+    color: #4EC9B0;
+}
+
+.param {
+    color: #9CDCFE;
+}
+
+.void {
+    color: #AAAAAA
+}
+
+.indent {
+    margin-left: 50px;
+    display: inline-block;
+}

@@ -1,0 +1,25 @@
+site_name: _Lib Docs
+theme:
+  name: material
+  palette:
+    scheme: slate
+  hljs_languages:
+    - gdscript
+markdown_extensions:
+  - meta
+  - gd_defs
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+extra_css:
+  - wiki.css
+nav:
+  - Home: index.md
+  - ApiApi: ApiApi.md
+  - InputMapApi:
+    - InputMapApi: InputMapApi/index.md
+    - InputEventEmitterNode: InputMapApi/InputEventEmitterNode.md
