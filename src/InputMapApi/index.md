@@ -28,19 +28,37 @@ The InputMapApi makes it possible to attach an :link:`InputEventEmitterNode` as 
 :method:anchor:`define_actions`:
 
 <span class="indent">
-W.I.P.
+Registers actions to the :link:`InputMap` from a :Link:`Dictionary` and adds them to the Shortcuts menu. :param:`actions` may consist of nested dictionaries to define categories inside the Shortcuts menu. Shortcut entries can either be a :link:`String` defining the action name or an :link:`Array`. The arrays first entry defines the action name while the following entries define the default shortcuts, either as a :link:`String` denoting the shortcut or a :link:`InputEventKey`.
+Example:
+
+```gdscript
+var input_definitions: Dictionary = {
+    "Some Shortcut": ["shortcut1", "Ctrl+P", "L"],
+    "Some Category":{
+        "Other Shortcut": "shortcut2",
+        "Third Shortcut": "shortcut3"
+    }
+}
+self.Global.API.InputMapApi.define_actions("Example Mod", input_definitions)
+```
 </span>
 
 :method:anchor:`deserialize_event`:
 
 <span class="indent">
-W.I.P.
+Deserializes an :link:`InputEventKey` from :param:`string`.
 </span>
 
 :method:anchor:`serialize_event`:
 
 <span class="indent">
-W.I.P.
+Serializes :param:`event` into a :link:`String`.
+</span>
+
+:method:anchor:`event_as_string`:
+
+<span class="indent">
+Turns :param:`event` into a human readable :link:`String` representation.
 </span>
 
 :method:anchor:`get_agent`:
