@@ -51,10 +51,10 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
             builder.start("a", {"href": target})
             builder.data(target[1:])
         elif len(parts) == 1:
-            builder.start("a", {"href": self.md.Meta["root"][0] + "/" + self.class_url_provider.get_href(target)})
+            builder.start("a", {"href": self.fix_url(self.class_url_provider.get_href(target))})
             builder.data(target)
         else:
-            builder.start("a", {"href": self.md.Meta["root"][0] + "/" + self.class_url_provider.get_href(parts[0]) + "#" + parts[1]})
+            builder.start("a", {"href": self.fix_url(self.class_url_provider.get_href(parts[0])) + "#" + parts[1]})
             builder.data(target)
         builder.end("a")
         return builder.close()
@@ -190,6 +190,12 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
         builder.start("span", {"class": "bracket"})
         builder.data("()")
         builder.end("span")
+    
+    def fix_url(self, url: str) -> str:
+        if url.startswith("http"):
+            return url
+        return self.md.Meta["root"][0] + "/" + url
+        
 
 
 class ClassMemberPreprocessor(Preprocessor):
@@ -303,7 +309,7 @@ class ClassMemberPreprocessor(Preprocessor):
             definition["class"] = "void"
         else:
             definition["class"] = "type"
-            definition["href"] = self.md.Meta["root"][0] + "/" + self.class_url_provider.get_href(type)
+            definition["href"] = self.fix_url(self.class_url_provider.get_href(type))
         return definition
     
     def build_method_name(self, method: str) -> dict:
@@ -331,6 +337,11 @@ class ClassMemberPreprocessor(Preprocessor):
             "text": property,
             "class": "prop"
         }
+    
+    def fix_url(self, url: str) -> str:
+        if url.startswith("http"):
+            return url
+        return self.md.Meta["root"][0] + "/" + url
 
 def makeExtension(**kwargs):
     return ClassMemberExtension(**kwargs)
