@@ -97,10 +97,12 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
         builder.data(" ")
         self.rbracket(builder)
 
-    def build_methods_table(self) -> Element:
+    def build_methods_table(self, sort: bool = False) -> Element:
         builder: TreeBuilder = TreeBuilder()
         builder.start("table", {})
-        for sig in self.md.class_members["methods"].values():
+        methods = self.md.class_members["methods"]
+        for key in (sorted(methods) if sort else methods):
+            sig = methods[key]
             builder.start("tr", {})
             builder.start("td", {})
             if "return_type" in sig:
