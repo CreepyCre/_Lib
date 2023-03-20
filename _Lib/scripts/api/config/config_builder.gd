@@ -189,13 +189,13 @@ func add_stylebox_override(name: String, stylebox: StyleBox) -> ConfigBuilder:
     return self
 
 func wrap(save_entry: String, root_node: Control, target_node = null) -> ConfigBuilder:
-    if (save_entry == null):
+    if (save_entry == ""):
         return add_node(WrappedControlConfigNode.new(save_entry, root_node, target_node)).flatten()
     else:
         return add_node(WrappedControlConfigNode.new(save_entry, root_node, target_node))
 
 func extend(save_entry: String, node: Control) -> ConfigBuilder:
-    if (save_entry == null):
+    if (save_entry == ""):
         return add_node(ContainerExtensionConfigNode.extend("", node)).flatten()
     else:
         return add_node(ContainerExtensionConfigNode.extend(save_entry, node))
@@ -233,43 +233,43 @@ func text_edit(save_entry: String, default_value: String) -> ConfigBuilder:
 func shortcuts(save_entry: String, definitions: Dictionary) -> ConfigBuilder:
     return add_node(ShortcutsConfigNode.new(save_entry, definitions, _input_map_api))
     
-func aspect_ratio_container(save_entry: String = null) -> ConfigBuilder:
+func aspect_ratio_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, AspectRatioContainer.new())
 
-func center_container(save_entry: String = null) -> ConfigBuilder:
+func center_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, CenterContainer.new())
 
-func h_box_container(save_entry: String = null) -> ConfigBuilder:
+func h_box_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, HBoxContainer.new())
 
-func v_box_container(save_entry: String = null) -> ConfigBuilder:
+func v_box_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, VBoxContainer.new())
 
-func grid_container(save_entry: String = null) -> ConfigBuilder:
+func grid_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, GridContainer.new())
 
-#func h_flow_container(save_entry: String = null) -> ConfigBuilder:
+#func h_flow_container(save_entry: String = "") -> ConfigBuilder:
 #    return extend(save_entry, HFlowContainer.new())
 
-#func v_flow_container(save_entry: String = null) -> ConfigBuilder:
+#func v_flow_container(save_entry: String = "") -> ConfigBuilder:
 #    return extend(save_entry, VFlowContainer.new())
 
-func h_split_container(save_entry: String = null) -> ConfigBuilder:
+func h_split_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, HSplitContainer.new())
 
-func v_split_container(save_entry: String = null) -> ConfigBuilder:
+func v_split_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, VSplitContainer.new())
 
-func margin_container(save_entry: String = null) -> ConfigBuilder:
+func margin_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, MarginContainer.new())
 
-func panel_container(save_entry: String = null) -> ConfigBuilder:
+func panel_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, PanelContainer.new())
 
-func scroll_container(save_entry: String = null) -> ConfigBuilder:
+func scroll_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, ScrollContainer.new())
 
-func tab_container(save_entry: String = null) -> ConfigBuilder:
+func tab_container(save_entry: String = "") -> ConfigBuilder:
     return extend(save_entry, TabContainer.new())
 
 func color_rect(color: Color) -> ConfigBuilder:
