@@ -45,25 +45,25 @@ methods:    ConfigBuilder enter()
             ConfigBuilder line_edit(save_entry: String, default_value: String, require_hit_enter: bool = true=)
             ConfigBuilder text_edit(save_entry: String, default_value: String)
             ConfigBuilder shortcuts(save_entry: String, definitions: Dictionary)
-            ConfigBuilder aspect_ratio_container(save_entry: String = null=)
-            ConfigBuilder center_container(save_entry: String = null=)
-            ConfigBuilder h_box_container(save_entry: String = null=)
-            ConfigBuilder v_box_container(save_entry: String = null=)
-            ConfigBuilder grid_container(save_entry: String = null=)
-            ConfigBuilder h_split_container(save_entry: String = null=)
-            ConfigBuilder v_split_container(save_entry: String = null=)
-            ConfigBuilder margin_container(save_entry: String = null=)
-            ConfigBuilder panel_container(save_entry: String = null=)
-            ConfigBuilder scroll_container(save_entry: String = null=)
-            ConfigBuilder tab_container(save_entry: String = null=)
-            ConfigBuilder color_rect(WIP)
+            ConfigBuilder aspect_ratio_container(save_entry: String = ""=)
+            ConfigBuilder center_container(save_entry: String = ""=)
+            ConfigBuilder h_box_container(save_entry: String = ""=)
+            ConfigBuilder v_box_container(save_entry: String = ""=)
+            ConfigBuilder grid_container(save_entry: String = ""=)
+            ConfigBuilder h_split_container(save_entry: String = ""=)
+            ConfigBuilder v_split_container(save_entry: String = ""=)
+            ConfigBuilder margin_container(save_entry: String = ""=)
+            ConfigBuilder panel_container(save_entry: String = ""=)
+            ConfigBuilder scroll_container(save_entry: String = ""=)
+            ConfigBuilder tab_container(save_entry: String = ""=)
+            ConfigBuilder color_rect(color: Color)
             ConfigBuilder h_separator()
             ConfigBuilder v_separator()
             ConfigBuilder label(text: String = ""=)
             ConfigBuilder nine_patch_rect()
             ConfigBuilder panel()
             ConfigBuilder reference_rect()
-            ConfigBuilder rich_text_label(WIP)
+            ConfigBuilder rich_text_label(bbcode_text: String = ""=)
             ConfigBuilder texture_rect(texture: Texture)
             ConfigBuilder build(should_load: bool = true=, should_free: bool = true=)
             ConfigAgent get_agent()
@@ -96,12 +96,12 @@ Exits the node previously entered.
 
 :method:anchor:`add_node`: <br>
 <span class="indent">
-Adds a :link:`Control` as child of the node currently entered.
+Adds :param:`node` as child of the node currently entered.
 </span>
 
 :method:anchor:`add_node_direct`: <br>
 <span class="indent">
-Directly adds a :link:`Control` as child of the node currently entered bypassing the get_target() call.
+Directly adds :param:`node` as child of the node currently entered bypassing the get_target() call.
 </span>
 
 :method:anchor:`with`: <br>
@@ -253,7 +253,7 @@ Forwards call to :link:`Control#add_stylebox_override` on the most recent node.
 
 :method:anchor:`wrap`: <br>
 <span class="indent">
-Wraps a scene in a WrappedControlConfigNode where :param:`root_node` is the scene root and :param:`target_node` is where new child nodes will be appended by the ConfigBuilder. The wrapped scenes config nodes will be saved into the category :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Wraps a scene in a WrappedControlConfigNode where :param:`root_node` is the scene root and :param:`target_node` is where new child nodes will be appended by the ConfigBuilder. The wrapped scenes config nodes will be saved into the category :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`extend`: <br>
@@ -324,62 +324,62 @@ Appends a :link:`Tree` config node with config key :param:`save_entry` that cont
 
 :method:anchor:`aspect_ratio_container`: <br>
 <span class="indent">
-Appends an :link:`AspectRatioContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends an :link:`AspectRatioContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`center_container`: <br>
 <span class="indent">
-Appends a :link:`CenterContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`CenterContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`h_box_container`: <br>
 <span class="indent">
-Appends a :link:`HBoxContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`HBoxContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`v_box_container`: <br>
 <span class="indent">
-Appends a :link:`VBoxContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`VBoxContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`grid_container`: <br>
 <span class="indent">
-Appends a :link:`GridContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`GridContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`h_split_container`: <br>
 <span class="indent">
-Appends an :link:`HSplitContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends an :link:`HSplitContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`v_split_container`: <br>
 <span class="indent">
-Appends a :link:`VSplitContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`VSplitContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`margin_container`: <br>
 <span class="indent">
-Appends a :link:`MarginContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`MarginContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`panel_container`: <br>
 <span class="indent">
-Appends a :link:`PanelContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`PanelContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`scroll_container`: <br>
 <span class="indent">
-Appends a :link:`ScrollContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`ScrollContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`tab_container`: <br>
 <span class="indent">
-Appends a :link:`TabContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to null flattens the node.
+Appends a :link:`TabContainer` with config key :param:`save_entry`. Setting :param:`save_entry` to "" flattens the node.
 </span>
 
 :method:anchor:`color_rect`: <br>
 <span class="indent">
-W.I.P.
+Appends a :link:`ColorRect` with :param:`color` as its color.
 </span>
 
 :method:anchor:`h_separator`: <br>
@@ -414,7 +414,7 @@ Appends a :link:`ReferenceRect`.
 
 :method:anchor:`rich_text_label`: <br>
 <span class="indent">
-W.I.P.
+Appends a bbcode enabled :link:`RichTextLabel` with :param:`bbcode_text` as its bbcode_text.
 </span>
 
 :method:anchor:`texture_rect`: <br>

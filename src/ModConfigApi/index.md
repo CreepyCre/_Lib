@@ -8,7 +8,7 @@ An Api that enables creating a mod config accessible from the "Mods" menu.
 
 ## Description
 
-The ModConfigApi manages mod configs. It's only method creates a :link:`ConfigBuilder` that offers methods for building a mod config that is automatically saved into a given file by the ModConfigApi.
+The ModConfigApi manages mod configs. It's only method creates a :link:`ConfigBuilder` that offers methods for building a mod config that is automatically saved into a given file by the ModConfigApi. See :link:`ConfigBuilder` for a detailed explanation on the usage.
 
 ## Methods
 
