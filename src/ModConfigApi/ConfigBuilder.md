@@ -394,7 +394,7 @@ Appends a :link:`VSeparator`.
 
 :method:anchor:`label`: <br>
 <span class="indent">
-Appends a :link:`Label` with text :param`text`.
+Appends a :link:`Label` with text :param:`text`.
 </span>
 
 :method:anchor:`nine_patch_rect`: <br>
@@ -419,7 +419,7 @@ W.I.P.
 
 :method:anchor:`texture_rect`: <br>
 <span class="indent">
-Appends a :link:`TextureRect` with texture :para:`texture`.
+Appends a :link:`TextureRect` with texture :param:`texture`.
 </span>
 
 :method:anchor:`build`: <br>
