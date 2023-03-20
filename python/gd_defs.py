@@ -161,25 +161,27 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
     def build_node(self, builder: TreeBuilder, definition: dict):
         has_class = "class" in definition
         has_href = "href" in definition
-        match has_href:
-            case True:
-                builder.start("a", {"href": definition["href"]})
-                match has_class:
-                    case True:
-                        builder.start("span", {"class": definition["class"]})
-                        builder.data(definition["text"])
-                        builder.end("span")
-                    case False:
-                        builder.data(definition["text"])
-                builder.end("a")
-            case False:
-                match has_class:
-                    case True:
-                        builder.start("span", {"class": definition["class"]})
-                        builder.data(definition["text"])
-                        builder.end("span")
-                    case False:
-                        builder.data(definition["text"])
+        has_tooltip = "tooltip" in definition
+        if has_href:
+            builder.start("a", {"href": definition["href"]})
+
+        tag = "span"
+        attributes = {}
+        if has_class or has_tooltip:
+            if has_class:
+                attributes["class"] = definition["class"]
+            if has_tooltip:
+                tag = "abbr"
+                attributes["title"] = definition["tooltip"]
+            builder.start(tag, attributes)
+
+        builder.data(definition["text"])
+        
+        if has_class or has_tooltip:
+            builder.end(tag)
+
+        if has_href:
+            builder.end("a")
     
     def lbracket(self, builder: TreeBuilder):
         builder.start("span", {"class": "bracket"})
@@ -241,7 +243,6 @@ class ClassMemberPreprocessor(Preprocessor):
                 methods = {}
                 meta_methods = self.md.Meta['methods']
                 for meta_method in meta_methods:
-                    print(meta_method)
                     signature = {}
                     returntype_method = re.search(r"^[a-zA-Z _]*", meta_method).group().strip().split(" ")
                     if (len(returntype_method)) == 1:
@@ -251,7 +252,7 @@ class ClassMemberPreprocessor(Preprocessor):
                         method_name = returntype_method[1]
                         signature["return_type"] = self.build_type(returntype_method[0])
                         signature["method"] = self.build_method_name(method_name)
-                    params = re.search(r"\((([a-zA-Z0-9_ :]*([=][^=]*[=][ ]*)?)[,)])+", meta_method).group()[1:-1].split(",")
+                    params = re.search(r"\((([a-zA-Z0-9_ :.]*([=][^=]*[=][ ]*)?)[,)])+", meta_method).group()[1:-1].split(",")
                     if len(params) == 1 and params[0].strip() == "":
                             signature["params"] = []
                             methods[method_name] = signature
@@ -340,6 +341,12 @@ class ClassMemberPreprocessor(Preprocessor):
         }
 
     def build_param(self, param: str) -> dict:
+        if (param.endswith("...")):
+            return {
+                "text": param,
+                "class": "param",
+                "tooltip": "This is a varags parameter. Due to the implementation it accepts up to 10 arguments."
+            }
         return {
             "text": param,
             "class": "param"

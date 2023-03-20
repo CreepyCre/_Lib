@@ -29,5 +29,6 @@ nav:
   - ModConfigApi:
     - ModConfigApi: ModConfigApi/index.md
     - ConfigBuilder: ModConfigApi/ConfigBuilder.md
+    - ConfigAgent: ModConfigApi/ConfigAgent.md
   - ModSignalingApi: ModSignalingApi.md
   - PreferencesWindowApi: PreferencesWindowApi.md

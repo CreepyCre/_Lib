@@ -9,6 +9,7 @@ class ClassUrlProvider:
             "InputMapApi/InputEventEmitterNode",
             "ModConfigApi",
             "ModConfigApi/ConfigBuilder",
+            "ModConfigApi/ConfigAgent",
             "ModSignalingApi",
             "PreferencesWindowApi"
 
