@@ -513,13 +513,13 @@
 
 <p>A Node that emits cancellable input event signals.</p>
 <h2 id="description">Description</h2>
-<p>An InputEventEmitterNode can be attached as the child of any node via the <a href="../../InputMapApi">InputMapApi</a>. Any time the <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_input">Node#_input</a>, <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_input">Node#_unhandled_input</a> or <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_key_input">Node#_unhandled_key_input</a> method is called on it it will emit a signal accordingly. The signals provide the InputEventEmitterNode whose <span><a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></span> method can then be called to prevent further propagation of the <a href="https://docs.godotengine.org/en/3.5/classes/class_inputevent.html">InputEvent</a>.</p>
+<p>An InputEventEmitterNode can be attached as the child of any node via the <a href="../../InputMapApi">InputMapApi</a>. Any time the <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_input">Node#_input</a>, <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_input">Node#_unhandled_input</a> or <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_key_input">Node#_unhandled_key_input</a> method is called on it it will emit a signal accordingly. The signals provide the InputEventEmitterNode whose <span><a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">( )</span></span> method can then be called to prevent further propagation of the <a href="https://docs.godotengine.org/en/3.5/classes/class_inputevent.html">InputEvent</a>.</p>
 <h2 id="methods">Methods</h2>
 <p>
 <table>
 <tr>
 <td><span class="void">void</span></td>
-<td><a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></td>
+<td><a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">( )</span></td>
 </tr>
 </table>
 </p>
@@ -537,7 +537,7 @@ Emitted when <a href="https://docs.godotengine.org/en/3.5/classes/class_node.htm
 Emitted when <a href="https://docs.godotengine.org/en/3.5/classes/class_node.html#_unhandled_key_input">Node#_unhandled_key_input</a> is called on this Node.
 </span></p>
 <h2 id="method-descriptions">Method Descriptions</h2>
-<p><span id="accept_event"><span class="void">void</span> <a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">(</span> <span class="param"></span> <span class="bracket">)</span></span>: <br>
+<p><span id="accept_event"><span class="void">void</span> <a href="#accept_event"><span class="method">accept_event</span></a> <span class="bracket">( )</span></span>: <br>
 <span class="indent">
 Call to prevent further propagation of the received <a href="https://docs.godotengine.org/en/3.5/classes/class_inputevent.html">InputEvent</a>.
 </span></p>
