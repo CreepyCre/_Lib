@@ -509,13 +509,13 @@
 
 <p>An Api that makes adding additional tabs to the preferences window easy.</p>
 <h2 id="description">Description</h2>
-<p>The PreferencesWindowApi makes it possible to easily add new tabs to the preferences window using <span><a href="#create_category"><span class="method">create_category</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">container</span> <span class="bracket">)</span></span>. The attached container can then interact with the preferences window using the provided methods and signals.</p>
+<p>The PreferencesWindowApi makes it possible to easily add new tabs to the preferences window using <span><a href="#create_category"><span class="method">create_category</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">container</span> = <span class="default">_create_default_container()</span> <span class="bracket">)</span></span>. The attached container can then interact with the preferences window using the provided methods and signals.</p>
 <h2 id="methods">Methods</h2>
 <p>
 <table>
 <tr>
 <td><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a></td>
-<td><a href="#create_category"><span class="method">create_category</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">container</span> <span class="bracket">)</span></td>
+<td><a href="#create_category"><span class="method">create_category</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">container</span> = <span class="default">_create_default_container()</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><span class="void">void</span></td>
@@ -545,7 +545,7 @@ Emitted whenever the apply button is pressed.
 Emitted right before the preferences window would open up. Use this signal to for example rebuild <a href="https://docs.godotengine.org/en/3.5/classes/class_tree.html">Tree</a>s.
 </span></p>
 <h2 id="method-descriptions">Method Descriptions</h2>
-<p><span id="create_category"><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <a href="#create_category"><span class="method">create_category</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">container</span> <span class="bracket">)</span></span>: <br>
+<p><span id="create_category"><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <a href="#create_category"><span class="method">create_category</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">container</span> = <span class="default">_create_default_container()</span> <span class="bracket">)</span></span>: <br>
 <span class="indent">
 Creates a new category in the preferences window under the name <span class="param">name</span>. Attaches <span class="param">container</span> if given or generates a blank <a href="https://docs.godotengine.org/en/3.5/classes/class_vboxcontainer.html">VBoxContainer</a> as the new category panel and returns it.
 </span></p>
