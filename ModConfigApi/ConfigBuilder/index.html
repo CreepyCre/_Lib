@@ -519,11 +519,19 @@
 <table>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#enter"><span class="method">enter</span></a> <span class="bracket">( )</span></td>
+<td><a href="#add_color_override"><span class="method">add_color_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">color</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#exit"><span class="method">exit</span></a> <span class="bracket">( )</span></td>
+<td><a href="#add_constant_override"><span class="method">add_constant_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">constant</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#add_font_override"><span class="method">add_font_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_font.html"><span class="type">Font</span></a> <span class="param">font</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#add_icon_override"><span class="method">add_icon_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_texture.html"><span class="type">Texture</span></a> <span class="param">texture</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
@@ -535,19 +543,147 @@
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#with"><span class="method">with</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">property</span>, <span class="param">value</span> <span class="bracket">)</span></td>
+<td><a href="#add_shader_override"><span class="method">add_shader_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_shader.html"><span class="type">Shader</span></a> <span class="param">shader</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#size_flags_h"><span class="method">size_flags_h</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></td>
+<td><a href="#add_stylebox_override"><span class="method">add_stylebox_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_stylebox.html"><span class="type">StyleBox</span></a> <span class="param">stylebox</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#size_flags_v"><span class="method">size_flags_v</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></td>
+<td><a href="#aspect_ratio_container"><span class="method">aspect_ratio_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#size_expand_fill"><span class="method">size_expand_fill</span></a> <span class="bracket">( )</span></td>
+<td><a href="#build"><span class="method">build</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">should_load</span> = <span class="default">true</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">should_free</span> = <span class="default">true</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#call_on"><span class="method">call_on</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <abbr class="param" title="This is a varags parameter. Due to the implementation it accepts up to 10 arguments.">args...</abbr> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#call_on_ref"><span class="method">call_on_ref</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <abbr class="param" title="This is a varags parameter. Due to the implementation it accepts up to 10 arguments.">args...</abbr> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#center_container"><span class="method">center_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#check_box"><span class="method">check_box</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">text</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#check_button"><span class="method">check_button</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">text</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#color_picker"><span class="method">color_picker</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#color_picker_button"><span class="method">color_picker_button</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#color_rect"><span class="method">color_rect</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">color</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#connect_current"><span class="method">connect_current</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span> = <span class="default">[]</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> = <span class="default">0</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#connect_ref"><span class="method">connect_ref</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span> = <span class="default">[]</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> = <span class="default">0</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#connect_ref_to_prop"><span class="method">connect_ref_to_prop</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">property</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#connect_to_prop"><span class="method">connect_to_prop</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">property</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#enter"><span class="method">enter</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#exit"><span class="method">exit</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#extend"><span class="method">extend</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">node</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#flatten"><span class="method">flatten</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">value</span> = <span class="default">true</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigAgent"><span class="type">ConfigAgent</span></a></td>
+<td><a href="#get_agent"><span class="method">get_agent</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a></td>
+<td><a href="#get_current"><span class="method">get_current</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a></td>
+<td><a href="#get_ref"><span class="method">get_ref</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a></td>
+<td><a href="#get_root"><span class="method">get_root</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#grid_container"><span class="method">grid_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#h_box_container"><span class="method">h_box_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#h_separator"><span class="method">h_separator</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#h_slider"><span class="method">h_slider</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#h_split_container"><span class="method">h_split_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#label"><span class="method">label</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">text</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#line_edit"><span class="method">line_edit</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">require_hit_enter</span> = <span class="default">true</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#margin_container"><span class="method">margin_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#nine_patch_rect"><span class="method">nine_patch_rect</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#option_button"><span class="method">option_button</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">options</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#panel"><span class="method">panel</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#panel_container"><span class="method">panel_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
@@ -575,187 +711,7 @@
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#flatten"><span class="method">flatten</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">value</span> = <span class="default">true</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a></td>
-<td><a href="#get_current"><span class="method">get_current</span></a> <span class="bracket">( )</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
 <td><a href="#ref"><span class="method">ref</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a></td>
-<td><a href="#get_ref"><span class="method">get_ref</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#call_on"><span class="method">call_on</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <abbr class="param" title="This is a varags parameter. Due to the implementation it accepts up to 10 arguments.">args...</abbr> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#call_on_ref"><span class="method">call_on_ref</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <abbr class="param" title="This is a varags parameter. Due to the implementation it accepts up to 10 arguments.">args...</abbr> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#connect_current"><span class="method">connect_current</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span> = <span class="default">[]</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> = <span class="default">0</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#connect_ref"><span class="method">connect_ref</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_object.html"><span class="type">Object</span></a> <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">method_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">binds</span> = <span class="default">[]</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> = <span class="default">0</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#connect_to_prop"><span class="method">connect_to_prop</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">property</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#connect_ref_to_prop"><span class="method">connect_ref_to_prop</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">reference_name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">signal_name</span>, <span class="param">target</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">property</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#add_color_override"><span class="method">add_color_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">color</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#add_constant_override"><span class="method">add_constant_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">constant</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#add_font_override"><span class="method">add_font_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_font.html"><span class="type">Font</span></a> <span class="param">font</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#add_icon_override"><span class="method">add_icon_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_texture.html"><span class="type">Texture</span></a> <span class="param">texture</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#add_shader_override"><span class="method">add_shader_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_shader.html"><span class="type">Shader</span></a> <span class="param">shader</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#add_stylebox_override"><span class="method">add_stylebox_override</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">name</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_stylebox.html"><span class="type">StyleBox</span></a> <span class="param">stylebox</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#wrap"><span class="method">wrap</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">root_node</span>, <span class="param">target_node</span> = <span class="default">null</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#extend"><span class="method">extend</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">node</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#check_button"><span class="method">check_button</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">text</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#check_box"><span class="method">check_box</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">text</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#h_slider"><span class="method">h_slider</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#v_slider"><span class="method">v_slider</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#spin_box"><span class="method">spin_box</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#color_picker"><span class="method">color_picker</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#color_picker_button"><span class="method">color_picker_button</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#option_button"><span class="method">option_button</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">options</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#line_edit"><span class="method">line_edit</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">default_value</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">require_hit_enter</span> = <span class="default">true</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#text_edit"><span class="method">text_edit</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#shortcuts"><span class="method">shortcuts</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_dictionary.html"><span class="type">Dictionary</span></a> <span class="param">definitions</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#aspect_ratio_container"><span class="method">aspect_ratio_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#center_container"><span class="method">center_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#h_box_container"><span class="method">h_box_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#v_box_container"><span class="method">v_box_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#grid_container"><span class="method">grid_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#h_split_container"><span class="method">h_split_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#v_split_container"><span class="method">v_split_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#margin_container"><span class="method">margin_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#panel_container"><span class="method">panel_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#scroll_container"><span class="method">scroll_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#tab_container"><span class="method">tab_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#color_rect"><span class="method">color_rect</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_color.html"><span class="type">Color</span></a> <span class="param">color</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#h_separator"><span class="method">h_separator</span></a> <span class="bracket">( )</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#v_separator"><span class="method">v_separator</span></a> <span class="bracket">( )</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#label"><span class="method">label</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">text</span> = <span class="default">""</span> <span class="bracket">)</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#nine_patch_rect"><span class="method">nine_patch_rect</span></a> <span class="bracket">( )</span></td>
-</tr>
-<tr>
-<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#panel"><span class="method">panel</span></a> <span class="bracket">( )</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
@@ -767,19 +723,63 @@
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#scroll_container"><span class="method">scroll_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#shortcuts"><span class="method">shortcuts</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_dictionary.html"><span class="type">Dictionary</span></a> <span class="param">definitions</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#size_expand_fill"><span class="method">size_expand_fill</span></a> <span class="bracket">( )</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#size_flags_h"><span class="method">size_flags_h</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#size_flags_v"><span class="method">size_flags_v</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">flags</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#spin_box"><span class="method">spin_box</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#tab_container"><span class="method">tab_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#text_edit"><span class="method">text_edit</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
 <td><a href="#texture_rect"><span class="method">texture_rect</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_texture.html"><span class="type">Texture</span></a> <span class="param">texture</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
 <td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
-<td><a href="#build"><span class="method">build</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">should_load</span> = <span class="default">true</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_bool.html"><span class="type">bool</span></a> <span class="param">should_free</span> = <span class="default">true</span> <span class="bracket">)</span></td>
+<td><a href="#v_box_container"><span class="method">v_box_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
-<td><a href="../../ModConfigApi/ConfigAgent"><span class="type">ConfigAgent</span></a></td>
-<td><a href="#get_agent"><span class="method">get_agent</span></a> <span class="bracket">( )</span></td>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#v_separator"><span class="method">v_separator</span></a> <span class="bracket">( )</span></td>
 </tr>
 <tr>
-<td><a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a></td>
-<td><a href="#get_root"><span class="method">get_root</span></a> <span class="bracket">( )</span></td>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#v_slider"><span class="method">v_slider</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_float.html"><span class="type">float</span></a> <span class="param">default_value</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#v_split_container"><span class="method">v_split_container</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span> = <span class="default">""</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#with"><span class="method">with</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">property</span>, <span class="param">value</span> <span class="bracket">)</span></td>
+</tr>
+<tr>
+<td><a href="../../ModConfigApi/ConfigBuilder"><span class="type">ConfigBuilder</span></a></td>
+<td><a href="#wrap"><span class="method">wrap</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">save_entry</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_control.html"><span class="type">Control</span></a> <span class="param">root_node</span>, <span class="param">target_node</span> = <span class="default">null</span> <span class="bracket">)</span></td>
 </tr>
 </table>
 </p>
