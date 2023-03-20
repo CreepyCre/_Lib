@@ -2,8 +2,8 @@
 _: _
 ---
 root: ..
-methods:    void connect_deferred(signal_id: String, target: Object, method: String, binds: Array, flags: int)
-            void add_user_signal(signal_id: String, arguments: Array)
+methods:    void connect_deferred(signal_id: String, target: Object, method: String, binds: Array = []=, flags: int = 0)
+            void add_user_signal(signal_id: String, arguments: Array = []=)
 signals:    signal_registered(String signal_id)
 
 Enables inter-mod communication.

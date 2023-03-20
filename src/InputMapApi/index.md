@@ -7,7 +7,7 @@ methods:    void define_actions(category: String, actions: Dictionary)
             String serialize_event(event: InputEventKey)
             String event_as_string(event: InputEventKey)
             ActionConfigSyncAgent get_agent(action: String)
-            ActionConfigSyncAgent get_or_create_agent(action: String, deadzone: float)
+            ActionConfigSyncAgent get_or_create_agent(action: String, deadzone: float = 0.5=)
             InputEventEmitterNode get_or_append_event_emitter(node: Node)
             InputEventEmitterNode master_event_emitter()
 

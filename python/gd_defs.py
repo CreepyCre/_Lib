@@ -154,6 +154,9 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
             self.build_node(builder, definition["type"])
             builder.data(" ")
         self.build_node(builder, definition["name"])
+        if "default" in definition:
+            builder.data(" = ")
+            self.build_node(builder, definition["default"])
     
     def build_node(self, builder: TreeBuilder, definition: dict):
         has_class = "class" in definition
@@ -238,6 +241,7 @@ class ClassMemberPreprocessor(Preprocessor):
                 methods = {}
                 meta_methods = self.md.Meta['methods']
                 for meta_method in meta_methods:
+                    print(meta_method)
                     signature = {}
                     returntype_method = re.search(r"^[a-zA-Z _]*", meta_method).group().strip().split(" ")
                     if (len(returntype_method)) == 1:
@@ -247,30 +251,30 @@ class ClassMemberPreprocessor(Preprocessor):
                         method_name = returntype_method[1]
                         signature["return_type"] = self.build_type(returntype_method[0])
                         signature["method"] = self.build_method_name(method_name)
-                    params = re.search(r"\(([a-zA-Z0-9_ ,:]*)\)", meta_method).group(1).split(",")
+                    params = re.search(r"\((([a-zA-Z0-9_ :]*([=][^=]*[=][ ]*)?)[,)])+", meta_method).group()[1:-1].split(",")
                     if len(params) == 1 and params[0].strip() == "":
                             signature["params"] = []
                             methods[method_name] = signature
                             continue
                     param_sigs = []
                     for param in params:
+                        param_sig = {}
+                        if "=" in param:
+                            param_default = [entry.strip() for entry in param.rstrip("= ").split("=")]
+                            param = param_default[0]
+                            param_sig["default"] = self.build_default(param_default[1])
                         if ":" in param:
                             split_param = [entry.strip() for entry in param.split(":")]
-                            param_sigs.append({
-                                "name": self.build_param(split_param[0]),
-                                "type": self.build_type(split_param[1])
-                            })
+                            param_sig["name"] = self.build_param(split_param[0])
+                            param_sig["type"] = self.build_type(split_param[1])
                         else:
                             split_param = param.strip().split(" ")
                             if len(split_param) == 1:
-                                param_sigs.append({
-                                    "name": self.build_param(split_param[0])
-                                })
+                                param_sig["name"] = self.build_param(split_param[0])
                             else:
-                                param_sigs.append({
-                                    "name": self.build_param(split_param[1]),
-                                    "type": self.build_type(split_param[0])
-                                })
+                                param_sig["name"] = self.build_param(split_param[1])
+                                param_sig["type"] = self.build_type(split_param[0])
+                        param_sigs.append(param_sig)
                     signature["params"] = param_sigs
                     methods[method_name] = signature
                 class_members["methods"] = methods
@@ -282,31 +286,30 @@ class ClassMemberPreprocessor(Preprocessor):
                     signature = {}
                     signal = re.search("^[a-zA-Z _]*", meta_signal).group().strip()
                     signature["signal"] = self.build_signal_name(signal)
-                    params = re.search(r"\(([a-zA-Z0-9_ ,:]*)\)", meta_signal).group(1).split(",")
+                    params = re.search(r"\((([a-zA-Z0-9_ :]*([=][^=]*[=][ ]*)?)[,)])+", meta_method).group()[1:-1].split(",")
                     if len(params) == 1 and params[0].strip() == "":
                             signature["params"] = []
                             signals[signal] = signature
                             continue
                     param_sigs = []
                     for param in params:
+                        param_sig = {}
+                        if "=" in param:
+                            param_default = [entry.strip() for entry in param.rstrip("= ").split("=")]
+                            param = param_default[0]
+                            param_sig["default"] = self.build_default(param_default[1])
                         if ":" in param:
                             split_param = [entry.strip() for entry in param.split(":")]
-                            param_sigs.append({
-                                "name": self.build_param(split_param[0]),
-                                "type": self.build_type(split_param[1])
-                            })
+                            param_sig["name"] = self.build_param(split_param[0])
+                            param_sig["type"] = self.build_type(split_param[1])
                         else:
                             split_param = param.strip().split(" ")
                             if len(split_param) == 1:
-                                param_sigs.append({
-                                    "name": self.build_param(split_param[0]),
-                                    "type": self.build_type("Variant")
-                                })
+                                param_sig["name"] = self.build_param(split_param[0])
                             else:
-                                param_sigs.append({
-                                    "name": self.build_param(split_param[1]),
-                                    "type": self.build_type(split_param[0])
-                                })
+                                param_sig["name"] = self.build_param(split_param[1])
+                                param_sig["type"] = self.build_type(split_param[0])
+                        param_sigs.append(param_sig)
                     signature["params"] = param_sigs
                     signals[signal] = signature
                 class_members["signals"] = signals
@@ -340,6 +343,12 @@ class ClassMemberPreprocessor(Preprocessor):
         return {
             "text": param,
             "class": "param"
+        }
+    
+    def build_default(self, default: str) -> dict:
+        return {
+            "text": default,
+            "class": "default"
         }
 
     def build_property(self, property: str) -> dict:

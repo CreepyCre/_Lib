@@ -2,7 +2,7 @@
 _: _
 ---
 root: ..
-methods:    Control create_category(name: String, container: Control)
+methods:    Control create_category(name: String, container: Control = _create_default_container()=)
             void show_close()
             void show_back()
             WindowDialog get_preferences_window()
