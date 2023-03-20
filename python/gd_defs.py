@@ -190,7 +190,7 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
     
     def brackets(self, builder: TreeBuilder):
         builder.start("span", {"class": "bracket"})
-        builder.data("()")
+        builder.data("( )")
         builder.end("span")
     
     def fix_url(self, url: str) -> str:
@@ -248,6 +248,10 @@ class ClassMemberPreprocessor(Preprocessor):
                         signature["return_type"] = self.build_type(returntype_method[0])
                         signature["method"] = self.build_method_name(method_name)
                     params = re.search(r"\(([a-zA-Z0-9_ ,:]*)\)", meta_method).group(1).split(",")
+                    if len(params) == 1 and params[0].strip() == "":
+                            signature["params"] = []
+                            methods[method_name] = signature
+                            continue
                     param_sigs = []
                     for param in params:
                         if ":" in param:
@@ -279,6 +283,10 @@ class ClassMemberPreprocessor(Preprocessor):
                     signal = re.search("^[a-zA-Z _]*", meta_signal).group().strip()
                     signature["signal"] = self.build_signal_name(signal)
                     params = re.search(r"\(([a-zA-Z0-9_ ,:]*)\)", meta_signal).group(1).split(",")
+                    if len(params) == 1 and params[0].strip() == "":
+                            signature["params"] = []
+                            signals[signal] = signature
+                            continue
                     param_sigs = []
                     for param in params:
                         if ":" in param:
