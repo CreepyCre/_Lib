@@ -27,13 +27,14 @@
 }
 
 .indent {
+    --margin-left: 40px;
     margin-top: 5px;
-    margin-left: 40px;
+    margin-left: var(--margin-left);
     padding-left: 20px;
     padding-top: 10px;
     padding-bottom: 10px;
     border-radius: 5px;
-    width: 100%;
+    width: calc(100% - var(--margin-left));
     background-color: #00000030;
     display: inline-block;
 }
