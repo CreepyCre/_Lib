@@ -82,16 +82,16 @@ func rect_min_y(min_y: float) -> ConfigBuilder:
     _last_child_node.rect_min_size = Vector2(_last_child_node.rect_min_size.x, min_y)
     return self
 
-func rect_size(min_size: Vector2) -> ConfigBuilder:
-    _last_child_node.rect_min_size = min_size
+func rect_size(size: Vector2) -> ConfigBuilder:
+    _last_child_node.rect_min_size = size
     return self
 
-func rect_x(min_x: float) -> ConfigBuilder:
-    _last_child_node.rect_size = Vector2(min_x, _last_child_node.rect_size.y)
+func rect_x(x: float) -> ConfigBuilder:
+    _last_child_node.rect_size = Vector2(x, _last_child_node.rect_size.y)
     return self
 
-func rect_y(min_y: float) -> ConfigBuilder:
-    _last_child_node.rect_size = Vector2(_last_child_node.rect_size.x, min_y)
+func rect_y(y: float) -> ConfigBuilder:
+    _last_child_node.rect_size = Vector2(_last_child_node.rect_size.x, y)
     return self
 
 func flatten(value: bool = true) -> ConfigBuilder:
@@ -148,7 +148,7 @@ func connect_current(signal_name: String, target: Object, method_name: String, b
     _last_child_node.connect(signal_name, target, method_name, binds, flags)
     return self
 
-func connect_ref(reference_name:String, signal_name: String, target: Object, method_name: String, binds: Array = [], flags: int = 0) -> ConfigBuilder:
+func connect_ref(reference_name: String, signal_name: String, target: Object, method_name: String, binds: Array = [], flags: int = 0) -> ConfigBuilder:
     var ref = _references[reference_name]
     if ref != null:
         ref.connect(signal_name, target, method_name, binds, flags)
@@ -189,14 +189,14 @@ func add_stylebox_override(name: String, stylebox: StyleBox) -> ConfigBuilder:
     return self
 
 func wrap(save_entry: String, root_node: Control, target_node = null) -> ConfigBuilder:
-    if (save_entry == ""):
+    if (save_entry == null):
         return add_node(WrappedControlConfigNode.new(save_entry, root_node, target_node)).flatten()
     else:
         return add_node(WrappedControlConfigNode.new(save_entry, root_node, target_node))
 
 func extend(save_entry: String, node: Control) -> ConfigBuilder:
-    if (save_entry == ""):
-        return add_node(ContainerExtensionConfigNode.extend(save_entry, node)).flatten()
+    if (save_entry == null):
+        return add_node(ContainerExtensionConfigNode.extend("", node)).flatten()
     else:
         return add_node(ContainerExtensionConfigNode.extend(save_entry, node))
 
@@ -233,48 +233,47 @@ func text_edit(save_entry: String, default_value: String) -> ConfigBuilder:
 func shortcuts(save_entry: String, definitions: Dictionary) -> ConfigBuilder:
     return add_node(ShortcutsConfigNode.new(save_entry, definitions, _input_map_api))
     
-func aspect_ratio_container(save_entry: String = "") -> ConfigBuilder:
+func aspect_ratio_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, AspectRatioContainer.new())
 
-func center_container(save_entry: String = "") -> ConfigBuilder:
+func center_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, CenterContainer.new())
 
-func h_box_container(save_entry: String = "") -> ConfigBuilder:
+func h_box_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, HBoxContainer.new())
 
-func v_box_container(save_entry: String = "") -> ConfigBuilder:
+func v_box_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, VBoxContainer.new())
 
-func grid_container(save_entry: String = "") -> ConfigBuilder:
+func grid_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, GridContainer.new())
 
-#func h_flow_container(save_entry: String = "") -> ConfigBuilder:
+#func h_flow_container(save_entry: String = null) -> ConfigBuilder:
 #    return extend(save_entry, HFlowContainer.new())
 
-#func v_flow_container(save_entry: String = "") -> ConfigBuilder:
+#func v_flow_container(save_entry: String = null) -> ConfigBuilder:
 #    return extend(save_entry, VFlowContainer.new())
 
-func h_split_container(save_entry: String = "") -> ConfigBuilder:
+func h_split_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, HSplitContainer.new())
 
-func v_split_container(save_entry: String = "") -> ConfigBuilder:
+func v_split_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, VSplitContainer.new())
 
-func margin_container(save_entry: String = "") -> ConfigBuilder:
+func margin_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, MarginContainer.new())
 
-func panel_container(save_entry: String = "") -> ConfigBuilder:
+func panel_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, PanelContainer.new())
 
-func scroll_container(save_entry: String = "") -> ConfigBuilder:
+func scroll_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, ScrollContainer.new())
 
-func tab_container(save_entry: String = "") -> ConfigBuilder:
+func tab_container(save_entry: String = null) -> ConfigBuilder:
     return extend(save_entry, TabContainer.new())
 
-# TODO
-func color_rect() -> ConfigBuilder:
-    return add_node(ColorRect.new())
+func color_rect(color: Color) -> ConfigBuilder:
+    return add_node(ColorRect.new()).with("color", color)
 
 func h_separator() -> ConfigBuilder:
     return add_node(HSeparator.new())
@@ -294,9 +293,8 @@ func panel() -> ConfigBuilder:
 func reference_rect() -> ConfigBuilder:
     return add_node(ReferenceRect.new())
 
-# TODO
-func rich_text_label() -> ConfigBuilder:
-    return add_node(RichTextLabel.new())
+func rich_text_label(bbcode_text: String = "") -> ConfigBuilder:
+    return add_node(RichTextLabel.new()).with("bbcode_enabled", true).with("bbcode_text", bbcode_text)
 
 func texture_rect(texture: Texture) -> ConfigBuilder:
     return add_node(TextureRect.new()).with("texture", texture)

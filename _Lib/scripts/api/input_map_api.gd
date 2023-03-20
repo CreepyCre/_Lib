@@ -77,7 +77,7 @@ func get_or_append_event_emitter(node: Node) -> InputEventEmitterNode:
     _event_emitters[node] = emitter
     return emitter
 
-func master_event_emitter():
+func master_event_emitter() -> InputEventEmitterNode:
     return get_or_append_event_emitter(_master_node)
 
 func _create_agent(action: String, erase_on_unload = true) -> ActionConfigSyncAgent:
