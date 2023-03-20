@@ -7,20 +7,20 @@ var _deferred_connections: Dictionary = {}
 signal signal_registered(signal_id)
 
 ## Connect to a signal either immediately or whenever the signal is actually registered
-func connect_deferred(signal_id: String, target: Object, method: String):
+func connect_deferred(signal_id: String, target: Object, method: String, binds: Array = [], flags: int = 0):
     if has_signal(signal_id):
-        connect(signal_id, target, method)
+        connect(signal_id, target, method, binds, flags)
     else:
         if _deferred_connections.has(signal_id):
-            _deferred_connections[signal_id] = _deferred_connections[signal_id] + [{"target": target, "method": method}]
+            _deferred_connections[signal_id] = _deferred_connections[signal_id] + [{"target": target, "method": method, "binds": binds, "flags": flags}]
         else:
-            _deferred_connections[signal_id] = [{"target": target, "method": method}]
+            _deferred_connections[signal_id] = [{"target": target, "method": method, "binds": binds, "flags": flags}]
 
-func add_user_signal (signal_id: String, arguments: Array = []):
+func add_user_signal(signal_id: String, arguments: Array = []):
     .add_user_signal(signal_id, arguments)
     if _deferred_connections.has(signal_id):
         for callable in _deferred_connections.get(signal_id):
-            connect(signal_id, callable["target"], callable["method"])
+            connect(signal_id, callable["target"], callable["method"], callable["binds"], callable["flags"])
     emit_signal("signal_registered", signal_id)
 
 func _unload():
