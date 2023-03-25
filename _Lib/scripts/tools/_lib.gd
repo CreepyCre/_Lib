@@ -23,17 +23,19 @@ func _post_init(script_instance: Reference = self):
 
     _global = script_instance.Global
     _script = script_instance.Script
-    loader = load(_global.Root + "../util/file_loading_helper.gd").new(_global.Root + "../../")
+    var loader_script = load(_global.Root + "../util/file_loading_helper.gd")
+    loader = loader_script.new(_global.Root + "../../")
 
     var _master = _global.Editor.owner
     _master.get_node(_master.loadingBoxPath).connect("visibility_changed", self, "_loading_box_visibility_changed")
 
-    api = loader.init_api("api_api")
-    api.register("ModSignalingAPI", loader.init_api("mod_signaling_api"))
+    api = init_api("api_api")
+    api.register("Util", init_api("util", loader_script))
+    api.register("ModSignalingAPI", init_api("mod_signaling_api"))
     api.ModSignalingAPI.add_user_signal("unload")
-    api.register("InputMapApi", loader.init_api("input_map_api", _global.Editor.owner))
-    api.register("PreferencesWindowApi", loader.init_api("preferences_window_api", _global.Editor.Windows.Preferences))
-    api.register("ModConfigApi", loader.init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader))
+    api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
+    api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
+    api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader))
 
     register_mod(self, _global)
 
@@ -55,6 +57,30 @@ func _loading_box_visibility_changed():
     if not self.Global.Editor.owner.IsLoadingMap:
         return
     _unload()
+
+func init_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):
+    if (arg9 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    elif (arg8 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    elif (arg7 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+    elif (arg6 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+    elif (arg5 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5)
+    elif (arg4 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4)
+    elif (arg3 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3)
+    elif (arg2 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2)
+    elif (arg1 != null):
+        return loader.load_script("api/" + api_name).new(arg0, arg1)
+    elif (arg0 != null):
+        return loader.load_script("api/" + api_name).new(arg0)
+    else:
+        return loader.load_script("api/" + api_name).new()
 
 func _unload():
     var _master = _global.Editor.owner
