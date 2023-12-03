@@ -85,5 +85,5 @@ func _unload():
     var _master = _global.Editor.owner
     _master.get_node(_master.loadingBoxPath).disconnect("visibility_changed", self, "_loading_box_visibility_changed")
     Engine.disconnect("_lib_register_mod", self, "register_mod")
-    self.Global.API.ModSignalingApi.emit_signal("unload")
-    self.Global.API._unload()
+    _global.API.ModSignalingApi.emit_signal("unload")
+    _global.API._unload()
