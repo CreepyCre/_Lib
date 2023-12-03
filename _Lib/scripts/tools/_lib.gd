@@ -31,8 +31,7 @@ func _post_init(script_instance: Reference = self):
 
     api = init_api("api_api")
     api.register("Util", init_api("util", loader_script))
-    api.register("ModSignalingAPI", init_api("mod_signaling_api"))
-    api.ModSignalingAPI.add_user_signal("unload")
+    api.register("ModSignalingApi", init_api("mod_signaling_api"))
     api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
     api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader))

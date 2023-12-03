@@ -146,7 +146,7 @@ class ActionConfigSyncAgent:
 class InputEventEmitterNode:
     extends Node
 
-    signal input(event, emitter)
+    signal signal_input(event, emitter)
     signal unhandled_input(event, emitter)
     signal unhandled_key_input(event, emitter)
     
@@ -154,7 +154,7 @@ class InputEventEmitterNode:
         get_tree().set_input_as_handled()
 
     func _input(event):
-        emit_signal("input", event, self)
+        emit_signal("signal_input", event, self)
     
     func _unhandled_input(event):
         emit_signal("unhandled_input", event, self)

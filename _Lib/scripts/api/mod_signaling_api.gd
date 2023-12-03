@@ -3,8 +3,10 @@ class_name ModSignalingAPI
 var debug_class_name: String = "ModSignalingAPI"
 var _deferred_connections: Dictionary = {}
 
-## Will be emitted whenever a signal is registered to the mod signaling api.
+## Emitted whenever a signal is registered to the mod signaling api.
 signal signal_registered(signal_id)
+## Emitted whenever the map unloads, which also causes mods to unload/ reload.
+signal unload()
 
 ## Connect to a signal either immediately or whenever the signal is actually registered
 func connect_deferred(signal_id: String, target: Object, method: String, binds: Array = [], flags: int = 0):
