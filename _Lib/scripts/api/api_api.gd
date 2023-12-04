@@ -20,6 +20,11 @@ func _get_property_list():
         property_list.append({"name": api_id, "type": typeof(apis[api_id])})
     return property_list
 
+func _update(delta):
+    for api_id in apis:
+        var api = apis[api_id]
+        if (api.has_method("_update")):
+            api._update(delta)
 
 func _unload():
     for api_api_instance in api_api_instances:

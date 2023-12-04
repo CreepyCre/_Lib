@@ -32,11 +32,15 @@ func _post_init(script_instance: Reference = self):
     api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
     api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader))
+    api.register("HistoryApi", init_api("history_api", _global.Editor))
 
     api.ModRegistry.register(self, _global)
 
 func start():
     pass
+
+func update(delta):
+    api._update(delta)
 
 func _loading_box_visibility_changed():
     if not self.Global.Editor.owner.IsLoadingMap:

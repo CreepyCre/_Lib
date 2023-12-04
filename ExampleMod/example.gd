@@ -71,3 +71,16 @@ func start():
     var config_container = self.Global.API.PreferencesWindowApi.create_category("CATEGORY")
     config_container.add_child(label)
     label.owner = config_container
+
+# Input/ HistoryApi example
+func update(_delta):
+    if (Input.is_action_just_released("release_kraken", true)):
+        self.Global.API.HistoryApi.record(DummyRecord.new())
+    
+
+class DummyRecord:
+    func undo():
+        print("undo")
+
+    func redo():
+        print("redo")
