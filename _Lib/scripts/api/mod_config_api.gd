@@ -109,7 +109,7 @@ func _init(preferences_window_api, input_map_api, loader):
     preferences_window_api.connect("about_to_show", self, "_on_preferences_about_to_show")
     preferences_window_api.get_preferences_window().set_process_unhandled_key_input(false)
 
-func create_config(mod_id: String, title: String, config_file: String):
+func create_config(config_file: String, title: String, mod_id: String):
     var config_button = _mod_config_buttons[mod_id]
     config_button.set_disabled(false)
     config_button.connect("pressed", self, "_config_button_pressed", [mod_id])
@@ -395,3 +395,23 @@ func _unload():
     _shortcuts_node.remove_child(_mod_tree)
     _shortcuts_tree_node.show()
 
+## creates instanced ModConfigApi
+func _instance(mod_info):
+    return InstancedModConfigApi.new(self, mod_info)
+
+
+class InstancedModConfigApi:
+    var _mod_config_api
+    var _mod_info
+
+    func _init(mod_config_api, mod_info):
+        _mod_config_api = mod_config_api
+        _mod_info = mod_info
+    
+    func create_config(config_file: String = "user://mod_config/" + _mod_info.mod_meta["unique_id"].to_lower().replace(" ", "").replace(".", "_") + ".json", title: String = _mod_info.mod_meta["name"], mod_id: String = _mod_info.mod_meta["unique_id"]):
+        # backwards compat for _Lib 1.0.0-beta where the argument order was reversed
+        if (mod_id.ends_with(".json")):
+            return _mod_config_api.create_config(mod_id, title, config_file)
+        
+        return _mod_config_api.create_config(config_file, title, mod_id)
+        

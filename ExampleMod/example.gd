@@ -20,7 +20,7 @@ func start():
     #   .h_box_container().enter()
     # a named container will get a subsection in the config:
     #   .v_box_container("sub_section").enter()
-    var builder = self.Global.API.ModConfigApi.create_config("CreepyCre.ExampleMod", "Example Mod Config", self.Global.Root + "config.json")
+    var builder = self.Global.API.ModConfigApi.create_config(self.Global.Root + "config.json")
     var config = builder\
                 .shortcuts("shortcuts", input_definitions).rect_min_y(330)\
                 .h_box_container().enter()\

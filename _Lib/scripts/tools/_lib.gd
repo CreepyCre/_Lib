@@ -6,10 +6,6 @@ var _global: Dictionary
 var _script
 
 func _init():
-    if (not Engine.has_signal("_lib_register_mod")):
-        Engine.add_user_signal("_lib_register_mod", [{"name": "mod", "type": TYPE_OBJECT}])
-    Engine.connect("_lib_register_mod", self, "register_mod")
-
     if (not Engine.has_signal("_lib_internal_post_init")):
         Engine.add_user_signal("_lib_internal_post_init", [{"name": "script_instance", "type": TYPE_OBJECT}])
     Engine.connect("_lib_internal_post_init", self, "_post_init")
@@ -30,27 +26,17 @@ func _post_init(script_instance: Reference = self):
     _master.get_node(_master.loadingBoxPath).connect("visibility_changed", self, "_loading_box_visibility_changed")
 
     api = init_api("api_api")
+    api.register("ModRegistry", init_api("mod_registry", api, _script.GetActiveMods()))
     api.register("Util", init_api("util", loader_script))
     api.register("ModSignalingApi", init_api("mod_signaling_api"))
     api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
     api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader))
 
-    register_mod(self, _global)
+    api.ModRegistry.register(self, _global)
 
 func start():
     pass
-
-func register_mod(mod: Reference, global_instance = null):
-    if (global_instance == null):
-        global_instance = mod.Global
-    add_global(global_instance, "API", api)
-
-func add_global(global_instance: Dictionary, key, instance, path: Array = []):
-    var target = global_instance
-    for step in path:
-        target = target[step]
-    target[key] = instance
 
 func _loading_box_visibility_changed():
     if not self.Global.Editor.owner.IsLoadingMap:
