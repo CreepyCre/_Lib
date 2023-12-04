@@ -2,7 +2,7 @@
 _: _
 ---
 root: ..
-methods:    ConfigBuilder create_config(mod_id: String, title: String, config_file: String)
+methods:    ConfigBuilder create_config(config_file: String = "user://mod_config/" + mod_meta["unique_id"].to_lower().replace(" ", "").replace(".", "_") + ".json"=, title: String = mod_meta["name"]=, mod_id: String = mod_meta["unique_id"]=)
 
 An Api that enables creating a mod config accessible from the "Mods" menu.
 

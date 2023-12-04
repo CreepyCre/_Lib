@@ -12,6 +12,9 @@ class ClassUrlProvider:
             "ModConfigApi/ConfigAgent",
             "ModSignalingApi",
             "PreferencesWindowApi"
+            "HistoryApi"
+            "Util"
+            "Util/FileLoadingHelper"
 
         )
         self.registerNative(

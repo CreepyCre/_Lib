@@ -97,7 +97,7 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
         builder.data(" ")
         self.rbracket(builder)
 
-    def build_methods_table(self, sort: bool = False) -> Element:
+    def build_methods_table(self, sort: bool = True) -> Element:
         builder: TreeBuilder = TreeBuilder()
         builder.start("table", {})
         methods = self.md.class_members["methods"]
@@ -254,7 +254,7 @@ class ClassMemberPreprocessor(Preprocessor):
                         method_name = returntype_method[1]
                         signature["return_type"] = self.build_type(returntype_method[0])
                         signature["method"] = self.build_method_name(method_name)
-                    params = re.search(r"\((([a-zA-Z0-9_ :.]*([=][^=]*[=][ ]*)?)[,)])+", meta_method).group()[1:-1].split(",")
+                    params = self.split_params(re.search(r"\((([a-zA-Z0-9_ :.]*([=][^=]*[=][ ]*)?)[,)])+", meta_method).group()[1:-1])
                     if len(params) == 1 and params[0].strip() == "":
                             signature["params"] = []
                             methods[method_name] = signature
@@ -289,7 +289,7 @@ class ClassMemberPreprocessor(Preprocessor):
                     signature = {}
                     signal = re.search("^[a-zA-Z _]*", meta_signal).group().strip()
                     signature["signal"] = self.build_signal_name(signal)
-                    params = re.search(r"\((([a-zA-Z0-9_ :]*([=][^=]*[=][ ]*)?)[,)])+", meta_method).group()[1:-1].split(",")
+                    params = re.search(r"\((([a-zA-Z0-9_ :]*([=][^=]*[=][ ]*)?)[,)])+", meta_signal).group()[1:-1].split(",")
                     if len(params) == 1 and params[0].strip() == "":
                             signature["params"] = []
                             signals[signal] = signature
@@ -370,6 +370,24 @@ class ClassMemberPreprocessor(Preprocessor):
         if url.startswith("http"):
             return url
         return self.md.Meta["root"][0] + "/" + url
+    
+    def split_params(self, params_str):
+        if len(params_str) == 0:
+            return []
+        params = []
+        inside_default_param = False
+        last_comma = -1
+        for index in range(0, len(params_str)):
+            match params_str[index]:
+                case '=':
+                    inside_default_param = not inside_default_param
+                case ',':
+                    if inside_default_param:
+                        continue
+                    params.append(params_str[last_comma + 1:index])
+                    last_comma = index
+        params.append(params_str[last_comma + 1:])
+        return params
 
 def makeExtension(**kwargs):
     return ClassMemberExtension(**kwargs)

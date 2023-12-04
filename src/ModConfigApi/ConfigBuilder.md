@@ -65,7 +65,7 @@ methods:    ConfigBuilder enter()
             ConfigBuilder reference_rect()
             ConfigBuilder rich_text_label(bbcode_text: String = ""=)
             ConfigBuilder texture_rect(texture: Texture)
-            ConfigBuilder build(should_load: bool = true=, should_free: bool = true=)
+            ConfigAgent build(should_load: bool = true=, should_free: bool = true=)
             ConfigAgent get_agent()
             Control get_root()
 
@@ -74,8 +74,91 @@ Makes it possible to construct a config menu in a fairly human readable manner.
 
 ## Description
 
-W.I.P.
+The ConfigBuilder is used to create mod configs. It is supposed to provide an intuitive and human readable api for doing so. To achieve this, it relies on method chaining so the code for setting up a config may look structurally similar to the resulting config file. The following general types of methods are provided:
 
+- Scene tree navigation (:method:short:`enter` and :method:short:`exit`)
+- Node attachment and creation (e.g. :method:short:`add_node`)
+- Node configuration (e.g. :method:short:`size_expand_fill` and :method:short:`with`)
+- Node referencing (see :method:short:`ref`)
+
+A ConfigBuilder is obtained by creating a mod config using the ModConfigApi:
+```gdscript
+var mod_id: String = "CreepyCre.ExampleMod"
+var config_title: String = "Example Mod Config"
+var config_file: String = self.Global.Root + "config.json"
+var builder = self.Global.API.ModConfigApi.create_config(mod_id, config_title, config_file)
+```
+
+:link:`Control` nodes may then be created and appended to the config screen using their appropriate methods. The config can be built at the end using<br>:method:short:`build`:
+```gdscript
+# multiline method chaining does not allow comments inbetween
+var config = builder\
+    .label("Hello World!")\
+    .check_button("key1", true, "This is a check Button!")\
+    .build()
+```
+Writing a `\` at the end of a line allows for method chaining across multiple lines. Config nodes such as the :link:`CheckButton` created through<br>:method:short:`check_button`<br>take a :param:`save_entry` and :param:`default_value` as parameters. The :param:`save_entry` is the key the setting will be saved under in the config file. 
+
+For appending nodes as children of other nodes :method:short:`enter` and :method:short:`exit` allow hopping into and out of nodes:
+```gdscript
+builder\
+    .v_box_container().enter()\
+        .h_box_container().enter()\
+            .label("Hello World!")\
+        .exit()\
+    .exit()
+```
+Mind the indentation in this example. Though it serves no actual purpose indenting methods indicating the depth of the node entered is recommended for increased readability.
+
+Also mind the optional :param:`save_entry` parameter available for container type node creation. Supplying :param:`save_entry` will create sub categories for all contained config nodes. For example:
+```gdscript
+var config = builder\
+            .h_box_container("category").enter()\
+                .check_button("key1", true, "Hello")\
+                .check_box("key2", true, "World")\
+            .exit()\
+            .line_edit("key3", "This is the default text.")\
+            .build()
+```
+
+Will result in the following config:
+```gdscript
+{
+    "category": {
+        "key1": true,
+        "key2": true
+    }
+    "key3": "This is the default text."
+}
+```
+
+Config values may then be accessed and modified through the :link:`ConfigAgent` returned when building the config:
+```gdscript
+# access value
+print(config.category.key1)
+# change value
+config.category.key1 = false
+```
+
+For styling the nodes there are some shorthand methods available like<br>:method:short:`size_flags_h` or :method:short:`rect_min_size`.<br>For accessing properties and methods that do not have shorthand equivalents use<br>:method:short:`with` and :method:short:`call_on` which both perform actions on the last node created. :link:`#with` directly sets the given :param:`property` to :param:`value` while :link:`#call_on` forwards its parameters to :link:`Object#call`:
+```gdscript
+# hidden spin box. idk why you'd want this, it's just an example
+builder.spin_box("key", 70)\
+        .with("suffix","dpi")\
+        .call_on("hide")
+```
+
+For connecting node signals use :link:`#connect_current` and :link:`#connect_to_prop`. While :link:`#connect_current` forwards its parameters to connect, :link:`#connect_to_prop` actually forwards the signal to a utility methods that always updates the property :param:`property` of :param:`target` with the emitted value. 
+
+How would you handle connecting different config nodes signals together? To avoid having to keep references to nodes which would interrupt code flow use :method:short:`ref`. It assigns the key :param:`reference_name` to the last node so it may later be retrieved using :method:short:`get_ref` or be called on using<br>:method:short:`call_on_ref`,<br>:method:short:`connect_ref` and<br>:method:short:`connect_ref_to_prop`. E.g.:
+```gdscript
+builder\
+    .label().ref("slider_label")\
+    .h_slider("key", 42).size_flags_h(Control.SIZE_EXPAND_FILL)\
+        .connect_to_prop("loaded", builder.get_ref("slider_label"), "text")\
+        .connect_to_prop("value_changed", builder.get_ref("slider_label"), "text")\
+```
+In this example the text label has been connected to the sliders `loaded` and `value_changed` signals to make it display the current slider value.
 
 ## Methods
 

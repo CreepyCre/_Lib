@@ -22,6 +22,7 @@ extra_css:
 nav:
   - Home: index.md
   - ApiApi: ApiApi.md
+  - HistoryApi: HistoryApi.md
   - InputMapApi:
     - InputMapApi: InputMapApi/index.md
     - InputEventEmitterNode: InputMapApi/InputEventEmitterNode.md
@@ -32,3 +33,6 @@ nav:
     - ConfigAgent: ModConfigApi/ConfigAgent.md
   - ModSignalingApi: ModSignalingApi.md
   - PreferencesWindowApi: PreferencesWindowApi.md
+  - Util:
+    - Util: Util/index.md
+    - FileLoadingHelper: Util/FileLoadingHelper.md
