@@ -19,5 +19,5 @@ class InstancedUtil:
         _util = util
         _mod_info = mod_info
     
-    func create_loading_helper(root: String = _mod_info.mod.Global.Root + "../..") -> Reference:
+    func create_loading_helper(root: String = _mod_info.mod.Global.Root + "../../") -> Reference:
         return _util.create_loading_helper(root)
