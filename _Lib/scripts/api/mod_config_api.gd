@@ -1,4 +1,5 @@
 class_name ModConfigApi
+## https://creepycre.github.io/_Lib/ModConfigApi/
 
 var _preferences_window_api
 var _input_map_api
@@ -26,7 +27,8 @@ var _pressed_item: TreeItem = null
 var _agents: Array = []
 var _busy: bool = false
 
-func _init(preferences_window_api, input_map_api, loader):
+func _init(preferences_window_api, input_map_api, loader, active_mods: Array):
+    # grab some of the vanilla icons
     var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
     _edit_icon = theme.get_icon("Edit", "EditorIcons")
     _add_icon = theme.get_icon("Add", "EditorIcons")
@@ -34,14 +36,14 @@ func _init(preferences_window_api, input_map_api, loader):
 
     _preferences_window_api = preferences_window_api
     _input_map_api = input_map_api
+
+    # load scripts and resources
     _config_builder_script = loader.load_script("api/config/config_builder")
+    var texture_normal: Texture = loader.load_icon("cog_normal.png")
+    var texture_disabled: Texture = loader.load_icon("cog_disabled.png")
+    
+    # load and prepare scenes
     _mod_config_scene = loader.load_scene("ModConfig")
-    var config: ConfigFile = ConfigFile.new()
-    config.load("user://config.ini")
-    var mods_dir: String = config.get_value("Mods", "mods_directory")
-    var active_mods: Array = config.get_value("Mods", "active_mods")
-    var ddmod_files: Array = _get_all_files(mods_dir, "ddmod")
-    var file: File = File.new()
     _mod_menu = loader.load_scene("Mods").instance()
     _mods_panel = _mod_menu.get_node("ModPanel")
     _mod_list = _mods_panel.get_node("ModList")
@@ -49,13 +51,20 @@ func _init(preferences_window_api, input_map_api, loader):
     _mod_list.connect("nothing_selected", self, "_mod_selected")
     _mod_v_sep = _mods_panel.get_node("VSeparator")
     var mod_details_scene = loader.load_scene("ModDetails")
-    var texture_normal: Texture = loader.load_icon("cog_normal.png")
-    var texture_disabled: Texture = loader.load_icon("cog_disabled.png")
 
+    # read mod dir from config and find all .ddmod files
+    var config: ConfigFile = ConfigFile.new()
+    config.load("user://config.ini")
+    var mods_dir: String = config.get_value("Mods", "mods_directory")
+    var ddmod_files: Array = _get_all_files(mods_dir, "ddmod")
+    var file: File = File.new()
+
+    # read in .ddmod files as json and use the entries to construct mod details screen
     for ddmod_file in ddmod_files:
         file.open(ddmod_file, File.READ)
         var mod_info: Dictionary = JSON.parse(file.get_as_text()).result
         file.close()
+        # ignore mod if not active
         if (not active_mods.has(mod_info.get("unique_id"))):
             continue
         var mod_details = mod_details_scene.instance()
@@ -80,16 +89,22 @@ func _init(preferences_window_api, input_map_api, loader):
             mod_details.get_node("DescriptionScroller/Margins/Description").append_bbcode(mod_info.get("description"))
         _details_nodes.append(mod_details)
         _mods_panel.add_child(mod_details)
+    
+    # use PreferencesWindowApi to add mod menu to preferences window and connect the back button signal
     preferences_window_api.create_category("Mods", _mod_menu)
     _mod_menu.connect("back_pressed", self, "_back_pressed")
 
+    # aquire the vanilla InputEvent blocker
     var _preferences_window: WindowDialog = preferences_window_api.get_preferences_window()
     _blocker = _preferences_window.blocker
 
+    # hide vanilla shortcuts config tree
     _shortcuts_node = _preferences_window.get_node("Margins/VAlign/Shortcuts")
     _shortcuts_tree_node = _shortcuts_node.get_node("Tree")
     _shortcuts_tree_node.hide()
 
+
+    # we are making our own
     _mod_tree = Tree.new()
     _mod_tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     _mod_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -109,10 +124,13 @@ func _init(preferences_window_api, input_map_api, loader):
     preferences_window_api.connect("about_to_show", self, "_on_preferences_about_to_show")
     preferences_window_api.get_preferences_window().set_process_unhandled_key_input(false)
 
+## Creates a new ConfigBuilder for the mod with id mod_id. The mod config will automatically be saved into and loaded from config_file. 
 func create_config(config_file: String, title: String, mod_id: String):
+    # enable mod config button
     var config_button = _mod_config_buttons[mod_id]
     config_button.set_disabled(false)
     config_button.connect("pressed", self, "_config_button_pressed", [mod_id])
+    #create ConfigBuilder and add the configs root node to the mod menu
     var config_builder = _config_builder_script.config(title, config_file, _mod_config_scene, _input_map_api, _config_builder_script)
     var root: Control = config_builder.get_root()
     _preferences_window_api.connect("apply_pressed", config_builder.get_agent(), "save_cfg")
@@ -122,6 +140,7 @@ func create_config(config_file: String, title: String, mod_id: String):
     return config_builder
 
 func _on_preferences_about_to_show():
+    # clear the entire shortcut config tree and everything related to it first
     for agent in _agents:
         agent.disconnect("switched", self, "_switched")
         agent.disconnect("added", self, "_added_item")
@@ -132,6 +151,7 @@ func _on_preferences_about_to_show():
         if panel.has_method("_on_preferences_about_to_show"):
             panel._on_preferences_about_to_show()
     _mod_tree.clear()
+    # then rebuild it
     var root: TreeItem = _mod_tree.create_item()
     var dungeondraft_root_item: TreeItem = _mod_tree.create_item()
     dungeondraft_root_item.set_text(0, "Dungeondraft")
@@ -140,6 +160,7 @@ func _on_preferences_about_to_show():
     dungeondraft_root_item.set_selectable(2, false)
     dungeondraft_root_item.set_selectable(3, false)
 
+    # create shortcut tree items based on vanilla shortcut tree items
     var default_item: TreeItem = _shortcuts_tree_node.get_root().get_children()
     while default_item != null:
         var item: TreeItem = _mod_tree.create_item(dungeondraft_root_item)
@@ -154,6 +175,7 @@ func _on_preferences_about_to_show():
         item.set_selectable(3, false)
         default_item = default_item.get_next()
     
+    # create shortcut tree items based on actions registed to InputMapApi
     _add_actions_to_tree(root, _input_map_api._mod_actions)
 
 func _add_actions_to_tree(root: TreeItem, actions: Dictionary):
@@ -359,6 +381,7 @@ func _mod_selected(id: int = -1):
         _current_details = _details_nodes[id]
         _current_details.show()
 
+# utility method for recursively finding all files with file extension file_ext in path
 static func _get_all_files(path: String, file_ext := "", files := []):
         var dir = Directory.new()
     

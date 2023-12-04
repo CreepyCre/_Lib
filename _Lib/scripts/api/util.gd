@@ -1,4 +1,5 @@
 class_name Util
+## https://creepycre.github.io/_Lib/Util/
 
 var _loader_script: GDScript
 

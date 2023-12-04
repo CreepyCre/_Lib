@@ -12,6 +12,7 @@ func register(api_id: String, api: Object):
     emit_signal("api_registered", api_id, api)
 
 func _get(property):
+    # make APIs available as properties
     return apis.get(property)
 
 func _get_property_list():
@@ -21,18 +22,22 @@ func _get_property_list():
     return property_list
 
 func _update(delta):
+    # forward _update call to APIs with _update method
     for api_id in apis:
         var api = apis[api_id]
         if (api.has_method("_update")):
             api._update(delta)
 
 func _unload():
+    # unload InstancedApiApi objects
     for api_api_instance in api_api_instances:
         api_api_instance._unload()
+    # unload all APIs
     for api_id in apis:
         var api = apis[api_id]
         if (api.has_method("_unload")):
             api._unload()
+    # disconnect all signal connections
     for signal_dict in get_signal_list():
         var signal_name = signal_dict.name
         for callable_dict in get_signal_connection_list(signal_name):
@@ -42,9 +47,11 @@ func _unload():
 func _instance(mod_info):
     var api_api_instance = InstancedApiApi.new(self, mod_info)
     api_api_instances.append(api_api_instance)
+    # forward signal to InstancedApiApi
     connect("api_registered", api_api_instance, "_emit_api_registered")
     return api_api_instance
-    
+
+# Wrapper for ApiApi that supplies some default parameters
 class InstancedApiApi:
     var _mod_info
     var _api_api
@@ -61,11 +68,14 @@ class InstancedApiApi:
         _api_api.register(api_id, api)
     
     func _get(property):
+        # return instanced api if already available
         if (property in _instanced_apis):
             return _instanced_apis[property]
         var api = _api_api[property]
+        # if api can't be instanced just return it
         if (not api.has_method("_instance")):
             return api
+        # create api instance
         var instanced_api = api._instance(_mod_info)
         _instanced_apis[property] = instanced_api
         return instanced_api
@@ -74,14 +84,16 @@ class InstancedApiApi:
         return _api_api._get_property_list()
     
     func _unload():
+        # unload instanced apis
         for api_id in _instanced_apis:
             var api = _instanced_apis[api_id]
             if (api.has_method("_unload")):
                 api._unload()
+        # disconnect all signal connections
         for signal_dict in get_signal_list():
             var signal_name = signal_dict.name
             for callable_dict in get_signal_connection_list(signal_name):
                 disconnect(signal_name, callable_dict.target, callable_dict.method)
-    
+
     func _emit_api_registered(api_id, api):
         emit_signal("api_registered", api_id, api)

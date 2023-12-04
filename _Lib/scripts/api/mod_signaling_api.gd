@@ -12,7 +12,7 @@ signal unload()
 func connect_deferred(signal_id: String, target: Object, method: String, binds: Array = [], flags: int = 0):
     if has_signal(signal_id):
         connect(signal_id, target, method, binds, flags)
-    else:
+    else: # store attempted connection in dictionary for connecting later
         if _deferred_connections.has(signal_id):
             _deferred_connections[signal_id] = _deferred_connections[signal_id] + [{"target": target, "method": method, "binds": binds, "flags": flags}]
         else:
@@ -20,6 +20,7 @@ func connect_deferred(signal_id: String, target: Object, method: String, binds: 
 
 func add_user_signal(signal_id: String, arguments: Array = []):
     .add_user_signal(signal_id, arguments)
+    # connect all deferred connections
     if _deferred_connections.has(signal_id):
         for callable in _deferred_connections.get(signal_id):
             connect(signal_id, callable["target"], callable["method"], callable["binds"], callable["flags"])
@@ -27,6 +28,7 @@ func add_user_signal(signal_id: String, arguments: Array = []):
 
 func _unload():
     _deferred_connections.clear()
+    # disconnect all signals
     for signal_dict in get_signal_list():
         var signal_name = signal_dict.name
         for callable_dict in get_signal_connection_list(signal_name):
