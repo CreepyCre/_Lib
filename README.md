@@ -10,10 +10,12 @@ This mod offers additional API to simplify implementing certain features like co
 
 Current API:
 - [ApiApi](https://creepycre.github.io/_Lib/ApiApi/)
+- [HistoryApi](https://creepycre.github.io/_Lib/HistoryApi/)
 - [InputMapApi](https://creepycre.github.io/_Lib/InputMapApi)
 - [ModConfigApi](https://creepycre.github.io/_Lib/ModConfigApi)
 - [ModSignalingApi](https://creepycre.github.io/_Lib/ModSignalingApi)
 - [PreferencesWindowApi](https://creepycre.github.io/_Lib/PreferencesWindowApi)
+- [Util](https://creepycre.github.io/_Lib/Util)
 
 ## Using _Lib
 To be able to access _Lib's Api put the following at the top of your mods `start()` method:
