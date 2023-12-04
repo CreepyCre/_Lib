@@ -5,10 +5,10 @@ var _root: String
 func _init(root: String):
     _root = root
 
-func load_script(script_path: String) -> Script:
+func load_script(script_path: String) -> GDScript:
     return _load("scripts/" + script_path + ".gd")
 
-func load_scene(scene_path: String):
+func load_scene(scene_path: String) -> PackedScene:
     return _load("scenes/" + scene_path + ".tscn")
 
 func load_icon(icon_path: String) -> Texture:
