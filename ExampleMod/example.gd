@@ -1,5 +1,7 @@
 var script_class = "tool"
 
+var counter: int = 0
+
 func start():
     if (not Engine.has_signal("_lib_register_mod")):
         return
@@ -75,12 +77,18 @@ func start():
 # Input/ HistoryApi example
 func update(_delta):
     if (Input.is_action_just_released("release_kraken", true)):
-        self.Global.API.HistoryApi.record(DummyRecord.new())
+        self.Global.API.HistoryApi.record(DummyRecord.new(counter), 10)
+        counter = counter + 1
     
 
 class DummyRecord:
+    var _num: String
+
+    func _init(num):
+        _num = str(num)
+
     func undo():
-        print("undo")
+        print("undo " + _num)
 
     func redo():
-        print("redo")
+        print("redo " + _num)
