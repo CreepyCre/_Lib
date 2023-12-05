@@ -11,11 +11,10 @@ class ClassUrlProvider:
             "ModConfigApi/ConfigBuilder",
             "ModConfigApi/ConfigAgent",
             "ModSignalingApi",
-            "PreferencesWindowApi"
-            "HistoryApi"
-            "Util"
+            "PreferencesWindowApi",
+            "HistoryApi",
+            "Util",
             "Util/FileLoadingHelper"
-
         )
         self.registerNative(
             "AABB",
