@@ -5,6 +5,7 @@ const _TEXT_BOX_POS: Vector2 = Vector2(1.93729e296, 1.08346e301)
 const FLAG_ALL:             int = 0b111111111111
 const FLAG_WITH_NODE_ID:    int = 0b011111011100
 const FLAG_PORTAL:          int = 0b100000010000
+
 const FLAG_WORLD:           int = 0b000000000001
 const FLAG_LEVEL:           int = 0b000000000010
 const FLAG_PATTERN:         int = 0b000000000100
@@ -132,10 +133,11 @@ func _node_path_elements(path: NodePath) -> Array:
 
 func _hackbox_data() -> Dictionary:
     var texts = _world.AllLevels[0].Texts
-    for text in .get_children():
+    for text in texts.get_children():
         if (text.rect_position == _TEXT_BOX_POS):
-            texts.remove_child(text)
-            return JSON.parse(text.text).result
+            var result: Dictionary = JSON.parse(text.text).result
+            _world.DeleteNodeByID(text.get_meta("node_id"))
+            return result
     return {}
 
 func _create_hackbox(save_data: Dictionary):
@@ -151,12 +153,12 @@ func _create_hackbox(save_data: Dictionary):
 
 func _delete_hackbox():
     var texts = _world.AllLevels[0].Texts
-    for text in .get_children():
+    for text in texts.get_children():
         if (text.rect_position == _TEXT_BOX_POS):
-            texts.remove_child(text)
+            _world.DeleteNodeByID(text.get_meta("node_id"))
             return
 
-func _load_component(component_key, save_data: Dictionary):
+func _load_component(component_key, save_data: Array):
     for entry in save_data:
         var _node_type = entry["type"]
         match _node_type:
@@ -245,6 +247,10 @@ func _save_end():
 
 func _instance(mod_info):
     return InstancedComponentsApi.new(self, mod_info)
+
+func _unload():
+    _scene_tree.disconnect("node_added", self, "_node_added")
+    _scene_tree.disconnect("node_removed", self, "_node_removed")
 
 class InstancedComponentsApi:
     var _components_api
