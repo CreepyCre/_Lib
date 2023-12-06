@@ -43,7 +43,7 @@ func _post_init(script_instance: Reference = self):
     api.register("AccessorApi", init_api("accessor_api"))
     api.register("ModRegistry", init_api("mod_registry", api, _script.GetActiveMods()))
     api.register("Util", init_api("util", loader_script))
-    api.register("ModSignalingApi", init_api("mod_signaling_api"))
+    api.register("ModSignalingApi", init_api("mod_signaling_api", _global.Editor.Infobar))
     api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
     api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods()))
