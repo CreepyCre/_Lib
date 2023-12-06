@@ -74,6 +74,11 @@ func start():
     config_container.add_child(label)
     label.owner = config_container
 
+    var component_key = self.Global.API.ComponentsApi.register("test_component", PropComponent, self.Global.API.ComponentsApi.FLAG_PROP, false)
+    # you can now use:
+    # component_key.get(some_prop)
+    # to get the instance of PropComponent tied to that specific Prop
+
 # Input/ HistoryApi example
 func update(_delta):
     if (Input.is_action_just_released("release_kraken", true)):
@@ -92,3 +97,16 @@ class DummyRecord:
 
     func redo():
         print("redo " + _num)
+
+class PropComponent:
+    var _num: int
+
+    func _init(_node: Node, num: int = randi()):
+        _num = num
+        print("component prop num " + str(num))
+
+    static func deserialize(_node: Node, _data):
+        return PropComponent.new(_node, _data)
+    
+    func serialize(_node: Node):
+        return _num

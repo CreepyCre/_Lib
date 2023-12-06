@@ -48,6 +48,7 @@ func _post_init(script_instance: Reference = self):
     api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods()))
     api.register("HistoryApi", init_api("history_api", _global.Editor, api.AccessorApi.config()))
+    api.register("ComponentsApi", init_api("components_api", api.ModSignalingApi, _global.World))
 
     api.ModRegistry.register(self, _global)
 
