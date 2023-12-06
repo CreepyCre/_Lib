@@ -50,8 +50,8 @@ func _init(mod_signaling_api, world: Node2D):
     _scene_tree.connect("node_added", self, "_node_added")
     _scene_tree.connect("node_removed", self, "_node_removed")
 
-func register(namespace: String, identifier: String, component_script: GDScript, flags: int, lazy: bool = true):
-    var key = ComponentKey.new(self, component_script, flags)
+func register(namespace: String, identifier: String, component_factory: Reference, flags: int, lazy: bool = true):
+    var key = ComponentKey.new(self, component_factory, flags)
     if not namespace in _components:
         _components[namespace] = {}
     var component_namespace = _components[namespace]
@@ -98,8 +98,8 @@ func node_type(node: Node) -> int:
     match _node_path_elements(node.get_path()):
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World"]:
             return TYPE_WORLD
-        ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var level]:
-            if (level in _world.AllLevels):
+        ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level]:
+            if (node in _world.AllLevels):
                 return TYPE_LEVEL
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level, "PatternShapes", var _layer, var _pattern]:
             # can theoretically fail if someone adds children to PatternShapes, should be fairly unlikely though
@@ -120,8 +120,8 @@ func node_type(node: Node) -> int:
             return TYPE_ROOF
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level, "Texts", var _text]:
             return TYPE_TEXT
-        ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", _, "Walls", var _wall, var portal]:
-            if portal.WallID != null:
+        ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", _, "Walls", var _wall, var _portal]:
+            if node.WallID != null:
                 return TYPE_PORTAL_WALL
     return -1
 
@@ -160,10 +160,13 @@ func _delete_hackbox():
 
 func _load_component(component_key, save_data: Array):
     for entry in save_data:
-        var _node_type = entry["type"]
+        var _node_type: int = entry["type"]
         match _node_type:
             TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT:
-                var node: Node = _world.GetNodeById(entry["node_id"])
+                var node_id: int = entry["node_id"]
+                if (not node_id in _world.NodeLookup):
+                    break
+                var node: Node = _world.NodeLookup[node_id]
                 if (node_type(node) == _node_type and bool((1 << _node_type) & component_key._flags)):
                     component_key._deserialize(node, entry["data"])
             TYPE_WORLD:
@@ -192,8 +195,11 @@ func _load_component(component_key, save_data: Array):
                                 component_key._deserialize(material_mesh, entry["data"])
                                 break
             TYPE_PORTAL_WALL:
-                var wall: Node2D = _world.GetNodeById(entry["wall_id"])
-                var wall_distance: int = entry["wall_distance"]
+                var wall_id: int = entry["wall_id"]
+                if (not wall_id in _world.NodeLookup):
+                    break
+                var wall: Node = _world.NodeLookup[wall_id]
+                var wall_distance: float = entry["wall_distance"]
                 for child in wall.get_children():
                     if (child.WallDistance == wall_distance):
                         component_key._deserialize(child, entry["data"])
@@ -227,8 +233,7 @@ func _write_type(node: Node):
             entry["layer"] = node.get_node("../").z_index
             entry["texture"] = node.TileTexture.resource_path
         TYPE_PORTAL_WALL:
-            var wall: Node2D = node.get_parent()
-            entry["wall_id"] = wall.get_meta("node_id")
+            entry["wall_id"] = node.WallID
             entry["wall_distance"] = node.WallDistance
     return entry
     
@@ -260,8 +265,8 @@ class InstancedComponentsApi:
         _components_api = components_api
         _mod_info = mod_info
 
-    func register(identifier: String, component_script: GDScript, flags: int, lazy: bool = true):
-        return _components_api.register(_mod_info.mod_meta["unique_id"], identifier, component_script, flags, lazy)
+    func register(identifier: String, component_factory: Reference, flags: int, lazy: bool = true):
+        return _components_api.register(_mod_info.mod_meta["unique_id"], identifier, component_factory, flags, lazy)
 
     func node_type(node: Node) -> int:
         return _components_api.node_type(node)
@@ -271,13 +276,13 @@ class InstancedComponentsApi:
 
 class ComponentKey:
     var _components_api
-    var _component_script: GDScript
+    var _component_factory: Reference
     var _flags: int
     var _tracked_nodes: Dictionary
 
-    func _init(components_api, component_script, flags: int):
+    func _init(components_api, component_factory: Reference, flags: int):
         _components_api = components_api
-        _component_script = component_script
+        _component_factory = component_factory
         _flags = flags
     
     func is_applicable(node: Node):
@@ -288,7 +293,7 @@ class ComponentKey:
     
     func get_component(node: Node):
         if not has_component(node):
-            _tracked_nodes[node] = _component_script.new(node)
+            _tracked_nodes[node] = _component_factory.create(node)
         return _tracked_nodes[node]
 
     func _serialize() -> Array:
@@ -305,9 +310,8 @@ class ComponentKey:
             out.append(entry)
         return out
 
-    
     func _deserialize(node: Node, data):
-        _tracked_nodes[node] = _component_script.deserialize(node, data)
+        _tracked_nodes[node] = _component_factory.deserialize(node, data)
 
     func _node_removed(node: Node):
         if has_component(node):
