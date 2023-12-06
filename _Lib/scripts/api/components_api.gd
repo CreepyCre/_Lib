@@ -81,17 +81,19 @@ func register(namespace: String, identifier: String, component_script: GDScript,
         for level in _world.AllLevels:
             for layer in level.MaterialMeshes.get_children():
                 for material_mesh in layer.get_children():
-                    if (ClassDB.class.instance_has(material_mesh)):
-                        key.get_component(material_mesh)
+                    key.get_component(material_mesh)
     if (flags & FLAG_PORTAL_WALL):
         for level in _world.AllLevels:
             for wall in level.Walls.get_children():
-                for portal in wall.Portals:
-                    key.get_component(portal)
+                for child in wall.get_children:
+                    if child.WallID != null:
+                        key.get_component(child)
 
     return key
 
 func node_type(node: Node) -> int:
+    if (not node.is_inside_tree()):
+        return -1
     match _node_path_elements(node.get_path()):
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World"]:
             return TYPE_WORLD
@@ -117,8 +119,8 @@ func node_type(node: Node) -> int:
             return TYPE_ROOF
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level, "Texts", var _text]:
             return TYPE_TEXT
-        ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", _, "Walls", var wall, var portal]:
-            if portal in wall.Portals:
+        ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", _, "Walls", var _wall, var portal]:
+            if portal.WallID != null:
                 return TYPE_PORTAL_WALL
     return -1
 
@@ -189,9 +191,11 @@ func _load_component(component_key, save_data: Dictionary):
                                 break
             TYPE_PORTAL_WALL:
                 var wall: Node2D = _world.GetNodeById(entry["wall_id"])
-                var index: int = entry["index"]
-                if (wall.Portals.size() > index):
-                    component_key._deserialize(wall.Portals[index], entry["data"])
+                var wall_distance: int = entry["wall_distance"]
+                for child in wall.get_children():
+                    if (child.WallDistance == wall_distance):
+                        component_key._deserialize(child, entry["data"])
+                        break
 
 func _node_added(node: Node):
     yield(_scene_tree, "idle_frame")
@@ -223,7 +227,7 @@ func _write_type(node: Node):
         TYPE_PORTAL_WALL:
             var wall: Node2D = node.get_parent()
             entry["wall_id"] = wall.get_meta("node_id")
-            entry["index"] = wall.Portals.find(wall)
+            entry["wall_distance"] = node.WallDistance
     return entry
     
 func _save_begin():
