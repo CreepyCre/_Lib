@@ -4,31 +4,32 @@ const _TEXT_BOX_POS: Vector2 = Vector2(1.93729e296, 1.08346e301)
 
 const FLAG_ALL:             int = 0b111111111111
 const FLAG_WITH_NODE_ID:    int = 0b011111011100
+const FLAG_PORTAL:          int = 0b100000010000
 const FLAG_WORLD:           int = 0b000000000001
 const FLAG_LEVEL:           int = 0b000000000010
 const FLAG_PATTERN:         int = 0b000000000100
 const FLAG_WALL:            int = 0b000000001000
-const FLAG_PORTAL:          int = 0b000000010000
+const FLAG_PORTAL_FREE:     int = 0b000000010000
 const FLAG_MATERIAL:        int = 0b000000100000
 const FLAG_PATH:            int = 0b000001000000
 const FLAG_PROP:            int = 0b000010000000
 const FLAG_LIGHT:           int = 0b000100000000
 const FLAG_ROOF:            int = 0b001000000000
 const FLAG_TEXT:            int = 0b010000000000
-const FLAG_WALL_PORTAL:     int = 0b100000000000
+const FLAG_PORTAL_WALL:     int = 0b100000000000
 
 const TYPE_WORLD:           int = 0
 const TYPE_LEVEL:           int = 1
 const TYPE_PATTERN:         int = 2
 const TYPE_WALL:            int = 3
-const TYPE_PORTAL:          int = 4
+const TYPE_PORTAL_FREE:     int = 4
 const TYPE_MATERIAL:        int = 5
 const TYPE_PATH:            int = 6
 const TYPE_PROP:            int = 7
 const TYPE_LIGHT:           int = 8
 const TYPE_ROOF:            int = 9
 const TYPE_TEXT:            int = 10
-const TYPE_WALL_PORTAL:     int = 11
+const TYPE_PORTAL_WALL:     int = 11
 
 var _world: Node2D
 var _scene_tree: SceneTree
@@ -82,7 +83,7 @@ func register(namespace: String, identifier: String, component_script: GDScript,
                 for material_mesh in layer.get_children():
                     if (ClassDB.class.instance_has(material_mesh)):
                         key.get_component(material_mesh)
-    if (flags & FLAG_WALL_PORTAL):
+    if (flags & FLAG_PORTAL_WALL):
         for level in _world.AllLevels:
             for wall in level.Walls.get_children():
                 for portal in wall.Portals:
@@ -103,7 +104,7 @@ func node_type(node: Node) -> int:
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level, "Walls", var _wall]:
             return TYPE_WALL
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level, "Portals", var _portal]:
-            return TYPE_PORTAL
+            return TYPE_PORTAL_FREE
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level, "MaterialMeshes", var _layer, var _material]:
             return TYPE_MATERIAL
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level, "Pathways", var _material]:
@@ -118,7 +119,7 @@ func node_type(node: Node) -> int:
             return TYPE_TEXT
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", _, "Walls", var wall, var portal]:
             if portal in wall.Portals:
-                return TYPE_WALL_PORTAL
+                return TYPE_PORTAL_WALL
     return -1
 
 func _node_path_elements(path: NodePath) -> Array:
@@ -157,7 +158,7 @@ func _load_component(component_key, save_data: Dictionary):
     for entry in save_data:
         var _node_type = entry["type"]
         match _node_type:
-            TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT:
+            TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT:
                 var node: Node = _world.GetNodeById(entry["node_id"])
                 if (node_type(node) == _node_type and bool((1 << _node_type) & component_key._flags)):
                     component_key._deserialize(node, entry["data"])
@@ -186,7 +187,7 @@ func _load_component(component_key, save_data: Dictionary):
                                 done = true
                                 component_key._deserialize(material_mesh, entry["data"])
                                 break
-            TYPE_WALL_PORTAL:
+            TYPE_PORTAL_WALL:
                 var wall: Node2D = _world.GetNodeById(entry["wall_id"])
                 var index: int = entry["index"]
                 if (wall.Portals.size() > index):
@@ -208,7 +209,7 @@ func _write_type(node: Node):
     var _node_type: int = node_type(node)
     entry["type"] = _node_type
     match _node_type:
-        TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT:
+        TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT:
             if (not node.has_meta("node_id")):
                 return null
             entry["node_id"] = node.get_meta("node_id")
@@ -219,7 +220,7 @@ func _write_type(node: Node):
         TYPE_MATERIAL:
             entry["layer"] = node.get_node("../").z_index
             entry["texture"] = node.TileTexture.resource_path
-        TYPE_WALL_PORTAL:
+        TYPE_PORTAL_WALL:
             var wall: Node2D = node.get_parent()
             entry["wall_id"] = wall.get_meta("node_id")
             entry["index"] = wall.Portals.find(wall)
