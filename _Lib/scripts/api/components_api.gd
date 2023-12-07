@@ -39,6 +39,7 @@ var _components: Dictionary = {}
 var _non_lazy_components: Array = []
 
 var _save_data = {}
+var _wall_portal_queue = {}
 
 func _init(mod_signaling_api, world: Node2D):
     _world = world
@@ -196,20 +197,46 @@ func _load_component(component_key, save_data: Array):
                                 break
             TYPE_PORTAL_WALL:
                 var wall_id: int = entry["wall_id"]
-                if (not wall_id in _world.NodeLookup):
-                    break
-                var wall: Node = _world.NodeLookup[wall_id]
-                var wall_distance: float = entry["wall_distance"]
-                for child in wall.get_children():
-                    if (child.WallDistance == wall_distance):
-                        component_key._deserialize(child, entry["data"])
-                        break
+                var position: Vector2 = str2var(entry["position"])
+                _load_portal_wall(component_key, wall_id, position, entry["data"])
+                
+
+func _load_portal_wall(component_key, wall_id: int, position: Vector2, data):
+    if (not wall_id in _world.NodeLookup):
+        return
+    var wall: Node = _world.NodeLookup[wall_id]
+    for child in wall.get_children():
+        if (child.position == position and child.WallID == wall_id):
+            component_key._deserialize(child, data)
+            return
+    # queue it in case the portal is added to the tree one frame later
+    if (not _wall_portal_queue.has(wall_id)):
+        _wall_portal_queue[wall_id] = {}
+    var wall_dict: Dictionary = _wall_portal_queue[wall_id]
+    if (not wall_dict.has(position)):
+        wall_dict[position] = []
+        wall_dict[position].append([component_key, data])
 
 func _node_added(node: Node):
+    _try_resolve_wall_portals(node)
     yield(_scene_tree, "idle_frame")
     for component in _non_lazy_components:
         if (component.is_applicable(node)):
             component.get_component(node)
+
+func _try_resolve_wall_portals(node: Node):
+    if (node.WallID == null or node.position == null or not _wall_portal_queue.has(node.WallID)):
+        return
+    var _wall_dict: Dictionary = _wall_portal_queue[node.WallID]
+    if (not _wall_dict.has(node.position)):
+        return
+    var _queue: Array = _wall_dict[node.position]
+    _wall_dict.erase(node.position)
+    if (_wall_dict.empty()):
+        _wall_portal_queue.erase(node.WallID)
+    for key_data in _queue:
+        key_data[0]._deserialize(node, key_data[1])
+        
 
 func _node_removed(node: Node):
     for namespace_dict in _components.values():
@@ -234,7 +261,7 @@ func _write_type(node: Node):
             entry["texture"] = node.TileTexture.resource_path
         TYPE_PORTAL_WALL:
             entry["wall_id"] = node.WallID
-            entry["wall_distance"] = node.WallDistance
+            entry["position"] = var2str(node.position)
     return entry
     
 func _save_begin():
