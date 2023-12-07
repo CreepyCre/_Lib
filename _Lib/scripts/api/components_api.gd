@@ -207,11 +207,9 @@ func _node_added(node: Node):
         yield(_scene_tree, "idle_frame")
         if (_active_record.has(_node_type)):
             var typed_record = _active_record[_node_type]
-            print(typed_record)
             match _node_type:
                 TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT, TYPE_PORTAL_WALL:
                     var node_id = node.get_meta("node_id")
-                    print(node_id)
                     if (typed_record.has(node_id)):
                         var component_data_dict: Dictionary = typed_record[node_id]
                         typed_record.erase(node_id)
@@ -257,8 +255,6 @@ func _node_removed(node: Node):
     for namespace_dict in _components.values():
         for component in namespace_dict.values():
             var result: Array = component._node_removed(node)
-            print(result)
-            print(_processing_record)
             if (not _processing_record or not result[0]):
                 continue
             if (not _record.has(_node_type)):
@@ -328,7 +324,6 @@ func _undo_begin(record):
 
 func _undo_end(record):
     _processing_record = false
-    print(_record)
     if (not _record.empty()):
         _record_entries[record] = _record
         _record = {}
@@ -344,7 +339,6 @@ func _redo_begin(record):
 
 func _redo_end(record):
     _processing_record = false
-    print(_record)
     if (not _record.empty()):
         _record_entries[record] = _record
         _record = {}
