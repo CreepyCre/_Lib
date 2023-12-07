@@ -76,7 +76,7 @@ func start():
 
     var component_key = self.Global.API.ComponentsApi.register("test_component", PropComponent, self.Global.API.ComponentsApi.FLAG_ALL, false)
     # you can now use:
-    # component_key.get(some_prop)
+    # component_key.get_component(some_prop)
     # to get the instance of PropComponent tied to that specific Prop
 
 # Input/ HistoryApi example
