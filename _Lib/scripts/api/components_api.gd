@@ -327,8 +327,6 @@ func _undo_begin(record):
         _active_record = {}
 
 func _undo_end(record):
-    for i in record.idle_frames():
-        yield(_world.get_tree(), "idle_frame")
     _processing_record = false
     print(_record)
     if (not _record.empty()):
@@ -345,8 +343,6 @@ func _redo_begin(record):
         _active_record = {}
 
 func _redo_end(record):
-    for i in record.idle_frames():
-        yield(_world.get_tree(), "idle_frame")
     _processing_record = false
     print(_record)
     if (not _record.empty()):

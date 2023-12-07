@@ -119,7 +119,7 @@ func undo() -> bool:
     _replacement_undo_button.disabled = history.empty()
     _replacement_redo_button.disabled = false
 
-    emit_signal("undo_end", history_record)
+    _emit_signal_delayed("undo_end", history_record)
 
     return true
 
@@ -143,9 +143,14 @@ func redo() -> bool:
     _replacement_undo_button.disabled = false
     _replacement_redo_button.disabled = redo_history.empty()
 
-    emit_signal("redo_end", history_record)
+    _emit_signal_delayed("redo_end", history_record)
 
     return true
+
+func _emit_signal_delayed(sig: String, history_record):
+    for i in history_record.idle_frames():
+        yield(_menu_align.get_tree(), "idle_frame")
+    emit_signal(sig, history_record)
 
 # call to make sure we aren't spamming undos/ redos
 func _aquire_lock() -> bool:
