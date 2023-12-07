@@ -3,7 +3,7 @@ class_name ComponentsApi
 const _TEXT_BOX_POS: Vector2 = Vector2(1.93729e296, 1.08346e301)
 
 const FLAG_ALL:             int = 0b111111111111
-const FLAG_WITH_NODE_ID:    int = 0b011111011100
+const FLAG_WITH_NODE_ID:    int = 0b111111011100
 const FLAG_PORTAL:          int = 0b100000010000
 
 const FLAG_WORLD:           int = 0b000000000001
@@ -39,13 +39,24 @@ var _components: Dictionary = {}
 var _non_lazy_components: Array = []
 
 var _save_data = {}
-var _wall_portal_queue = {}
 
-func _init(mod_signaling_api, world: Node2D):
+var _record = {}
+var _active_record = {}
+var _record_entries = {}
+var _processing_record: bool = false
+
+
+func _init(mod_signaling_api, history_api, world: Node2D):
     _world = world
 
     mod_signaling_api.connect("save_begin", self, "_save_begin")
     mod_signaling_api.connect("save_end", self, "_save_end")
+    history_api.connect("dropped", self, "_dropped")
+    history_api.connect("undo_begin", self, "_undo_begin")
+    history_api.connect("undo_end", self, "_undo_end")
+    history_api.connect("redo_begin", self, "_redo_begin")
+    history_api.connect("redo_end", self, "_redo_end")
+
     _save_data = _hackbox_data()
     _scene_tree = world.get_tree()
     _scene_tree.connect("node_added", self, "_node_added")
@@ -84,13 +95,6 @@ func register(namespace: String, identifier: String, component_script: GDScript,
             for layer in level.MaterialMeshes.get_children():
                 for material_mesh in layer.get_children():
                     key.get_component(material_mesh)
-    if (flags & FLAG_PORTAL_WALL):
-        for level in _world.AllLevels:
-            for wall in level.Walls.get_children():
-                for child in wall.get_children:
-                    if child.WallID != null:
-                        key.get_component(child)
-
     return key
 
 func node_type(node: Node) -> int:
@@ -163,13 +167,12 @@ func _load_component(component_key, save_data: Array):
     for entry in save_data:
         var _node_type: int = entry["type"]
         match _node_type:
-            TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT:
+            TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT, TYPE_PORTAL_WALL:
                 var node_id: int = entry["node_id"]
-                if (not node_id in _world.NodeLookup):
-                    break
-                var node: Node = _world.NodeLookup[node_id]
-                if (node_type(node) == _node_type and bool((1 << _node_type) & component_key._flags)):
-                    component_key._deserialize(node, entry["data"])
+                if (node_id in _world.NodeLookup):
+                    var node: Node = _world.NodeLookup[node_id]
+                    if (node_type(node) == _node_type and bool((1 << _node_type) & component_key._flags)):
+                        component_key._deserialize(node, entry["data"])
             TYPE_WORLD:
                 if (FLAG_WORLD & component_key._flags):
                     component_key._deserialize(_world, entry["data"])
@@ -182,73 +185,114 @@ func _load_component(component_key, save_data: Array):
                 var level: Node2D = _world.GetLevelByID(entry["level"])
                 var layer: int = entry["layer"]
                 var texture: String = entry["texture"]
-                if (level == null):
-                    break
-                # TODO: pre build dict so this is less expensive
-                var done: bool = false
-                for material_layer in level.MaterialMeshes.get_children():
-                    if (done):
-                        break
-                    if (material_layer.name == "Layer " + str(layer)):
-                        for material_mesh in material_layer.get_children():
-                            if (material_mesh.TileTexture.resource_path == texture):
-                                done = true
-                                component_key._deserialize(material_mesh, entry["data"])
-                                break
-            TYPE_PORTAL_WALL:
-                var wall_id: int = entry["wall_id"]
-                var position: Vector2 = str2var(entry["position"])
-                _load_portal_wall(component_key, wall_id, position, entry["data"])
-                
-
-func _load_portal_wall(component_key, wall_id: int, position: Vector2, data):
-    if (not wall_id in _world.NodeLookup):
-        return
-    var wall: Node = _world.NodeLookup[wall_id]
-    for child in wall.get_children():
-        if (child.position == position and child.WallID == wall_id):
-            component_key._deserialize(child, data)
-            return
-    # queue it in case the portal is added to the tree one frame later
-    if (not _wall_portal_queue.has(wall_id)):
-        _wall_portal_queue[wall_id] = {}
-    var wall_dict: Dictionary = _wall_portal_queue[wall_id]
-    if (not wall_dict.has(position)):
-        wall_dict[position] = []
-        wall_dict[position].append([component_key, data])
+                if (level != null):
+                    # TODO: pre build dict so this is less expensive
+                    var done: bool = false
+                    for material_layer in level.MaterialMeshes.get_children():
+                        if (done):
+                            break
+                        if (material_layer.name == "Layer " + str(layer)):
+                            for material_mesh in material_layer.get_children():
+                                if (material_mesh.TileTexture.resource_path == texture):
+                                    done = true
+                                    component_key._deserialize(material_mesh, entry["data"])
+                                    break
 
 func _node_added(node: Node):
-    _try_resolve_wall_portals(node)
-    yield(_scene_tree, "idle_frame")
+    var _node_type: int = node_type(node)
+    # this way we don't have to do any jank to identify wall portals inbetween map saves/ loads
+    if (_node_type == TYPE_PORTAL_WALL and not node.has_meta("node_id")):
+        _world.AssignNodeID(node)
+    if (_processing_record):
+        yield(_scene_tree, "idle_frame")
+        if (_active_record.has(_node_type)):
+            var typed_record = _active_record[_node_type]
+            print(typed_record)
+            match _node_type:
+                TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT, TYPE_PORTAL_WALL:
+                    var node_id = node.get_meta("node_id")
+                    print(node_id)
+                    if (typed_record.has(node_id)):
+                        var component_data_dict: Dictionary = typed_record[node_id]
+                        typed_record.erase(node_id)
+                        if (typed_record.empty()):
+                            _active_record.erase(_node_type)
+                        for component in component_data_dict:
+                            if (not component.has_component(node)):
+                                component._deserialize(node, component_data_dict[component])
+                TYPE_LEVEL:
+                    if (typed_record.has(node.ID)):
+                        var component_data_dict: Dictionary = typed_record[node.ID]
+                        typed_record.erase(node.ID)
+                        if (typed_record.empty()):
+                            _active_record.erase(_node_type)
+                        for component in component_data_dict:
+                            if (not component.has_component(node)):
+                                component._deserialize(node, component_data_dict[component])
+                TYPE_MATERIAL:
+                    var layer = node.get_node("../").z_index
+                    if (typed_record.has(layer)):
+                        var texture_path: String = node.TileTexture.resource_path
+                        var layer_record: Dictionary = typed_record[layer]
+                        if (layer_record.has(texture_path)):
+                            var component_data_dict: Dictionary = layer_record[texture_path]
+                            layer_record.erase(texture_path)
+                            if (layer_record.empty()):
+                                typed_record.erase(layer)
+                                if (typed_record.empty()):
+                                    _active_record.erase(_node_type)
+                            for component in component_data_dict:
+                                if (not component.has_component(node)):
+                                    component._deserialize(node, component_data_dict[component])
+    else:
+        yield(_scene_tree, "idle_frame")
     for component in _non_lazy_components:
         if (component.is_applicable(node)):
             component.get_component(node)
-
-func _try_resolve_wall_portals(node: Node):
-    if (node.WallID == null or node.position == null or not _wall_portal_queue.has(node.WallID)):
-        return
-    var _wall_dict: Dictionary = _wall_portal_queue[node.WallID]
-    if (not _wall_dict.has(node.position)):
-        return
-    var _queue: Array = _wall_dict[node.position]
-    _wall_dict.erase(node.position)
-    if (_wall_dict.empty()):
-        _wall_portal_queue.erase(node.WallID)
-    for key_data in _queue:
-        key_data[0]._deserialize(node, key_data[1])
         
-
 func _node_removed(node: Node):
+    var _node_type: int = node_type(node)
+    if (_node_type < 0):
+        return
     for namespace_dict in _components.values():
         for component in namespace_dict.values():
-            component._node_removed(node)
-    
+            var result: Array = component._node_removed(node)
+            print(result)
+            print(_processing_record)
+            if (not _processing_record or not result[0]):
+                continue
+            if (not _record.has(_node_type)):
+                _record[_node_type] = {}
+            var data = result[1]
+            var typed_record: Dictionary = _record[_node_type]
+            match _node_type:
+                TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT, TYPE_PORTAL_WALL:
+                    var node_id: int = node.get_meta("node_id")
+                    if (not typed_record.has(node_id)):
+                        typed_record[node_id] = {}
+                    typed_record[node_id][component] = data
+                TYPE_WORLD:
+                    typed_record[component] = data
+                TYPE_LEVEL:
+                    if (not typed_record.has(node.ID)):
+                        typed_record[node.ID] = {}
+                    typed_record[node.ID][component] = data
+                TYPE_MATERIAL:
+                    var layer: int = node.get_node("../").z_index
+                    if (not typed_record.has(layer)):
+                        typed_record[layer] = {}
+                    var layer_record: Dictionary = typed_record[layer]
+                    var texture_path: String = node.TileTexture.resource_path
+                    if (not layer_record.has(texture_path)):
+                        layer_record[texture_path] = {}
+                    layer_record[texture_path][component] = data
+
 func _write_type(node: Node):
     var entry: Dictionary = {}
     var _node_type: int = node_type(node)
     entry["type"] = _node_type
     match _node_type:
-        TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT:
+        TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT, TYPE_PORTAL_WALL:
             if (not node.has_meta("node_id")):
                 return null
             entry["node_id"] = node.get_meta("node_id")
@@ -259,9 +303,6 @@ func _write_type(node: Node):
         TYPE_MATERIAL:
             entry["layer"] = node.get_node("../").z_index
             entry["texture"] = node.TileTexture.resource_path
-        TYPE_PORTAL_WALL:
-            entry["wall_id"] = node.WallID
-            entry["position"] = var2str(node.position)
     return entry
     
 func _save_begin():
@@ -276,6 +317,60 @@ func _save_begin():
 
 func _save_end():
     _delete_hackbox()
+
+func _undo_begin(record):
+    _processing_record = true
+    if _record_entries.has(record):
+        _active_record = _record_entries[record]
+        _record_entries.erase(record)
+    else:
+        _active_record = {}
+
+func _undo_end(record):
+    for i in record.idle_frames():
+        yield(_world.get_tree(), "idle_frame")
+    _processing_record = false
+    print(_record)
+    if (not _record.empty()):
+        _record_entries[record] = _record
+        _record = {}
+    _load_wall_portal_record()
+
+func _redo_begin(record):
+    _processing_record = true
+    if _record_entries.has(record):
+        _active_record = _record_entries[record]
+        _record_entries.erase(record)
+    else:
+        _active_record = {}
+
+func _redo_end(record):
+    for i in record.idle_frames():
+        yield(_world.get_tree(), "idle_frame")
+    _processing_record = false
+    print(_record)
+    if (not _record.empty()):
+        _record_entries[record] = _record
+        _record = {}
+    _load_wall_portal_record()
+
+func _load_wall_portal_record():
+    # attach to wall portals
+    # everything else should have already entered the scene
+    if (_active_record.has(TYPE_PORTAL_WALL)):
+        var wall_portal_record = _active_record[TYPE_PORTAL_WALL]
+        for node_id in wall_portal_record:
+            if (not node_id in _world.NodeLookup):
+                continue
+            var node: Node = _world.NodeLookup[node_id]
+            var component_data_dict: Dictionary = wall_portal_record[node_id]
+            for component in component_data_dict:
+                if (not component.has_component(node)):
+                    component._deserialize(node, component_data_dict[component])
+
+func _dropped(record, _type: int):
+    if (_record_entries.has(record)):
+        _record_entries.erase(record)
 
 func _instance(mod_info):
     return InstancedComponentsApi.new(self, mod_info)
@@ -319,12 +414,20 @@ class ComponentKey:
         return node in _tracked_nodes
     
     func get_component(node: Node):
-        if not has_component(node):
+        if (not has_component(node)):
             if (_component_script.has_method("create")):
                 _tracked_nodes[node] = _component_script.create(node)
             else:
                 _tracked_nodes[node] = _component_script.new(node)
         return _tracked_nodes[node]
+    
+    func detach_component(node: Node):
+        if (not has_component(node)):
+            return
+        var component = _tracked_nodes[node]
+        _tracked_nodes.erase(node)
+        if (component.has_method("detached")):
+            component.detached(node)
 
     func _serialize() -> Array:
         var out: Array = []
@@ -332,18 +435,28 @@ class ComponentKey:
             if (not is_instance_valid(node)):
                 _tracked_nodes.erase(node)
                 continue
-            var component = _tracked_nodes[node]
-            var entry = _components_api._write_type(node)
+            var entry = _serialize_node(node)
             if (entry == null):
                 continue
-            entry["data"] = component.serialize(node)
             out.append(entry)
         return out
+    
+    func _serialize_node(node: Node):
+        var component = _tracked_nodes[node]
+        var entry = _components_api._write_type(node)
+        if (entry == null):
+            return null
+        entry["data"] = component.serialize(node)
+        return entry
 
     func _deserialize(node: Node, data):
         _tracked_nodes[node] = _component_script.deserialize(node, data)
 
     func _node_removed(node: Node):
         if has_component(node):
-            get_component(node).component_node_removed(node)
-        _tracked_nodes.erase(node)
+            var component = get_component(node)
+            var data = component.serialize(node)
+            component.component_node_removed(node)
+            _tracked_nodes.erase(node)
+            return [true, data]
+        return [false]

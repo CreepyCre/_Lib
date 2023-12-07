@@ -20,6 +20,13 @@ var redo_history: Array = []
 
 var _locked: bool = false
 
+signal recorded(history_record)
+signal dropped(history_record, type)
+signal undo_begin(history_record)
+signal undo_end(history_record)
+signal redo_begin(history_record)
+signal redo_end(history_record)
+
 # editor is Global.Editor
 func _init(editor: CanvasLayer, config: ConfigFile):
     _config = config
@@ -46,12 +53,13 @@ func record(history_record: Object, max_count = null, record_type = null):
         max_count = -1
     if (not history_record.has_method("record_type")):
         record_type = history_record.get_script()
-    if ((max_count != null) or (record_type != null)):
-        history_record = RecordWrapper.new(history_record, max_count, record_type)
+    # ensure every record is a unique instance, small hack to make a record itself usable as identifier.
+    history_record = RecordWrapper.new(history_record, max_count, record_type)
     # new record voids redo history
     var old_redo_history: Array = redo_history
     redo_history = []
     history.append(history_record)
+    emit_signal("recorded", history_record)
     # drop oldest record if there's more than configurated
     var dropped_history: Array = []
     while (history.size() > _config.get_value("Preferences", "max_undos", 32)):
@@ -80,10 +88,12 @@ func record(history_record: Object, max_count = null, record_type = null):
     for rec in old_redo_history:
         if (rec.has_method("dropped")):
             rec.dropped(REDO)
+        emit_signal("dropped", rec, REDO)
     
     for rec in dropped_history:
         if (rec.has_method("dropped")):
             rec.dropped(UNDO)
+        emit_signal("dropped", rec, UNDO)
 
     # update undo/ redo button state
     _replacement_undo_button.disabled = false
@@ -92,15 +102,16 @@ func record(history_record: Object, max_count = null, record_type = null):
 ## Undoes relevant record in history by calling its undo() method
 ## Is called by undo button or undo shortcut
 func undo() -> bool:
-    # make sure we don't trigger our vanilla record detection wrongfully
-    _ignore_history_changed = true
     # safeguard
     if (history.empty()):
         return false
     if (not _aquire_lock()):
         return false
+    # make sure we don't trigger our vanilla record detection wrongfully
+    _ignore_history_changed = true
     # undo history_record and move it into the redo history
     var history_record = history.pop_back()
+    emit_signal("undo_begin", history_record)
     history_record.undo()
     redo_history.append(history_record)
 
@@ -108,26 +119,31 @@ func undo() -> bool:
     _replacement_undo_button.disabled = history.empty()
     _replacement_redo_button.disabled = false
 
+    emit_signal("undo_end", history_record)
+
     return true
 
 ## Redoes relevant record in history by calling its redo() method
 ## Is called by undo button or undo shortcut
 func redo() -> bool:
-    # make sure we don't trigger our vanilla record detection wrongfully
-    _ignore_history_changed = true
     # safeguard
     if (redo_history.empty()):
         return false
     if (not _aquire_lock()):
         return false
+    # make sure we don't trigger our vanilla record detection wrongfully
+    _ignore_history_changed = true
     # redo history_record and move it into the undo history
     var history_record = redo_history.pop_back()
+    emit_signal("redo_begin", history_record)
     history_record.redo()
     history.append(history_record)
 
     # update undo/ redo button state
     _replacement_undo_button.disabled = false
     _replacement_redo_button.disabled = redo_history.empty()
+
+    emit_signal("redo_end", history_record)
 
     return true
 
@@ -195,6 +211,12 @@ func _unload():
     history.clear()
     redo_history.clear()
 
+    # disconnect all signals
+    for signal_dict in get_signal_list():
+        var signal_name = signal_dict.name
+        for callable_dict in get_signal_connection_list(signal_name):
+            disconnect(signal_name, callable_dict.target, callable_dict.method)
+
 class RecordWrapper:
     var _record
     var _max_count
@@ -224,6 +246,11 @@ class RecordWrapper:
         if (_record_type != null):
             return _record_type
         return _record.record_type()
+    
+    func idle_frames() -> int:
+        if (_record.has_method("idle_frames")):
+            return _record.idle_frames()
+        return 0
 
 # corresponds to a record in the vanilla history
 class VanillaHistoryRecord:
@@ -239,3 +266,6 @@ class VanillaHistoryRecord:
     # equivalent to pressing original redo button
     func redo():
         _editor._on_RedoButton_pressed()
+
+    func idle_frames() -> int:
+        return 1
