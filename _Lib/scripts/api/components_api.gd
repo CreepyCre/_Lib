@@ -51,8 +51,8 @@ func _init(mod_signaling_api, world: Node2D):
     _scene_tree.connect("node_added", self, "_node_added")
     _scene_tree.connect("node_removed", self, "_node_removed")
 
-func register(namespace: String, identifier: String, component_factory: Reference, flags: int, lazy: bool = true):
-    var key = ComponentKey.new(self, component_factory, flags)
+func register(namespace: String, identifier: String, component_script: GDScript, flags: int, lazy: bool = true):
+    var key = ComponentKey.new(self, component_script, flags)
     if not namespace in _components:
         _components[namespace] = {}
     var component_namespace = _components[namespace]
@@ -292,8 +292,8 @@ class InstancedComponentsApi:
         _components_api = components_api
         _mod_info = mod_info
 
-    func register(identifier: String, component_factory: Reference, flags: int, lazy: bool = true):
-        return _components_api.register(_mod_info.mod_meta["unique_id"], identifier, component_factory, flags, lazy)
+    func register(identifier: String, component_script: GDScript, flags: int, lazy: bool = true):
+        return _components_api.register(_mod_info.mod_meta["unique_id"], identifier, component_script, flags, lazy)
 
     func node_type(node: Node) -> int:
         return _components_api.node_type(node)
@@ -303,13 +303,13 @@ class InstancedComponentsApi:
 
 class ComponentKey:
     var _components_api
-    var _component_factory: Reference
+    var _component_script: GDScript
     var _flags: int
     var _tracked_nodes: Dictionary
 
-    func _init(components_api, component_factory: Reference, flags: int):
+    func _init(components_api, component_script: GDScript, flags: int):
         _components_api = components_api
-        _component_factory = component_factory
+        _component_script = component_script
         _flags = flags
     
     func is_applicable(node: Node):
@@ -320,7 +320,10 @@ class ComponentKey:
     
     func get_component(node: Node):
         if not has_component(node):
-            _tracked_nodes[node] = _component_factory.create(node)
+            if (_component_script.has_method("create")):
+                _tracked_nodes[node] = _component_script.create(node)
+            else:
+                _tracked_nodes[node] = _component_script.new(node)
         return _tracked_nodes[node]
 
     func _serialize() -> Array:
@@ -338,7 +341,7 @@ class ComponentKey:
         return out
 
     func _deserialize(node: Node, data):
-        _tracked_nodes[node] = _component_factory.deserialize(node, data)
+        _tracked_nodes[node] = _component_script.deserialize(node, data)
 
     func _node_removed(node: Node):
         if has_component(node):

@@ -74,7 +74,7 @@ func start():
     config_container.add_child(label)
     label.owner = config_container
 
-    var component_key = self.Global.API.ComponentsApi.register("test_component", PropComponentFactory.new(), self.Global.API.ComponentsApi.FLAG_ALL, false)
+    var component_key = self.Global.API.ComponentsApi.register("test_component", PropComponent, self.Global.API.ComponentsApi.FLAG_ALL, false)
     # you can now use:
     # component_key.get(some_prop)
     # to get the instance of PropComponent tied to that specific Prop
@@ -101,16 +101,14 @@ class DummyRecord:
 class PropComponent:
     var _num: int
 
-    func _init(num: int = OS.get_unix_time()):
+    # can also use static func create(node: Node) instead
+    func _init(_node: Node, num: int = OS.get_unix_time()):
         _num = num
         print("component prop num " + str(num))
+    
+    static func deserialize(_node: Node, data) -> PropComponent:
+        print("deserializing")
+        return PropComponent.new(_node, data)
         
     func serialize(_node: Node):
         return _num
-
-class PropComponentFactory:
-    func create(_node: Node):
-        return PropComponent.new()
-
-    func deserialize(_node: Node, data) -> PropComponent:
-        return PropComponent.new(data)
