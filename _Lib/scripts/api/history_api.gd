@@ -1,5 +1,8 @@
 class_name HistoryApi
 
+const UNDO: int = 0
+const REDO: int = 1
+
 var _config: ConfigFile
 var _vanilla_history_record
 
@@ -46,14 +49,17 @@ func record(history_record: Object, max_count = null, record_type = null):
     if ((max_count != null) or (record_type != null)):
         history_record = RecordWrapper.new(history_record, max_count, record_type)
     # new record voids redo history
+    var old_redo_history: Array = redo_history
     redo_history = []
     history.append(history_record)
     # drop oldest record if there's more than configurated
-    if (history.size() > _config.get_value("Preferences", "max_undos", 32)):
-        history.remove(0)
+    var dropped_history: Array = []
+    while (history.size() > _config.get_value("Preferences", "max_undos", 32)):
+        dropped_history.append(history.pop_front())
     
     # shorten history if one of the record types goes over its max count
     var counts: Dictionary = {}
+    var slice: int = 0
     for i in range(history.size() - 1, -1, -1):
         var rec = history[i]
         var rec_type = rec.record_type()
@@ -64,9 +70,20 @@ func record(history_record: Object, max_count = null, record_type = null):
             count = 1
         
         if ((rec.max_count() > 0) and count > (rec.max_count())):
-            history = history.slice(i + 1, history.size() - 1) # whoever implemented slice to be inclusive on both indices was surely drunk
+            slice = i + 1
             break
         counts[rec_type] = count
+    
+    for i in slice:
+        dropped_history.append(history.pop_front())
+    
+    for rec in old_redo_history:
+        if (rec.has_method("dropped")):
+            rec.dropped(REDO)
+    
+    for rec in dropped_history:
+        if (rec.has_method("dropped")):
+            rec.dropped(UNDO)
 
     # update undo/ redo button state
     _replacement_undo_button.disabled = false
@@ -193,6 +210,10 @@ class RecordWrapper:
     
     func redo():
         _record.redo()
+    
+    func dropped(type: int):
+        if (_record.has_method("dropped")):
+            _record.dropped(type)
 
     func max_count() -> int:
         if (_max_count != null):
