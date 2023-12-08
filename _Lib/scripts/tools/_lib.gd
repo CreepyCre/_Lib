@@ -33,7 +33,13 @@ func _post_init(script_instance: Reference = self):
     # get a FileLoadingHelper
     var loader_script = load(_global.Root + "../util/file_loading_helper.gd")
     loader = loader_script.new(_global.Root + "../../")
+    
+    init_api("logger")
 
+    var red = "[0;31m";
+    var reset = '[0m'
+    print(red + "Red text" + reset)
+    print(OS.get_cmdline_args())
 
     var _master = _global.Editor.owner
     # see _loading_box_visibility_changed()
