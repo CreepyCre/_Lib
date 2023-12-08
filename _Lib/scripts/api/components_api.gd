@@ -45,12 +45,15 @@ var _active_record = {}
 var _record_entries = {}
 var _processing_record: bool = false
 
+var _queued_history_record = [null, null]
+
 
 func _init(mod_signaling_api, history_api, world: Node2D):
     _world = world
 
     mod_signaling_api.connect("save_begin", self, "_save_begin")
     mod_signaling_api.connect("save_end", self, "_save_end")
+    history_api.connect("recorded", self, "_recorded")
     history_api.connect("dropped", self, "_dropped")
     history_api.connect("undo_begin", self, "_undo_begin")
     history_api.connect("undo_end", self, "_undo_end")
@@ -200,6 +203,8 @@ func _load_component(component_key, save_data: Array):
 
 func _node_added(node: Node):
     var _node_type: int = node_type(node)
+    if (_node_type < 0):
+        return
     # this way we don't have to do any jank to identify wall portals inbetween map saves/ loads
     if (_node_type == TYPE_PORTAL_WALL and not node.has_meta("node_id")):
         _world.AssignNodeID(node)
@@ -300,6 +305,10 @@ func _write_type(node: Node):
             entry["layer"] = node.get_node("../").z_index
             entry["texture"] = node.TileTexture.resource_path
     return entry
+
+func _recorded(record):
+    _processing_record = true
+    _queued_history_record[0] = record
     
 func _save_begin():
     var data: Dictionary = {}
@@ -364,6 +373,17 @@ func _dropped(record, _type: int):
 
 func _instance(mod_info):
     return InstancedComponentsApi.new(self, mod_info)
+
+func _update(_delta):
+    if (_queued_history_record[0] != null or _queued_history_record[1] != null):
+        var rec = _queued_history_record.pop_back()
+        _queued_history_record.push_front(null)
+        if (rec != null):
+            _record_entries[rec] = _record
+            _record = {}
+            if (_queued_history_record[1] == null):
+                _processing_record = false
+
 
 func _unload():
     _scene_tree.disconnect("node_added", self, "_node_added")
@@ -444,7 +464,7 @@ class ComponentKey:
 
     func _node_removed(node: Node):
         if has_component(node):
-            var component = get_component(node)
+            var component = _tracked_nodes[node]
             var data = component.serialize(node)
             component.component_node_removed(node)
             _tracked_nodes.erase(node)
