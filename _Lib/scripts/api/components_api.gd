@@ -65,7 +65,7 @@ func _init(mod_signaling_api, history_api, world: Node2D):
     _scene_tree.connect("node_added", self, "_node_added")
     _scene_tree.connect("node_removed", self, "_node_removed")
 
-func register(namespace: String, identifier: String, component_script: GDScript, flags: int, lazy: bool = true):
+func register(namespace: String, identifier: String, component_script, flags: int, lazy: bool = true):
     var key = ComponentKey.new(self, component_script, flags)
     if not namespace in _components:
         _components[namespace] = {}
@@ -397,7 +397,7 @@ class InstancedComponentsApi:
         _components_api = components_api
         _mod_info = mod_info
 
-    func register(identifier: String, component_script: GDScript, flags: int, lazy: bool = true):
+    func register(identifier: String, component_script, flags: int, lazy: bool = true):
         return _components_api.register(_mod_info.mod_meta["unique_id"], identifier, component_script, flags, lazy)
 
     func node_type(node: Node) -> int:
@@ -408,11 +408,11 @@ class InstancedComponentsApi:
 
 class ComponentKey:
     var _components_api
-    var _component_script: GDScript
+    var _component_script
     var _flags: int
     var _tracked_nodes: Dictionary
 
-    func _init(components_api, component_script: GDScript, flags: int):
+    func _init(components_api, component_script, flags: int):
         _components_api = components_api
         _component_script = component_script
         _flags = flags
