@@ -5,7 +5,7 @@ var _path_to_ddmod_json = {}
 var _unique_id_to_mod_info = {}
 var _registered_mods = []
 
-signal mod_registered(mod_info)
+signal registered(mod_info)
 
 func _init(api_api, active_mods):
     _api_api = api_api
@@ -13,7 +13,7 @@ func _init(api_api, active_mods):
     # create and connect to mod registration signal
     if (not Engine.has_signal("_lib_register_mod")):
         Engine.add_user_signal("_lib_register_mod", [{"name": "mod", "type": TYPE_OBJECT}])
-    Engine.connect("_lib_register_mod", self, "register_mod")
+    Engine.connect("_lib_register_mod", self, "register")
 
     # read in some mod directory from DungeonDraft config file
     var config: ConfigFile = ConfigFile.new()
@@ -40,7 +40,7 @@ func _init(api_api, active_mods):
         
 
 ## Registers a mod. This is indirectly called when using the Engine signal to register a mod, no clue why you'd want to call this directly.
-func register_mod(mod: Reference, global_instance = null):
+func register(mod: Reference, global_instance = null):
     # write stuff to mod.Global by default
     if (global_instance == null):
         global_instance = mod.Global
@@ -56,7 +56,7 @@ func register_mod(mod: Reference, global_instance = null):
     _registered_mods.append(mod_info)
     # add InstancedApiApi to mod global dictionary
     global_instance["API"] = _api_api._instance(mod_info)
-    emit_signal("mod_registered", mod_info)
+    emit_signal("registered", mod_info)
 
 func get_mod_info(mod_id: String):
     return _unique_id_to_mod_info[mod_id]
@@ -66,7 +66,7 @@ func get_mod_list():
 
 func _unload():
     # disconnect all signals
-    Engine.disconnect("_lib_register_mod", self, "register_mod")
+    Engine.disconnect("_lib_register_mod", self, "register")
     for signal_dict in get_signal_list():
         var signal_name = signal_dict.name
         for callable_dict in get_signal_connection_list(signal_name):
