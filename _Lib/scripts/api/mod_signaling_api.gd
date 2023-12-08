@@ -17,7 +17,6 @@ signal save_end()
 
 func _init(infobar: PanelContainer):
     _infobar = infobar
-    print(infobar.busyIcon)
     infobar.busyIcon.connect("visibility_changed", self, "_busy_icon_visibility_changed")
 
 ## Connect to a signal either immediately or whenever the signal is actually registered
