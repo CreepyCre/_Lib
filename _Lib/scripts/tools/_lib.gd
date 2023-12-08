@@ -1,5 +1,7 @@
 var script_class = "tool"
 
+const CLASS_NAME = "_LibMain"
+
 var api
 var loader
 var _global: Dictionary
@@ -33,14 +35,16 @@ func _post_init(script_instance: Reference = self):
     # get a FileLoadingHelper
     var loader_script = load(_global.Root + "../util/file_loading_helper.gd")
     loader = loader_script.new(_global.Root + "../../")
-    
+
     var _master = _global.Editor.owner
     # see _loading_box_visibility_changed()
     _master.get_node(_master.loadingBoxPath).connect("visibility_changed", self, "_loading_box_visibility_changed")
 
     api = init_api("api_api")
-    api.register("AccessorApi", init_api("accessor_api"))
+    api.register("Logger", init_api("logger"))
     api.register("ModRegistry", init_api("mod_registry", api, _script.GetActiveMods()))
+    api.ModRegistry.register(self, _global)
+    api.register("AccessorApi", init_api("accessor_api"))
     api.register("Util", init_api("util", loader_script))
     api.register("ModSignalingApi", init_api("mod_signaling_api", _global.Editor.Infobar))
     api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
@@ -48,8 +52,6 @@ func _post_init(script_instance: Reference = self):
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods()))
     api.register("HistoryApi", init_api("history_api", _global.Editor, api.AccessorApi.config()))
     api.register("ComponentsApi", init_api("components_api", api.ModSignalingApi, api.HistoryApi, _global.World))
-
-    api.ModRegistry.register(self, _global)
 
 func start():
     pass
