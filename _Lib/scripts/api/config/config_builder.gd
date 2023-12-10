@@ -496,6 +496,7 @@ class CheckButtonConfigNode:
     extends CheckButton
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -513,7 +514,9 @@ class CheckButtonConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = pressed
+        if (_cached_value != pressed):
+            _cached_value = pressed
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -531,6 +534,8 @@ class CheckButtonConfigNode:
     func set_config_value(value):
         set_pressed_no_signal(value)
         _cached_value = value
+        mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _pressed():
         mark_dirty()
@@ -545,6 +550,7 @@ class CheckBoxConfigNode:
     extends CheckBox
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -562,7 +568,9 @@ class CheckBoxConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = pressed
+        if (_cached_value != pressed):
+            _cached_value = pressed
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -581,6 +589,7 @@ class CheckBoxConfigNode:
         set_pressed_no_signal(value)
         _cached_value = value
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _pressed():
         mark_dirty()
@@ -595,6 +604,7 @@ class HSliderConfigNode:
     extends HSlider
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -613,7 +623,9 @@ class HSliderConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = value
+        if (_cached_value != value):
+            _cached_value = value
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -632,6 +644,7 @@ class HSliderConfigNode:
         value = val
         _cached_value = val
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _value_changed(_ignored: float):
         mark_dirty()
@@ -646,6 +659,7 @@ class VSliderConfigNode:
     extends VSlider
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -664,7 +678,9 @@ class VSliderConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = value
+        if (_cached_value != value):
+            _cached_value = value
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -683,6 +699,7 @@ class VSliderConfigNode:
         value = val
         _cached_value = val
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _value_changed(_ignored: float):
         mark_dirty()
@@ -697,6 +714,7 @@ class SpinBoxConfigNode:
     extends SpinBox
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -715,7 +733,9 @@ class SpinBoxConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = value
+        if (_cached_value != value):
+            _cached_value = value
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -734,6 +754,7 @@ class SpinBoxConfigNode:
         value = val
         _cached_value = val
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _value_changed(_ignored: float):
         mark_dirty()
@@ -748,6 +769,7 @@ class ColorPickerConfigNode:
     extends ColorPicker
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -766,7 +788,9 @@ class ColorPickerConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = color
+        if (_cached_value != color):
+            _cached_value = color
+            emit_signal("updated", _cached_value)
         return "#" + _cached_value.to_html()
     
     func load_cfg(data):
@@ -785,6 +809,7 @@ class ColorPickerConfigNode:
         color = val
         _cached_value = val
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _color_changed(_ignored: Color):
         mark_dirty()
@@ -799,6 +824,7 @@ class ColorPickerButtonConfigNode:
     extends ColorPickerButton
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -819,6 +845,9 @@ class ColorPickerButtonConfigNode:
         return _save_entry
     
     func save_cfg():
+        if (_cached_value != _picker.color):
+            _cached_value = _picker.color
+            emit_signal("updated", _cached_value)
         return "#" + _cached_value.to_html()
     
     func load_cfg(data):
@@ -837,6 +866,7 @@ class ColorPickerButtonConfigNode:
         _picker.color = val
         _cached_value = val
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _color_changed(_ignored: Color):
         mark_dirty()
@@ -851,6 +881,7 @@ class OptionButtonConfigNode:
     extends OptionButton
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -888,6 +919,9 @@ class OptionButtonConfigNode:
         return _save_entry
     
     func save_cfg():
+        if (_cached_value != selected):
+            _cached_value = selected
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -911,6 +945,7 @@ class OptionButtonConfigNode:
             selected = index
             _cached_value = index
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _item_selected(_ignored: int):
         mark_dirty()
@@ -925,6 +960,7 @@ class LineEditConfigNode:
     extends LineEdit
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -948,7 +984,9 @@ class LineEditConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = _text
+        if (_cached_value != _text):
+            _cached_value = _text
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -969,6 +1007,7 @@ class LineEditConfigNode:
         text = val
         _cached_value = val
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _text_entered(new_text: String):
         _text = new_text
@@ -985,6 +1024,7 @@ class TextEditConfigNode:
     extends TextEdit
 
     signal loaded(value)
+    signal updated(value)
 
     var _parent_config_node
     var _save_entry: String
@@ -1003,7 +1043,9 @@ class TextEditConfigNode:
         return _save_entry
     
     func save_cfg():
-        _cached_value = text
+        if (_cached_value != text):
+            _cached_value = text
+            emit_signal("updated", _cached_value)
         return _cached_value
     
     func load_cfg(data):
@@ -1022,6 +1064,7 @@ class TextEditConfigNode:
         text = val
         _cached_value = val
         mark_dirty()
+        emit_signal("updated", _cached_value)
     
     func _text_changed():
         mark_dirty()
