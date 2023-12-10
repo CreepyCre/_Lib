@@ -4,6 +4,7 @@ const CLASS_NAME = "_LibMain"
 
 var api
 var loader
+var config
 var _global: Dictionary
 var _script
 
@@ -52,6 +53,18 @@ func _post_init(script_instance: Reference = self):
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods()))
     api.register("HistoryApi", init_api("history_api", _global.Editor, api.AccessorApi.config()))
     api.register("ComponentsApi", init_api("components_api", api.ModSignalingApi, api.HistoryApi, _global.World))
+
+    # set up _Lib config
+    var builder = _global.API.ModConfigApi.create_config()
+    config = builder\
+                .h_box_container().enter()\
+                    .label("Log Level: ")\
+                    .option_button("log_level", api.Logger.get_log_level(), api.Logger._CONFIG_LOOKUP.keys())\
+                        .connect_current("updated", api.Logger, "set_log_level")\
+                .exit()\
+                .build()
+    
+    api.Logger.set_log_level(config.log_level)
 
 func start():
     pass

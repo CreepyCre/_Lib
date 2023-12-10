@@ -2,12 +2,12 @@ class_name Logger
 
 const CLASS_NAME = "Logger"
 
-const OFF:      int = -1
-const FATAL:    int = 0
-const ERROR:    int = 1
-const WARN:     int = 2
-const INFO:     int = 3
-const DEBUG:    int = 4
+const OFF:      int = 0
+const FATAL:    int = 1
+const ERROR:    int = 2
+const WARN:     int = 3
+const INFO:     int = 4
+const DEBUG:    int = 5
 
 const LEVEL_STRINGS: Dictionary = {
     FATAL:  "FATAL",
@@ -44,14 +44,17 @@ const CLASS_LINE = " [%s:%d]: "
 var _pretty_log: bool = "--prettylog" in OS.get_cmdline_args()
 
 var _config: ConfigFile = ConfigFile.new()
-var _log_level: int
+var _log_level: int = INFO
 
 # end goal is:
 # [hh:mm:ss] [LEVEL] [Mod Name] [ModClass:<optional line number>]: message
 func _init():
     if (File.new().file_exists("user://_Lib.ini")):
-        _config.load("user://_Lib.ini")
-    _log_level = _config.get_value("Logger", "log_level", INFO)
+        var err_code: int = _config.load("user://_Lib.ini")
+        if (err_code):
+            self.log(ERROR, "_Lib", CLASS_NAME, -1, "Could not load 'user://_Lib.ini', Error Code '%d'.", [err_code])
+        else:
+            _log_level = _config.get_value("Logger", "log_level", INFO)
 
 func log(level: int, mod_name: String, clazz, line: int, message: String, args = []):
     if (level > DEBUG):
@@ -66,10 +69,14 @@ func log_raw(level: int, message: String, args: Array):
         message = LEVEL_COLORS[level] + message + RESET
     print(message)
 
+func get_log_level():
+    return _log_level
+
 func set_log_level(level):
-    _log_level = level
-    _config.set_value("Logger", "log_level", level)
-    _config.save("user://_Lib.ini")
+    if (_log_level != level):
+        _log_level = level
+        _config.set_value("Logger", "log_level", level)
+        _config.save("user://_Lib.ini")
 
 func _build_prefix(level: int, mod_name: String, clazz = null, line: int = -1) -> String:
     var datetime: Dictionary = OS.get_datetime()
