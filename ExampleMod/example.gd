@@ -74,10 +74,13 @@ func start():
     config_container.add_child(label)
     label.owner = config_container
 
-    var component_key = self.Global.API.ComponentsApi.register("test_component", PropComponent, self.Global.API.ComponentsApi.FLAG_ALL, false)
+    # generally omit the last value/ set it to true. Setting to false will attach the component to every applicable node when the node enters the scene.
+    # for most props just having it be created when you access it is sufficient.
+    var component_key = self.Global.API.ComponentsApi.register("test_component", PropComponent, self.Global.API.ComponentsApi.FLAG_PROP, false)
     # you can now use:
     # component_key.get_component(some_prop)
     # to get the instance of PropComponent tied to that specific Prop
+    var other_component_key = self.Global.API.ComponentsApi.register("other_test_component", PropComponentFactory.new(1970), self.Global.API.ComponentsApi.FLAG_PROP, false)
 
 # Input/ HistoryApi example
 func update(_delta):
@@ -98,6 +101,7 @@ class DummyRecord:
     func redo():
         print("redo " + _num)
 
+# Either use the component class to provide the deserialization/ creation methods
 class PropComponent:
     var _num: int
 
@@ -112,3 +116,18 @@ class PropComponent:
         
     func serialize(_node: Node):
         return _num
+
+# Or provide a factory for the components
+# Serialization is still handled by the component itself
+class PropComponentFactory:
+    var _default_num: int
+
+    # we want to use component factories so we can pass additional data. e.g. another script with functions we need for initialization
+    func _init(default_num: int):
+        _default_num = default_num
+
+    func create(node: Node) -> PropComponent:
+        return PropComponent.new(node, _default_num)
+
+    func deserialize(node, data) -> PropComponent:
+        return PropComponent.deserialize(node, data)
