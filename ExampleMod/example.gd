@@ -1,5 +1,8 @@
 var script_class = "tool"
 
+# For logger use
+const CLASS_NAME: String = "Example"
+
 var counter: int = 0
 
 func start():
@@ -81,6 +84,18 @@ func start():
     # component_key.get_component(some_prop)
     # to get the instance of PropComponent tied to that specific Prop
     var other_component_key = self.Global.API.ComponentsApi.register("other_test_component", PropComponentFactory.new(1970), self.Global.API.ComponentsApi.FLAG_PROP, false)
+
+    # you can also use a string like for_class("ClassNameHere")
+    # using 'self' requires you to provide a 'const CLASS_NAME: String = "ClassNameHere"'
+    var logger = self.Global.API.Logger.for_class(self)
+
+    logger.info("This is the %s logger!", ["Example Mod"])
+    var other_logger = logger.with_formatter(logger.MILLIS_PREFIX_FORMATTER)
+    logger.info("Still uses [hh:mm:ss].")
+    other_logger.info("This one has milliseconds!")
+    # we can also
+    logger.set_formatter(logger.MILLIS_PREFIX_FORMATTER)
+    logger.info("Now this one has milliseconds!")
 
 # Input/ HistoryApi example
 func update(_delta):
