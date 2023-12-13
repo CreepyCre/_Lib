@@ -97,6 +97,11 @@ func start():
     logger.set_formatter(logger.MILLIS_PREFIX_FORMATTER)
     logger.info("Now this one has milliseconds!")
 
+    # LayerApi example
+    self.Global.API.LayerApi.remove_layer(300)
+    self.Global.API.LayerApi.add_layer(420, "Example Layer")
+    self.Global.API.LayerApi.rename_layer(400, "Renamed User Layer 4")
+
 # Input/ HistoryApi example
 func update(_delta):
     if (Input.is_action_just_released("release_kraken", true)):
