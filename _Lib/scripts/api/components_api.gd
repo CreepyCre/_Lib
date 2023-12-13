@@ -399,7 +399,10 @@ func _dropped(record, _type: int):
         _record_entries.erase(record)
 
 func _instance(mod_info):
-    return InstancedComponentsApi.new(self, mod_info)
+    var instance = InstancedComponentsApi.new(self, mod_info)
+    for sig in TYPE_TO_SIGNAL.values():
+        connect(sig, instance, "_call_signal", [sig])
+    return instance
 
 func _update(_delta):
     if (_queued_history_record[0] != null or _queued_history_record[1] != null):
@@ -423,6 +426,18 @@ func _unload():
             disconnect(signal_name, callable_dict.target, callable_dict.method)
 
 class InstancedComponentsApi:
+    signal level_added(node)
+    signal pattern_added(node)
+    signal wall_added(node)
+    signal portal_free_added(node)
+    signal material_added(node)
+    signal path_added(node)
+    signal prop_added(node)
+    signal light_added(node)
+    signal roof_added(node)
+    signal text_added(node)
+    signal portal_wall_added(node)
+
     var _components_api
     var _mod_info
 
@@ -438,6 +453,16 @@ class InstancedComponentsApi:
     
     func _get(property):
         return _components_api.get(property)
+    
+    func _call_signal(node: Node2D, sig: String):
+        emit_signal(sig, node)
+
+    func _unload():
+        # disconnect all signals
+        for signal_dict in get_signal_list():
+            var signal_name = signal_dict.name
+            for callable_dict in get_signal_connection_list(signal_name):
+                disconnect(signal_name, callable_dict.target, callable_dict.method)
 
 class ComponentKey:
     var _components_api
