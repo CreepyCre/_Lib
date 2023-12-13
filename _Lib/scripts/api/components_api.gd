@@ -32,6 +32,32 @@ const TYPE_ROOF:            int = 9
 const TYPE_TEXT:            int = 10
 const TYPE_PORTAL_WALL:     int = 11
 
+const TYPE_TO_SIGNAL = {
+    TYPE_LEVEL:         "level_added",
+    TYPE_PATTERN:       "pattern_added",
+    TYPE_WALL:          "wall_added",
+    TYPE_PORTAL_FREE:   "portal_free_added",
+    TYPE_MATERIAL:      "material_added",
+    TYPE_PATH:          "path_added",
+    TYPE_PROP:          "prop_added",
+    TYPE_LIGHT:         "light_added",
+    TYPE_ROOF:          "roof_added",
+    TYPE_TEXT:          "text_added",
+    TYPE_PORTAL_WALL:   "portal_wall_added"
+}
+
+signal level_added(node)
+signal pattern_added(node)
+signal wall_added(node)
+signal portal_free_added(node)
+signal material_added(node)
+signal path_added(node)
+signal prop_added(node)
+signal light_added(node)
+signal roof_added(node)
+signal text_added(node)
+signal portal_wall_added(node)
+
 var _world: Node2D
 var _scene_tree: SceneTree
 
@@ -252,6 +278,7 @@ func _node_added(node: Node):
     for component in _non_lazy_components:
         if (component.is_applicable(node)):
             component.get_component(node)
+    emit_signal(TYPE_TO_SIGNAL[_node_type], node)
         
 func _node_removed(node: Node):
     var _node_type: int = node_type(node)
@@ -300,7 +327,7 @@ func _write_type(node: Node):
         TYPE_WORLD:
             pass
         TYPE_LEVEL:
-            entry["level"] = node.ID
+            entry["level"] = _world.AllLevels.find(node)
         TYPE_MATERIAL:
             entry["layer"] = node.get_node("../").z_index
             entry["texture"] = node.TileTexture.resource_path
@@ -388,6 +415,12 @@ func _update(_delta):
 func _unload():
     _scene_tree.disconnect("node_added", self, "_node_added")
     _scene_tree.disconnect("node_removed", self, "_node_removed")
+
+    # disconnect all signals
+    for signal_dict in get_signal_list():
+        var signal_name = signal_dict.name
+        for callable_dict in get_signal_connection_list(signal_name):
+            disconnect(signal_name, callable_dict.target, callable_dict.method)
 
 class InstancedComponentsApi:
     var _components_api
