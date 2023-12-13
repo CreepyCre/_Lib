@@ -53,6 +53,7 @@ func _post_init(script_instance: Reference = self):
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods()))
     api.register("HistoryApi", init_api("history_api", _global.Editor, api.AccessorApi.config()))
     api.register("ComponentsApi", init_api("components_api", api.ModSignalingApi, api.HistoryApi, _global.World))
+    api.register("LayerApi", init_api("layer_api", _global.API.ComponentsApi, _global.World))
 
     # set up _Lib config
     var builder = _global.API.ModConfigApi.create_config()
