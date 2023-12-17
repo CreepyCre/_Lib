@@ -58,7 +58,7 @@ Emitted before a records :link:`Record.redo` method has finished processing.
 
 ## Enumerations
 
-:enum:`HistoryType`
+:enum:anchor:`HistoryType`
 <span class="indent">
 Denotes the type of history a record is currently recorded in.
 </span>
