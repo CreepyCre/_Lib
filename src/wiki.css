@@ -34,11 +34,13 @@
     color: #e07f7f
 }
 
-
 .enum {
-    color: #e07f7f
+    color: #4EC9B0
 }
 
+.enum_entry {
+    color: #e07f7f
+}
 
 .property {
     color: #e07f7f
