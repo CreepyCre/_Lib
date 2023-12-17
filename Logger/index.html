@@ -920,7 +920,7 @@ It's also possible to provide a unique prefix formatter using <a href="#set_form
 <td><a href="#fatal"><span class="method">fatal</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">clazz</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">line</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">message</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">args</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
-<td><a href="../../Logger/ClassLogger"><span class="type">ClassLogger</span></a></td>
+<td><a href="../Logger/ClassLogger"><span class="type">ClassLogger</span></a></td>
 <td><a href="#for_class"><span class="method">for_class</span></a> <span class="bracket">(</span> <span class="param">clazz</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
@@ -936,7 +936,7 @@ It's also possible to provide a unique prefix formatter using <a href="#set_form
 <td><a href="#warn"><span class="method">warn</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">clazz</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">line</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">message</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">args</span> <span class="bracket">)</span></td>
 </tr>
 <tr>
-<td><a href="../../Logger"><span class="type">Logger</span></a></td>
+<td><a href="../Logger"><span class="type">Logger</span></a></td>
 <td><a href="#with_formatter"><span class="method">with_formatter</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_funcref.html"><span class="type">FuncRef</span></a> <span class="param">prefix_formatter</span> = <span class="default">PREFIX_FORMATTER</span> <span class="bracket">)</span></td>
 </tr>
 </table>
@@ -962,9 +962,9 @@ Denotes the log level.
 </table>
 </p>
 <h2 id="method-descriptions">Method Descriptions</h2>
-<p><span id="for_class"><a href="../../Logger/ClassLogger"><span class="type">ClassLogger</span></a> <a href="#for_class"><span class="method">for_class</span></a> <span class="bracket">(</span> <span class="param">clazz</span> <span class="bracket">)</span></span>: <br>
+<p><span id="for_class"><a href="../Logger/ClassLogger"><span class="type">ClassLogger</span></a> <a href="#for_class"><span class="method">for_class</span></a> <span class="bracket">(</span> <span class="param">clazz</span> <span class="bracket">)</span></span>: <br>
 <span class="indent">
-Creates a <a href="../../Logger/ClassLogger">ClassLogger</a> which pre-supplies the <span class="param">clazz</span> for the logging methods. <span class="param">clazz</span> may be either a <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a> containing the class name or a relevant instance of the class/ the GDScript itself with a CLASS_NAME constant providing the name as a <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a>.
+Creates a <a href="../Logger/ClassLogger">ClassLogger</a> which pre-supplies the <span class="param">clazz</span> for the logging methods. <span class="param">clazz</span> may be either a <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a> containing the class name or a relevant instance of the class/ the GDScript itself with a CLASS_NAME constant providing the name as a <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html">String</a>.
 </span></p>
 <p><span id="debug"><span class="void">void</span> <a href="#debug"><span class="method">debug</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">clazz</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_int.html"><span class="type">int</span></a> <span class="param">line</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_string.html"><span class="type">String</span></a> <span class="param">message</span>, <a href="https://docs.godotengine.org/en/3.5/classes/class_array.html"><span class="type">Array</span></a> <span class="param">args</span> <span class="bracket">)</span></span>: <br>
 <span class="indent">
@@ -995,7 +995,7 @@ Sets <span class="param">prefix_formatter</span> as this loggers prefix formatte
 <span class="indent">
 Should <span class="param">clazz</span> or <span class="param">line</span> be equal to their default value, then this signifies that they are missing, so they should be omitted when formatting the log prefix.
 </span></p>
-<p><span id="with_formatter"><a href="../../Logger"><span class="type">Logger</span></a> <a href="#with_formatter"><span class="method">with_formatter</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_funcref.html"><span class="type">FuncRef</span></a> <span class="param">prefix_formatter</span> = <span class="default">PREFIX_FORMATTER</span> <span class="bracket">)</span></span>: <br>
+<p><span id="with_formatter"><a href="../Logger"><span class="type">Logger</span></a> <a href="#with_formatter"><span class="method">with_formatter</span></a> <span class="bracket">(</span> <a href="https://docs.godotengine.org/en/3.5/classes/class_funcref.html"><span class="type">FuncRef</span></a> <span class="param">prefix_formatter</span> = <span class="default">PREFIX_FORMATTER</span> <span class="bracket">)</span></span>: <br>
 <span class="indent">
 Creates and returns a new Logger with <span class="param">prefix_formatter</span> as the loggers prefix formatter. The prefix formatter is a <a href="https://docs.godotengine.org/en/3.5/classes/class_funcref.html">FuncRef</a> to any method with signature:
 </span>
