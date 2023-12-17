@@ -25,6 +25,11 @@ nav:
   - AccessorApi:
     - AccessorApi: AccessorApi/index.md
     - ObjectVisitor: AccessorApi/ObjectVisitor.md
+  - ComponentsApi:
+    - ComponentsApi: ComponentsApi/index.md
+    - Component: ComponentsApi/Component.md
+    - ComponentFactory: ComponentsApi/ComponentFactory.md
+    - ComponentKey: ComponentsApi/ComponentKey.md
   - HistoryApi:
     - HistoryApi: HistoryApi/index.md
     - Record: HistoryApi/Record.md

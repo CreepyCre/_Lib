@@ -18,6 +18,11 @@ class ClassUrlProvider:
             "Util/FileLoadingHelper",
             "AccessorApi",
             "AccessorApi/ObjectVisitor",
+            "ComponentsApi",
+            "ComponentsApi/Component",
+            "ComponentsApi/ComponentFactory",
+            "ComponentsApi/ComponentKey",
+        )
         self.registerDungeondraft(
             "ArcVector2",
             "AssetPack",
