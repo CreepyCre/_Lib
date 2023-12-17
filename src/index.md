@@ -30,8 +30,12 @@ After registering your mod with _Lib you will now have an entry `Global.API` ava
 
 ## Current API
 - [ApiApi](./ApiApi)
+- [Logger](./Logger)
+- [AccessorApi](./AccessorApi)
+- [ComponentsApi](./ComponentsApi)
 - [HistoryApi](./HistoryApi)
 - [InputMapApi](./InputMapApi)
+- [LayerApi](./LayerApi)
 - [ModConfigApi](./ModConfigApi)
 - [ModSignalingApi](./ModSignalingApi)
 - [PreferencesWindowApi](./PreferencesWindowApi)
