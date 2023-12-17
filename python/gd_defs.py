@@ -10,7 +10,7 @@ class ClassMemberExtension(Extension):
         md.registerExtension(self)
         self.md = md
         md.preprocessors.register(ClassMemberPreprocessor(md, class_url_provider.ClassUrlProvider()), "class_member_preprocessor", 0)
-        md.inlinePatterns.register(ClassMemberResolvingInlineProcessor(r":(?P<command>[a-z:]+):(`(?P<parameter>[a-zA-Z0-9_#]+)`)?", md, class_url_provider.ClassUrlProvider()), "class_member_resolver", 1000)
+        md.inlinePatterns.register(ClassMemberResolvingInlineProcessor(r":(?P<command>[a-z:]+):(`(?P<parameter>[a-zA-Z0-9_#.]+)`)?", md, class_url_provider.ClassUrlProvider()), "class_member_resolver", 1000)
 
     def reset(self):
         self.md.class_members = {}
@@ -27,6 +27,24 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
     
     def handleCommand(self, command, parameter) -> Element:
         match command:
+            case "constant":
+                return self.build_constant(parameter)
+            case "constant:short":
+                return self.build_constant(parameter, short = True)
+            case "constants":
+                return self.build_constants_table()
+            case "enum":
+                return self.build_enum(parameter)
+            case "enum_entry":
+                return self.build_enum_entry(parameter)
+            case "property":
+                return self.build_property(parameter)
+            case "property:anchor":
+                return self.build_property(parameter, outer_attributes = {"id": parameter})
+            case "property:short":
+                return self.build_property(parameter, short = True)
+            case "properties":
+                return self.build_properties_table()
             case "method":
                 return self.build_method(parameter)
             case "method:anchor":
@@ -53,20 +71,106 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
             builder.start("a", {"href": target})
             builder.data(target[1:])
         elif len(parts) == 1:
-            builder.start("a", {"href": self.fix_url(self.class_url_provider.get_href(target))})
-            builder.data(target)
+            parts = target.split(".")
+            if len(parts) == 1:
+                builder.start("a", {"href": self.fix_url(self.class_url_provider.get_href(target))})
+                builder.data(target)
+            else:
+                builder.start("a", {"href": self.fix_url(self.class_url_provider.get_href(parts[0])) + "#" + parts[1]})
+                builder.data(parts[1])
         else:
             builder.start("a", {"href": self.fix_url(self.class_url_provider.get_href(parts[0])) + "#" + parts[1]})
             builder.data(target)
         builder.end("a")
         return builder.close()
 
-    def build_property(self, property: str) -> Element:
+    def build_property(self, property: str, outer_attributes: dict = {}, short = False) -> Element:
         builder: TreeBuilder = TreeBuilder()
-        builder.start("span", {})
-        self.build_param(builder, self.md.class_members["properties"][property])
+        builder.start("span", outer_attributes)
+        self.build_param(builder, self.md.class_members["properties"][property], short = short)
         builder.end("span")
         return builder.close()
+    
+    def build_properties_table(self, sort: bool = True) -> Element:
+        builder: TreeBuilder = TreeBuilder()
+        builder.start("table", {})
+        properties = self.md.class_members["properties"]
+        for key in (sorted(properties) if sort else properties):
+            sig = properties[key]
+            builder.start("tr", {})
+            builder.start("td", {})
+            if "type" in sig:
+                self.build_node(builder, sig["type"])
+            else:
+                self.build_node(builder, {
+                    "text": "???",
+                    "class": "Variant"
+                })
+            builder.end("td")
+            builder.start("td", {})
+            self.build_param(builder, sig, type = False)
+            builder.end("td")
+            builder.end("tr")
+        builder.end("table")
+        return builder.close()
+    
+    def build_constant(self, constant: str, short = False) -> Element:
+        builder: TreeBuilder = TreeBuilder()
+        builder.start("span", {})
+        self.build_param(builder, self.md.class_members["constants"][constant], short = short)
+        builder.end("span")
+        return builder.close()
+
+    def build_constants_table(self, sort: bool = True) -> Element:
+        builder: TreeBuilder = TreeBuilder()
+        builder.start("table", {})
+        constants = self.md.class_members["constants"]
+        for key in (sorted(constants) if sort else constants):
+            sig = constants[key]
+            builder.start("tr", {})
+            builder.start("td", {})
+            if "type" in sig:
+                self.build_node(builder, sig["type"])
+            else:
+                self.build_node(builder, {
+                    "text": "???",
+                    "class": "Variant"
+                })
+            builder.end("td")
+            builder.start("td", {})
+            self.build_param(builder, sig, type = False)
+            builder.end("td")
+            builder.end("tr")
+        builder.end("table")
+        return builder.close()
+    
+    def build_enum(self, enum_name: str) -> Element:
+        builder: TreeBuilder = TreeBuilder()
+        builder.start("span", {})
+        builder.data("enum ")
+        self.build_node(builder, self.md.class_members["enums"][enum_name]["name"])
+        builder.data(":")
+        builder.start("ul", {})
+        for index, entry in enumerate(self.md.class_members["enums"][enum_name]["entries"]):
+            builder.start("li", {})
+            self.build_node(builder, entry)
+            builder.data(" = ")
+            self.build_node(builder, {
+                "text": str(index),
+                "class": "default"
+            })
+            builder.end("li")
+        builder.end("ul")
+        builder.end("span")
+        return builder.close()
+
+    def build_enum_entry(self, enum_entry: str) -> Element:
+            enum_name, entry_name = enum_entry.split(".")
+            builder: TreeBuilder = TreeBuilder()
+            builder.start("span", {})
+            self.build_node(builder, self.md.class_members["enums"][enum_name]["entry_map"][entry_name])
+            builder.end("span")
+            return builder.close()
 
     def build_method(self, method: str, outer_attributes: dict = {}, short = False) -> Element:
         builder: TreeBuilder = TreeBuilder()
@@ -151,12 +255,12 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
         builder.end("span")
         return builder.close()
 
-    def build_param(self, builder: TreeBuilder, definition: dict):
-        if "type" in definition:
+    def build_param(self, builder: TreeBuilder, definition: dict, short = False, type = True):
+        if "type" in definition and not short and type:
             self.build_node(builder, definition["type"])
             builder.data(" ")
         self.build_node(builder, definition["name"])
-        if "default" in definition:
+        if "default" in definition and not short:
             builder.data(" = ")
             self.build_node(builder, definition["default"])
     
@@ -220,26 +324,115 @@ class ClassMemberPreprocessor(Preprocessor):
                 properties = {}
                 for property in meta_properties:
                     if ":" in property:
-                        split_property = [entry.strip() for entry in property.split(":")]
+                        split_property = [entry.strip() for entry in property.split(":", 1)]
                         prop_name = split_property[0]
-                        properties[prop_name] = {
-                            "name": self.build_property(prop_name),
-                            "type": self.build_type(split_property[1])
-                        }
-                    else:
-                        split_property = property.strip().split(" ")
-                        if len(split_property) == 1:
-                            prop_name = split_property[0]
-                            properties[prop_name] = {
-                                "name": self.build_property(prop_name)
-                            }
-                        else:
-                            prop_name = split_property[1]
+                        if "=" in split_property[1]:
+                            split_type_value = [entry.strip() for entry in split_property[1].split("=", 1)]
                             properties[prop_name] = {
                                 "name": self.build_property(prop_name),
-                                "type": self.build_type(split_property[0])
+                                "type": self.build_type(split_type_value[0]),
+                                "default": self.build_default(split_type_value[1])
                             }
+                        else:
+                            properties[prop_name] = {
+                                "name": self.build_property(prop_name),
+                                "type": self.build_type(split_property[1])
+                            }
+                    else:
+                        if "=" in property:
+                            split_property = [entry.strip() for entry in property.split("=", 1)]
+                            prop_type_name = split_property[0]
+                            if " " in prop_type_name:
+                                split_type_name = [entry.strip() for entry in prop_type_name.split(" ", 1)]
+                                prop_name = split_type_name[1]
+                                properties[prop_name] = {
+                                    "name": self.build_property(prop_name),
+                                    "type": self.build_type(split_type_name[0]),
+                                    "default": self.build_default(split_property[1])
+                                }
+                            else:
+                                properties[prop_type_name] = {
+                                    "name": self.build_property(prop_type_name),
+                                    "default": self.build_default(split_property[1])
+                                }
+                        else:
+                            if " " in property:
+                                split_type_name = [entry.strip() for entry in property.split(" ", 1)]
+                                prop_name = split_type_name[1]
+                                properties[prop_name] = {
+                                    "name": self.build_property(prop_name),
+                                    "type": self.build_type(split_type_name[0])
+                                }
+                            else:
+                                properties[property] = {
+                                    "name": self.build_property(property)
+                                }
                 class_members["properties"] = properties
+
+            if 'constants' in self.md.Meta:
+                meta_constants = self.md.Meta['constants']
+                constants = {}
+                for constant in meta_constants:
+                    if ":" in constant:
+                        split_constant = [entry.strip() for entry in constant.split(":", 1)]
+                        const_name = split_constant[0]
+                        if "=" in split_constant[1]:
+                            split_type_value = [entry.strip() for entry in split_constant[1].split("=", 1)]
+                            constants[const_name] = {
+                                "name": self.build_constant(const_name),
+                                "type": self.build_type(split_type_value[0]),
+                                "default": self.build_default(split_type_value[1])
+                            }
+                        else:
+                            constants[const_name] = {
+                                "name": self.build_constant(const_name),
+                                "type": self.build_type(split_constant[1])
+                            }
+                    else: 
+                        if "=" in constant:
+                            split_constant = [entry.strip() for entry in constant.split("=", 1)]
+                            const_type_name = split_constant[0]
+                            if " " in const_type_name:
+                                split_type_name = [entry.strip() for entry in const_type_name.split(" ", 1)]
+                                const_name = split_type_name[1]
+                                constants[const_name] = {
+                                    "name": self.build_constant(const_name),
+                                    "type": self.build_type(split_type_name[0]),
+                                    "default": self.build_default(split_constant[1])
+                                }
+                            else:
+                                constants[const_type_name] = {
+                                    "name": self.build_constant(const_type_name),
+                                    "default": self.build_default(split_constant[1])
+                                }
+                        else:
+                            if " " in constant:
+                                split_type_name = [entry.strip() for entry in constant.split(" ", 1)]
+                                const_name = split_type_name[1]
+                                constants[const_name] = {
+                                    "name": self.build_constant(const_name),
+                                    "type": self.build_type(split_type_name[0])
+                                }
+                            else:
+                                constants[constant] = {
+                                    "name": self.build_constant(constant)
+                                }
+                class_members["constants"] = constants
+            
+            if 'enums' in self.md.Meta:
+                enums = {}
+                meta_enums = self.md.Meta['enums']
+                for meta_enum in meta_enums:
+                    name_consts = [entry.strip() for entry in meta_enum.split(" ", 1)]
+                    enum_name = name_consts[0]
+                    raw_entries = [entry.strip() for entry in name_consts[1][1:-1].split(",")]
+                    enum_entries = [self.build_enum_entry(entry.strip()) for entry in raw_entries]
+                    enums[enum_name] = {
+                        "name": self.build_enum(enum_name),
+                        "entries": enum_entries,
+                        "entry_map": {name: data for name, data in zip(raw_entries, enum_entries)}
+                    }
+                class_members["enums"] = enums
 
             if 'methods' in self.md.Meta:
                 methods = {}
@@ -289,7 +482,7 @@ class ClassMemberPreprocessor(Preprocessor):
                     signature = {}
                     signal = re.search("^[a-zA-Z _]*", meta_signal).group().strip()
                     signature["signal"] = self.build_signal_name(signal)
-                    params = re.search(r"\((([a-zA-Z0-9_ :]*([=][^=]*[=][ ]*)?)[,)])+", meta_signal).group()[1:-1].split(",")
+                    params = re.search(r"\((([a-zA-Z0-9_ :.]*([=][^=]*[=][ ]*)?)[,)])+", meta_signal).group()[1:-1].split(",")
                     if len(params) == 1 and params[0].strip() == "":
                             signature["params"] = []
                             signals[signal] = signature
@@ -320,13 +513,21 @@ class ClassMemberPreprocessor(Preprocessor):
         return lines
     
     def build_type(self, type: str) -> dict:
-        definition = {"text": type}
-        if type == "void":
-            definition["class"] = "void"
+        if not "." in type:
+            definition = {"text": type}
+            if type == "void":
+                definition["class"] = "void"
+            else:
+                definition["class"] = "type"
+                definition["href"] = self.fix_url(self.class_url_provider.get_href(type))
+            return definition
         else:
-            definition["class"] = "type"
-            definition["href"] = self.fix_url(self.class_url_provider.get_href(type))
-        return definition
+            parts = type.split(".")
+            return {
+                "text": parts[1],
+                "class": "type",
+                "href": self.fix_url(self.class_url_provider.get_href(parts[0])) + "#" + parts[1]
+                }
     
     def build_method_name(self, method: str) -> dict:
         return {
@@ -363,9 +564,29 @@ class ClassMemberPreprocessor(Preprocessor):
     def build_property(self, property: str) -> dict:
         return {
             "text": property,
-            "class": "prop"
+            "class": "prop",
+            "href": "#" + property
+        }
+
+    def build_constant(self, constant: str) -> dict:
+        return {
+            "text": constant,
+            "class": "const"
+            #"href": "#" + constant # no need to have descriptions for individual constants
         }
     
+    def build_enum(self, enum_name: str) -> dict:
+        return {
+            "text": enum_name,
+            "class": "enum"
+        }
+    
+    def build_enum_entry(self, entry: str) -> dict:
+        return {
+            "text": entry,
+            "class": "enum_entry"
+        }
+
     def fix_url(self, url: str) -> str:
         if url.startswith("http"):
             return url
