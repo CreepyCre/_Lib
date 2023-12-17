@@ -22,6 +22,9 @@ extra_css:
 nav:
   - Home: index.md
   - ApiApi: ApiApi.md
+  - Logger:
+    - Logger: Logger/index.md
+    - ClassLogger: Logger/ClassLogger.md
   - AccessorApi:
     - AccessorApi: AccessorApi/index.md
     - ObjectVisitor: AccessorApi/ObjectVisitor.md

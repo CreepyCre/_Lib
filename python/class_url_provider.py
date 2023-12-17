@@ -22,6 +22,8 @@ class ClassUrlProvider:
             "ComponentsApi/Component",
             "ComponentsApi/ComponentFactory",
             "ComponentsApi/ComponentKey",
+            "Logger",
+            "Logger/ClassLogger",
         )
         self.registerDungeondraft(
             "ArcVector2",
