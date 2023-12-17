@@ -35,6 +35,8 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
                 return self.build_constants_table()
             case "enum":
                 return self.build_enum(parameter)
+            case "enum:anchor":
+                return self.build_enum(parameter, outer_attributes = {"id": parameter})
             case "enum_entry":
                 return self.build_enum_entry(parameter)
             case "property":
@@ -138,15 +140,18 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
                 })
             builder.end("td")
             builder.start("td", {})
-            self.build_param(builder, sig, type = False)
+            self.build_node(builder, sig["name"])
+            builder.end("td")
+            builder.start("td", {})
+            self.build_node(builder, sig["default"])
             builder.end("td")
             builder.end("tr")
         builder.end("table")
         return builder.close()
     
-    def build_enum(self, enum_name: str) -> Element:
+    def build_enum(self, enum_name: str, outer_attributes: dict = {}) -> Element:
         builder: TreeBuilder = TreeBuilder()
-        builder.start("span", {})
+        builder.start("span", outer_attributes)
         builder.data("enum ")
         self.build_node(builder, self.md.class_members["enums"][enum_name]["name"])
         builder.data(":")
@@ -176,6 +181,9 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
         builder: TreeBuilder = TreeBuilder()
         builder.start("span", outer_attributes)
         sig = self.md.class_members["methods"][method]
+        if not short and "static" in sig:
+            self.build_node(builder, sig["static"])
+            builder.data(" ")
         if not short and "return_type" in sig:
             self.build_node(builder, sig["return_type"])
             builder.data(" ")
@@ -218,6 +226,9 @@ class ClassMemberResolvingInlineProcessor(InlineProcessor):
                 })
             builder.end("td")
             builder.start("td", {})
+            if "static" in sig:
+                self.build_node(builder, sig["static"])
+                builder.data(" ")
             self.build_method_no_return_type(builder, sig)
             builder.end("td")
             builder.end("tr")
@@ -439,7 +450,13 @@ class ClassMemberPreprocessor(Preprocessor):
                 meta_methods = self.md.Meta['methods']
                 for meta_method in meta_methods:
                     signature = {}
-                    returntype_method = re.search(r"^[a-zA-Z _]*", meta_method).group().strip().split(" ")
+                    if meta_method.startswith("static "):
+                        meta_method = meta_method[7:]
+                        signature["static"] = {
+                            "text": "static",
+                            "class": "static"
+                        }
+                    returntype_method = re.search(r"^[a-zA-Z _.]*", meta_method).group().strip().split(" ")
                     if (len(returntype_method)) == 1:
                         method_name = returntype_method[0]
                         signature["method"] = self.build_method_name(method_name)
@@ -571,7 +588,7 @@ class ClassMemberPreprocessor(Preprocessor):
     def build_constant(self, constant: str) -> dict:
         return {
             "text": constant,
-            "class": "const"
+            "class": "constant"
             #"href": "#" + constant # no need to have descriptions for individual constants
         }
     
