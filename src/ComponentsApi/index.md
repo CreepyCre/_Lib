@@ -1,7 +1,7 @@
 ---
 _: _
 ---
-root: ../..
+root: ..
 methods:    ComponentKey register(identifier: String, component_script, flags: int, lazy: bool = true)
             ComponentsApi.NodeType node_type(node: Node)
 enums:      NodeType {TYPE_WORLD, TYPE_LEVEL, TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PORTAL_WALL, TYPE_MATERIAL, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT}

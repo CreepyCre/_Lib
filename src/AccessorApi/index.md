@@ -1,7 +1,7 @@
 ---
 _: _
 ---
-root: ../..
+root: ..
 methods:    Object accept(visitor: ObjectVisitor)
             ConfigFile config()
 

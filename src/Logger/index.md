@@ -1,7 +1,7 @@
 ---
 _: _
 ---
-root: ../..
+root: ..
 enums:      LogLevel {OFF, FATAL, ERROR, WARN, INFO, DEBUG}
 constants:  PREFIX_FORMATTER: FuncRef = funcref(self, "build_prefix")
             MILLIS_PREFIX_FORMATTER: FuncRef = funcref(self, "build_prefix_millis")
