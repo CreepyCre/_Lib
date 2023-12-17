@@ -16,6 +16,8 @@ class ClassUrlProvider:
             "HistoryApi/Record",
             "Util",
             "Util/FileLoadingHelper",
+            "AccessorApi",
+            "AccessorApi/ObjectVisitor",
         )
         self.registerNative(
             "AABB",

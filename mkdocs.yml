@@ -22,6 +22,9 @@ extra_css:
 nav:
   - Home: index.md
   - ApiApi: ApiApi.md
+  - AccessorApi:
+    - AccessorApi: AccessorApi/index.md
+    - ObjectVisitor: AccessorApi/ObjectVisitor.md
   - HistoryApi:
     - HistoryApi: HistoryApi/index.md
     - Record: HistoryApi/Record.md
