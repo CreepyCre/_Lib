@@ -26,6 +26,27 @@
     color: #AAAAAA
 }
 
+.static {
+    color: #4a5a6d
+}
+
+.constant {
+    color: #e07f7f
+}
+
+.enum {
+    color: #4EC9B0
+}
+
+.enum_entry {
+    color: #e07f7f
+}
+
+.property {
+    color: #e07f7f
+}
+
+
 .indent {
     --margin-left: 40px;
     margin-top: 5px;
