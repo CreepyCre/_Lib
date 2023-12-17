@@ -2,48 +2,66 @@ class_name ComponentsApi
 
 const _TEXT_BOX_POS: Vector2 = Vector2(1.93729e296, 1.08346e301)
 
+enum NodeType {
+    TYPE_WORLD,
+    TYPE_LEVEL,
+    TYPE_PATTERN,
+    TYPE_WALL,
+    TYPE_PORTAL_FREE,
+    TYPE_PORTAL_WALL,
+    TYPE_MATERIAL,
+    TYPE_PATH,
+    TYPE_PROP,
+    TYPE_LIGHT,
+    TYPE_ROOF,
+    TYPE_TEXT
+}
+
+# This makes the enum entries available without having to prefix NodeType.
+enum {
+    TYPE_WORLD,
+    TYPE_LEVEL,
+    TYPE_PATTERN,
+    TYPE_WALL,
+    TYPE_PORTAL_FREE,
+    TYPE_PORTAL_WALL,
+    TYPE_MATERIAL,
+    TYPE_PATH,
+    TYPE_PROP,
+    TYPE_LIGHT,
+    TYPE_ROOF,
+    TYPE_TEXT
+}
+
 const FLAG_ALL:             int = 0b111111111111
-const FLAG_WITH_NODE_ID:    int = 0b111111011100
-const FLAG_PORTAL:          int = 0b100000010000
+const FLAG_WITH_NODE_ID:    int = 0b111110111100
+const FLAG_PORTAL:          int = 0b000000110000
 
-const FLAG_WORLD:           int = 0b000000000001
-const FLAG_LEVEL:           int = 0b000000000010
-const FLAG_PATTERN:         int = 0b000000000100
-const FLAG_WALL:            int = 0b000000001000
-const FLAG_PORTAL_FREE:     int = 0b000000010000
-const FLAG_MATERIAL:        int = 0b000000100000
-const FLAG_PATH:            int = 0b000001000000
-const FLAG_PROP:            int = 0b000010000000
-const FLAG_LIGHT:           int = 0b000100000000
-const FLAG_ROOF:            int = 0b001000000000
-const FLAG_TEXT:            int = 0b010000000000
-const FLAG_PORTAL_WALL:     int = 0b100000000000
-
-const TYPE_WORLD:           int = 0
-const TYPE_LEVEL:           int = 1
-const TYPE_PATTERN:         int = 2
-const TYPE_WALL:            int = 3
-const TYPE_PORTAL_FREE:     int = 4
-const TYPE_MATERIAL:        int = 5
-const TYPE_PATH:            int = 6
-const TYPE_PROP:            int = 7
-const TYPE_LIGHT:           int = 8
-const TYPE_ROOF:            int = 9
-const TYPE_TEXT:            int = 10
-const TYPE_PORTAL_WALL:     int = 11
+const FLAG_WORLD:           int = 1 << TYPE_WORLD
+const FLAG_LEVEL:           int = 1 << TYPE_LEVEL
+const FLAG_PATTERN:         int = 1 << TYPE_PATTERN
+const FLAG_WALL:            int = 1 << TYPE_WALL
+const FLAG_PORTAL_FREE:     int = 1 << TYPE_PORTAL_FREE
+const FLAG_PORTAL_WALL:     int = 1 << TYPE_PORTAL_WALL
+const FLAG_MATERIAL:        int = 1 << TYPE_MATERIAL
+const FLAG_PATH:            int = 1 << TYPE_PATH
+const FLAG_PROP:            int = 1 << TYPE_PROP
+const FLAG_LIGHT:           int = 1 << TYPE_LIGHT
+const FLAG_ROOF:            int = 1 << TYPE_ROOF
+const FLAG_TEXT:            int = 1 << TYPE_TEXT
 
 const TYPE_TO_SIGNAL = {
-    TYPE_LEVEL:         "level_added",
-    TYPE_PATTERN:       "pattern_added",
-    TYPE_WALL:          "wall_added",
-    TYPE_PORTAL_FREE:   "portal_free_added",
-    TYPE_MATERIAL:      "material_added",
-    TYPE_PATH:          "path_added",
-    TYPE_PROP:          "prop_added",
-    TYPE_LIGHT:         "light_added",
-    TYPE_ROOF:          "roof_added",
-    TYPE_TEXT:          "text_added",
-    TYPE_PORTAL_WALL:   "portal_wall_added"
+    TYPE_LEVEL:  "level_added",
+    TYPE_PATTERN:  "pattern_added",
+    TYPE_WALL:  "wall_added",
+    TYPE_PORTAL_FREE:  "portal_free_added",
+    TYPE_PORTAL_WALL:  "portal_wall_added",
+    TYPE_MATERIAL:  "material_added",
+    TYPE_PATH:  "path_added",
+    TYPE_PROP:  "prop_added",
+    TYPE_LIGHT:  "light_added",
+    TYPE_ROOF:  "roof_added",
+    TYPE_TEXT: "text_added",
 }
 
 signal level_added(node)
@@ -91,8 +109,8 @@ func _init(mod_signaling_api, history_api, world: Node2D):
     _scene_tree.connect("node_added", self, "_node_added")
     _scene_tree.connect("node_removed", self, "_node_removed")
 
-func register(namespace: String, identifier: String, component_script, flags: int, lazy: bool = true):
-    var key = ComponentKey.new(self, component_script, flags)
+func register(namespace: String, identifier: String, component_factory, flags: int, lazy: bool = true):
+    var key = ComponentKey.new(self, component_factory, flags)
     if not namespace in _components:
         _components[namespace] = {}
     var component_namespace = _components[namespace]
@@ -131,7 +149,7 @@ func node_type(node: Node) -> int:
         return -1
     match _node_path_elements(node.get_path()):
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World"]:
-            return TYPE_WORLD
+            return NodeType.TYPE_WORLD
         ["root", "Master", "ViewportContainer2D", "Viewport2D", "World", var _level]:
             if (node in _world.AllLevels):
                 return TYPE_LEVEL
@@ -475,10 +493,10 @@ class ComponentKey:
         _component_script = component_script
         _flags = flags
     
-    func is_applicable(node: Node):
+    func is_applicable(node: Node) -> bool:
         return bool((1 << _components_api.node_type(node)) & _flags)
     
-    func has_component(node: Node):
+    func has_component(node: Node) -> bool:
         return node in _tracked_nodes
     
     func get_component(node: Node):

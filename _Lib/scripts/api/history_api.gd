@@ -1,7 +1,14 @@
 class_name HistoryApi
 
-const UNDO: int = 0
-const REDO: int = 1
+enum HistoryType {
+    UNDO,
+    REDO
+}
+
+enum {
+    UNDO,
+    REDO
+}
 
 var _config: ConfigFile
 var _vanilla_history_record

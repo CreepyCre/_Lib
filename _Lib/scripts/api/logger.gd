@@ -2,12 +2,23 @@ class_name Logger
 
 const CLASS_NAME = "Logger"
 
-const OFF:      int = 0
-const FATAL:    int = 1
-const ERROR:    int = 2
-const WARN:     int = 3
-const INFO:     int = 4
-const DEBUG:    int = 5
+enum LogLevel {
+    OFF,
+    FATAL,
+    ERROR,
+    WARN,
+    INFO,
+    DEBUG
+}
+
+enum {
+    OFF,
+    FATAL,
+    ERROR,
+    WARN,
+    INFO,
+    DEBUG
+}
 
 const LEVEL_STRINGS: Dictionary = {
     FATAL:  "FATAL",
@@ -48,8 +59,8 @@ var _pretty_log: bool = "--prettylog" in OS.get_cmdline_args()
 var _config: ConfigFile = ConfigFile.new()
 var _log_level: int = INFO
 
-var PREFIX_FORMATTER = funcref(self, "build_prefix")
-var MILLIS_PREFIX_FORMATTER = funcref(self, "build_prefix_millis")
+var PREFIX_FORMATTER: FuncRef = funcref(self, "build_prefix")
+var MILLIS_PREFIX_FORMATTER: FuncRef = funcref(self, "build_prefix_millis")
 
 # end goal is:
 # [hh:mm:ss] [LEVEL] [Mod Name] [ModClass:<optional line number>]: message
@@ -141,19 +152,19 @@ class InstancedLogger:
     func with_formatter(prefix_formatter: FuncRef = _logger.PREFIX_FORMATTER) -> InstancedLogger:
         return InstancedLogger.new(_logger, _mod_name, prefix_formatter)
     
-    func debug(clazz, line, message: = null, args = null):
+    func debug(clazz, line, message = null, args = null):
         _log(_prefix_formatter, DEBUG, clazz, line, message, args)
 
-    func info(clazz, line, message: = null, args = null):
+    func info(clazz, line, message = null, args = null):
         _log(_prefix_formatter, INFO, clazz, line, message, args)
         
-    func warn(clazz, line, message: = null, args = null):
+    func warn(clazz, line, message = null, args = null):
         _log(_prefix_formatter, WARN, clazz, line, message, args)
         
-    func error(clazz, line, message: = null, args = null):
+    func error(clazz, line, message = null, args = null):
         _log(_prefix_formatter, ERROR, clazz, line, message, args)
     
-    func fatal(clazz, line, message: = null, args = null):
+    func fatal(clazz, line, message = null, args = null):
         _log(_prefix_formatter, FATAL, clazz, line, message, args)
     
     func _log(prefix_formatter: FuncRef, level: int, clazz, line, message = null, args = null):
