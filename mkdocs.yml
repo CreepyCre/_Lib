@@ -37,6 +37,7 @@ nav:
     - InputMapApi: InputMapApi/index.md
     - InputEventEmitterNode: InputMapApi/InputEventEmitterNode.md
     - ActionConfigSyncAgent: InputMapApi/ActionConfigSyncAgent.md
+  - LayerApi: LayerApi.md
   - ModConfigApi:
     - ModConfigApi: ModConfigApi/index.md
     - ConfigBuilder: ModConfigApi/ConfigBuilder.md
