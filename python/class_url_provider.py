@@ -13,8 +13,9 @@ class ClassUrlProvider:
             "ModSignalingApi",
             "PreferencesWindowApi",
             "HistoryApi",
+            "HistoryApi/Record",
             "Util",
-            "Util/FileLoadingHelper"
+            "Util/FileLoadingHelper",
         )
         self.registerNative(
             "AABB",
