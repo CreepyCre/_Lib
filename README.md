@@ -10,12 +10,16 @@ This mod offers additional API to simplify implementing certain features like co
 
 Current API:
 - [ApiApi](https://creepycre.github.io/_Lib/ApiApi/)
+- [Logger](https://creepycre.github.io/_Lib/Logger/)
+- [AccessorApi](https://creepycre.github.io/_Lib/AccessorApi/)
+- [ComponentsApi](https://creepycre.github.io/_Lib/ComponentsApi/)
 - [HistoryApi](https://creepycre.github.io/_Lib/HistoryApi/)
-- [InputMapApi](https://creepycre.github.io/_Lib/InputMapApi)
-- [ModConfigApi](https://creepycre.github.io/_Lib/ModConfigApi)
-- [ModSignalingApi](https://creepycre.github.io/_Lib/ModSignalingApi)
-- [PreferencesWindowApi](https://creepycre.github.io/_Lib/PreferencesWindowApi)
-- [Util](https://creepycre.github.io/_Lib/Util)
+- [InputMapApi](https://creepycre.github.io/_Lib/InputMapApi/)
+- [LayerApi](https://creepycre.github.io/_Lib/LayerApi/)
+- [ModConfigApi](https://creepycre.github.io/_Lib/ModConfigApi/)
+- [ModSignalingApi](https://creepycre.github.io/_Lib/ModSignalingApi/)
+- [PreferencesWindowApi](https://creepycre.github.io/_Lib/PreferencesWindowApi/)
+- [Util](https://creepycre.github.io/_Lib/Util/)
 
 ## Using _Lib
 To be able to access _Lib's Api put the following at the top of your mods `start()` method:
@@ -29,4 +33,4 @@ if not Engine.has_signal("_lib_register_mod"):
 Engine.emit_signal("_lib_register_mod", self)
 ```
 
-After registering your mod with _Lib you will now have an entry `Global.API` available that contains all of the _Lib APIs. For more info on how to use them check out the [wiki](https://creepycre.github.io/_Lib/).
+After registering your mod with _Lib you will now have an entry `Global.API` available that contains all of the _Lib APIs. For more info on how to use them check out the [documentation](https://creepycre.github.io/_Lib/).
