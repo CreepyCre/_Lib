@@ -110,39 +110,39 @@ func _init(mod_signaling_api, history_api, world: Node2D):
     _scene_tree.connect("node_removed", self, "_node_removed")
 
 func register(namespace: String, identifier: String, component_factory, flags: int, lazy: bool = true):
-    var key = ComponentKey.new(self, component_factory, flags)
+    var accessor = ComponentAccessor.new(self, component_factory, flags)
     if not namespace in _components:
         _components[namespace] = {}
     var component_namespace = _components[namespace]
-    component_namespace[identifier] = key
+    component_namespace[identifier] = accessor
     if namespace in _save_data:
         var namespaced_save_data: Dictionary = _save_data[namespace]
         if identifier in namespaced_save_data:
-            _load_component(key, namespaced_save_data[identifier])
+            _load_component(accessor, namespaced_save_data[identifier])
             _save_data[namespace].erase(identifier)
             if (_save_data[namespace].empty()):
                 _save_data.erase(namespace)
     
     if (lazy):
-        return key
+        return accessor
     
-    _non_lazy_components.append(key)
+    _non_lazy_components.append(accessor)
     
     if (flags & FLAG_WITH_NODE_ID):
         for node in _world.NodeLookup.values():
-            if (key.is_applicable(node)):
-                key.get_component(node)
+            if (accessor.is_applicable(node)):
+                accessor.get_component(node)
     if (flags & FLAG_WORLD):
-        key.get_component(_world)
+        accessor.get_component(_world)
     if (flags & FLAG_LEVEL):
         for level in _world.AllLevels:
-            key.get_component(level)
+            accessor.get_component(level)
     if (flags & FLAG_MATERIAL):
         for level in _world.AllLevels:
             for layer in level.MaterialMeshes.get_children():
                 for material_mesh in layer.get_children():
-                    key.get_component(material_mesh)
-    return key
+                    accessor.get_component(material_mesh)
+    return accessor
 
 func node_type(node: Node) -> int:
     if (not node.is_inside_tree()):
@@ -210,7 +210,7 @@ func _delete_hackbox():
             _world.DeleteNodeByID(text.get_meta("node_id"))
             return
 
-func _load_component(component_key, save_data: Array):
+func _load_component(component_accessor, save_data: Array):
     for entry in save_data:
         var _node_type: int = entry["type"]
         match _node_type:
@@ -218,16 +218,16 @@ func _load_component(component_key, save_data: Array):
                 var node_id: int = entry["node_id"]
                 if (node_id in _world.NodeLookup):
                     var node: Node = _world.NodeLookup[node_id]
-                    if (node_type(node) == _node_type and bool((1 << _node_type) & component_key._flags)):
-                        component_key._deserialize(node, entry["data"])
+                    if (node_type(node) == _node_type and bool((1 << _node_type) & component_accessor._flags)):
+                        component_accessor._deserialize(node, entry["data"])
             TYPE_WORLD:
-                if (FLAG_WORLD & component_key._flags):
-                    component_key._deserialize(_world, entry["data"])
+                if (FLAG_WORLD & component_accessor._flags):
+                    component_accessor._deserialize(_world, entry["data"])
             TYPE_LEVEL:
-                if (FLAG_LEVEL & component_key._flags):
+                if (FLAG_LEVEL & component_accessor._flags):
                     var level: Node2D = _world.GetLevelByID(entry["level"])
                     if (level != null):
-                        component_key._deserialize(level, entry["data"])
+                        component_accessor._deserialize(level, entry["data"])
             TYPE_MATERIAL:
                 var level: Node2D = _world.GetLevelByID(entry["level"])
                 var layer: int = entry["layer"]
@@ -242,7 +242,7 @@ func _load_component(component_key, save_data: Array):
                             for material_mesh in material_layer.get_children():
                                 if (material_mesh.TileTexture.resource_path == texture):
                                     done = true
-                                    component_key._deserialize(material_mesh, entry["data"])
+                                    component_accessor._deserialize(material_mesh, entry["data"])
                                     break
 
 func _node_added(node: Node):
@@ -482,7 +482,7 @@ class InstancedComponentsApi:
             for callable_dict in get_signal_connection_list(signal_name):
                 disconnect(signal_name, callable_dict.target, callable_dict.method)
 
-class ComponentKey:
+class ComponentAccessor:
     var _components_api
     var _component_script
     var _flags: int
