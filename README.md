@@ -2,7 +2,7 @@
 _Lib<br>
 
 <a href="https://github.com/CreepyCre/_Lib"><img src="https://img.shields.io/badge/dynamic/json?color=informational&label=version&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2FCreepyCre%2F_Lib%2Fmaster%2F_Lib%2Fscripts%2Ftools%2F_Lib.ddmod%3Fcallback%3D%3F" alt="Version"></a>
-<a href="https://dungeondraft.net/"><img src="https://img.shields.io/badge/Dungeondraft-1.1.0.0%20Beta-blueviolet" alt="Dungeondraft version"></a>
+<a href="https://dungeondraft.net/"><img src="https://img.shields.io/badge/Dungeondraft-1.1.0.5%20Pudgy%20Phoenix-blueviolet" alt="Dungeondraft version"></a>
 <a href="https://github.com/CreepyCre/_Lib/blob/master/LICENSE"><img src="https://img.shields.io/github/license/CreepyCre/_Lib?color=900c3f" alt="License"></a>
 </h1>
 
