@@ -2,7 +2,7 @@
 _: _
 ---
 root: ..
-methods:    ComponentKey register(identifier: String, component_script, flags: int, lazy: bool = true)
+methods:    ComponentAccessor register(identifier: String, component_script, flags: int, lazy: bool = true)
             ComponentsApi.NodeType node_type(node: Node)
 enums:      NodeType {TYPE_WORLD, TYPE_LEVEL, TYPE_PATTERN, TYPE_WALL, TYPE_PORTAL_FREE, TYPE_PORTAL_WALL, TYPE_MATERIAL, TYPE_PATH, TYPE_PROP, TYPE_LIGHT, TYPE_ROOF, TYPE_TEXT}
 constants:  FLAG_ALL:             int = 0b111111111111
@@ -117,7 +117,7 @@ var prop_flag = 1 << TYPE_PROP
 :method:anchor:`register`: <br>
 <span class="indent">
 Registers a new component with :param:`identifier` as its unique identifier. :param:`component_factory` may be either the :link:`GDScript` of a :link:`Component` or a :link:`ComponentFactory`. It will be used to instantiate and deserialize the :link:`Component` :param:`flags` is any combination of node type flags to determine which types of nodes the component is applicable to. Setting :param:`lazy` to false will cause the component to be automatically attached to any node shortly after it enters the scene.
-The returned :link:`ComponentKey` can be used to access the :link:`Component` on applicable nodes.
+The returned :link:`ComponentAccessor` can be used to access the :link:`Component` on applicable nodes.
 </span>
 
 :method:anchor:`node_type`: <br>

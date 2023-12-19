@@ -21,7 +21,7 @@ class ClassUrlProvider:
             "ComponentsApi",
             "ComponentsApi/Component",
             "ComponentsApi/ComponentFactory",
-            "ComponentsApi/ComponentKey",
+            "ComponentsApi/ComponentAccessor",
             "Logger",
             "Logger/ClassLogger",
         )

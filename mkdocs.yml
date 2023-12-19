@@ -32,7 +32,7 @@ nav:
     - ComponentsApi: ComponentsApi/index.md
     - Component: ComponentsApi/Component.md
     - ComponentFactory: ComponentsApi/ComponentFactory.md
-    - ComponentKey: ComponentsApi/ComponentKey.md
+    - ComponentAccessor: ComponentsApi/ComponentAccessor.md
   - HistoryApi:
     - HistoryApi: HistoryApi/index.md
     - Record: HistoryApi/Record.md
