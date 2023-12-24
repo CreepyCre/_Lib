@@ -1,7 +1,7 @@
 {
 	"name": "_Lib",
 	"unique_id": "CreepyCre._Lib",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"author": "CreepyCre",
 	"description": "Implementing API seconds before Papa Sploot implements it himself in the next Dungeondraft version.",
 	"dd_version": "1.1.0.5"
