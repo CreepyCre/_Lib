@@ -536,7 +536,10 @@ class ComponentAccessor:
         return entry
 
     func _deserialize(node: Node, data):
-        _tracked_nodes[node] = _component_script.deserialize(node, data)
+        if (_component_script.has_method("deserialize")):
+            _tracked_nodes[node] = _component_script.deserialize(node, data)
+        else:
+            _tracked_nodes[node] = _component_script.new(node, data)
 
     func _node_removed(node: Node):
         if has_component(node):
