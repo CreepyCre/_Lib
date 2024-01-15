@@ -220,7 +220,11 @@ func _unload():
     _menu_align.remove_child(_replacement_redo_button)
 
     # clear history
+    for entry in history:
+        entry.free()
     history.clear()
+    for entry in redo_history:
+        entry.free()
     redo_history.clear()
 
     # disconnect all signals
