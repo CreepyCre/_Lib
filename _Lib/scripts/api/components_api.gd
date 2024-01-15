@@ -1,6 +1,8 @@
 class_name ComponentsApi
 
-const _TEXT_BOX_POS: Vector2 = Vector2(1.93729e296, 1.08346e301)
+const _BACKWARDS_COMPAT_TEXT_BOX_POS: Vector2 = Vector2(1.93729e296, 1.08346e301)
+const _TEXT_BOX_POS: Vector2 = Vector2(1.93729e36, 1.08346e37)
+
 
 enum NodeType {
     TYPE_WORLD,
@@ -186,7 +188,7 @@ func _node_path_elements(path: NodePath) -> Array:
 func _hackbox_data() -> Dictionary:
     var texts = _world.AllLevels[0].Texts
     for text in texts.get_children():
-        if (text.rect_position == _TEXT_BOX_POS):
+        if ((text.rect_position == _TEXT_BOX_POS) or (text.rect_position == _BACKWARDS_COMPAT_TEXT_BOX_POS)):
             var result: Dictionary = JSON.parse(text.text).result
             _world.DeleteNodeByID(text.get_meta("node_id"))
             return result
@@ -206,7 +208,7 @@ func _create_hackbox(save_data: Dictionary):
 func _delete_hackbox():
     var texts = _world.AllLevels[0].Texts
     for text in texts.get_children():
-        if (text.rect_position == _TEXT_BOX_POS):
+        if ((text.rect_position == _TEXT_BOX_POS) or (text.rect_position == _BACKWARDS_COMPAT_TEXT_BOX_POS)):
             _world.DeleteNodeByID(text.get_meta("node_id"))
             return
 

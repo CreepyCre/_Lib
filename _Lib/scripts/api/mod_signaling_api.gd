@@ -43,7 +43,7 @@ func _busy_icon_visibility_changed():
             _begun_save = true
             emit_signal("save_begin")
 
-func _update():
+func _update(_delta):
     if (_begun_save and not _infobar.spinBusyIcon):
         _begun_save = false
         emit_signal("save_end")
