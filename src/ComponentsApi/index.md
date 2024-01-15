@@ -116,7 +116,7 @@ var prop_flag = 1 << TYPE_PROP
 
 :method:anchor:`register`: <br>
 <span class="indent">
-Registers a new component with :param:`identifier` as its unique identifier. :param:`component_factory` may be either the :link:`GDScript` of a :link:`Component` or a :link:`ComponentFactory`. It will be used to instantiate and deserialize the :link:`Component` :param:`flags` is any combination of node type flags to determine which types of nodes the component is applicable to. Setting :param:`lazy` to false will cause the component to be automatically attached to any node shortly after it enters the scene.
+Registers a new component with :param:`identifier` as its unique identifier. :param:`component_factory` may be either the :link:`GDScript` of a :link:`Component` or a :link:`ComponentFactory`. It will be used to instantiate and deserialize the :link:`Component`. :param:`flags` is any combination of node type flags to determine which types of nodes the component is applicable to. Setting :param:`lazy` to false will cause the component to be automatically attached to any node shortly after it enters the scene.
 The returned :link:`ComponentAccessor` can be used to access the :link:`Component` on applicable nodes.
 </span>
 

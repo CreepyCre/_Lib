@@ -15,7 +15,7 @@ Represents a record that can be recorded to the :link:`HistoryApi`.
 
 There is no actual Record class, this page simply serves as a blueprint for implementing a record.
 
-A Record represents an entry in the :link:`HistoryApi`. It is required to implement :method:short:`undo` and :method:short:`redo` methods which are supposed to undo/ redo a change to the map. A record may also provide a :method:short:`record_type` method that returns a key for differentiating different record types. The records script is used as its record type if no other type is provided. Should a specific record type be added to the history more times than :method:short:`max_count` allows, then the oldest record of that type (and all other older records) will be dropped. Should a record implement a :method:short:`dropped` method it will be called when it is dropped, where :param:``
+A Record represents an entry in the :link:`HistoryApi`. It is required to implement :method:short:`undo` and :method:short:`redo` methods which are supposed to undo/ redo a change to the map. A record may also provide a :method:short:`record_type` method that returns a key for differentiating different record types. The records script is used as its record type if no other type is provided. Should a specific record type be added to the history more times than :method:short:`max_count` allows, then the oldest record of that type (and all other older records) will be dropped. Should a record implement a :method:short:`dropped` method it will be called when it is dropped, where :param:`type` denotes whether the record was dropped from the undo or redo history.
 
 ## Methods
 
