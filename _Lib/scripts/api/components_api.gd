@@ -124,12 +124,12 @@ func register(namespace: String, identifier: String, component_factory, flags: i
             _save_data[namespace].erase(identifier)
             if (_save_data[namespace].empty()):
                 _save_data.erase(namespace)
-    
+
     if (lazy):
         return accessor
-    
+
     _non_lazy_components.append(accessor)
-    
+
     if (flags & FLAG_WITH_NODE_ID):
         for node in _world.NodeLookup.values():
             if (accessor.is_applicable(node)):
@@ -299,7 +299,7 @@ func _node_added(node: Node):
         if (component.is_applicable(node)):
             component.get_component(node)
     emit_signal(TYPE_TO_SIGNAL[_node_type], node)
-        
+
 func _node_removed(node: Node):
     var _node_type: int = node_type(node)
     if (_node_type < 0):
@@ -356,7 +356,7 @@ func _write_type(node: Node):
 func _recorded(record):
     _processing_record = true
     _queued_history_record[0] = record
-    
+
 func _save_begin():
     var data: Dictionary = {}
     for namespace in _components:
@@ -470,10 +470,10 @@ class InstancedComponentsApi:
 
     func node_type(node: Node) -> int:
         return _components_api.node_type(node)
-    
+
     func _get(property):
         return _components_api.get(property)
-    
+
     func _call_signal(node: Node2D, sig: String):
         emit_signal(sig, node)
 
@@ -494,13 +494,13 @@ class ComponentAccessor:
         _components_api = components_api
         _component_script = component_script
         _flags = flags
-    
+
     func is_applicable(node: Node) -> bool:
         return bool((1 << _components_api.node_type(node)) & _flags)
-    
+
     func has_component(node: Node) -> bool:
         return node in _tracked_nodes
-    
+
     func get_component(node: Node):
         if (not has_component(node)):
             if (_component_script.has_method("create")):
@@ -508,7 +508,7 @@ class ComponentAccessor:
             else:
                 _tracked_nodes[node] = _component_script.new(node)
         return _tracked_nodes[node]
-    
+
     func detach_component(node: Node):
         if (not has_component(node)):
             return
@@ -528,7 +528,7 @@ class ComponentAccessor:
                 continue
             out.append(entry)
         return out
-    
+
     func _serialize_node(node: Node):
         var component = _tracked_nodes[node]
         var entry = _components_api._write_type(node)
@@ -538,10 +538,7 @@ class ComponentAccessor:
         return entry
 
     func _deserialize(node: Node, data):
-        if (_component_script.has_method("deserialize")):
-            _tracked_nodes[node] = _component_script.deserialize(node, data)
-        else:
-            _tracked_nodes[node] = _component_script.new(node, data)
+        _tracked_nodes[node] = _component_script.deserialize(node, data)
 
     func _node_removed(node: Node):
         if has_component(node):

@@ -29,7 +29,7 @@ func add_layers(layers: Dictionary, level: Node2D = null) -> void:
     _global_layers_component.add_layers(layers)
     for level in _world.AllLevels:
         _add_layers(layers, level)
-    
+
 
 func _add_layers(layers: Dictionary, level: Node2D) -> void:
     var current_layers: Dictionary = get_layers(level)
@@ -149,19 +149,22 @@ class GlobalLayersComponent:
     func _init(level: Node2D, layers: Dictionary = {}):
         for layer in layers:
             _layers[int(layer)] = layers[layer]
-    
+
     func serialize(_node: Node) -> Dictionary:
         return _layers
-    
+
+    static func deserialize(node: Node, data: Dictionary) -> GlobalLayersComponent:
+        return GlobalLayersComponent.new(node, data)
+
     func add_layers(layers: Dictionary) -> void:
         for layer in layers:
             if (not layer in _layers):
                 _layers[layer] = layers[layer]
-    
+
     func remove_layers(layers: Array) -> void:
         for layer in layers:
             if (layer in _layers):
                 _layers.erase(layer)
-    
+
     func get_layers() -> Dictionary:
         return _layers
