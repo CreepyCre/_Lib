@@ -131,8 +131,9 @@ func get_user_layers(level: Node2D) -> Dictionary:
     return Dictionary(level.SaveLayers())
 
 func _level_added(level: Node2D):
-    level.CreateDefaultLockedLayers()
-    level.LoadLayers(_global_layers_component.get_layers())
+    if (level.Data == null):
+        level.CreateDefaultLockedLayers()
+        level.LoadLayers(_global_layers_component.get_layers())
 
 class GlobalLayersComponent:
     var _layers: Dictionary = {
