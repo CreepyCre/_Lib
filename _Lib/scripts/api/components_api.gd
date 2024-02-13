@@ -486,13 +486,13 @@ class InstancedComponentsApi:
 
 class ComponentAccessor:
     var _components_api
-    var _component_script
+    var _component_factory
     var _flags: int
     var _tracked_nodes: Dictionary
 
-    func _init(components_api, component_script, flags: int):
+    func _init(components_api, component_factory, flags: int):
         _components_api = components_api
-        _component_script = component_script
+        _component_factory = ComponentFactoryWrapper.new(component_factory)
         _flags = flags
     
     func is_applicable(node: Node) -> bool:
@@ -503,10 +503,7 @@ class ComponentAccessor:
     
     func get_component(node: Node):
         if (not has_component(node)):
-            if (_component_script.has_method("create")):
-                _tracked_nodes[node] = _component_script.create(node)
-            else:
-                _tracked_nodes[node] = _component_script.new(node)
+            _tracked_nodes[node] = _component_factory.create(node)
         return _tracked_nodes[node]
     
     func detach_component(node: Node):
@@ -538,10 +535,7 @@ class ComponentAccessor:
         return entry
 
     func _deserialize(node: Node, data):
-        if (_component_script.has_method("deserialize")):
-            _tracked_nodes[node] = _component_script.deserialize(node, data)
-        else:
-            _tracked_nodes[node] = _component_script.new(node, data)
+        _tracked_nodes[node] = _component_factory.deserialize(node, data)
 
     func _node_removed(node: Node):
         if has_component(node):
@@ -551,3 +545,36 @@ class ComponentAccessor:
             _tracked_nodes.erase(node)
             return [true, data]
         return [false]
+
+class ComponentFactoryWrapper:
+    var _factory: Object
+    var _create: FuncRef
+    var _deserialize: FuncRef
+
+    func _init(factory):
+        self._factory = factory
+
+        if (_has_method(factory, "create")):
+            self._create = funcref(factory, "create")
+        else:
+            self._create = funcref(factory, "new")
+        
+        if (_has_method(factory, "deserialize")):
+            self._deserialize = funcref(factory, "deserialize")
+        else:
+            self._deserialize = funcref(factory, "new")
+    
+    func create(node: Node):
+        return self._create.call_func(node)
+    
+    func deserialize(node: Node, data):
+        return self._deserialize.call_func(node, data)
+
+    # can't differentiate between static & non static methods on GDScript objects
+    static func _has_method(obj: Object, method_name: String):
+        if (obj is GDScript):
+            for method_dict in obj.get_script_method_list():
+                if (method_dict["name"] == method_name):
+                    return true
+        return obj.has_method(method_name)
+    
