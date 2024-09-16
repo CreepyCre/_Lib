@@ -152,28 +152,31 @@ class InstancedLogger:
     func with_formatter(prefix_formatter: FuncRef = _logger.PREFIX_FORMATTER) -> InstancedLogger:
         return InstancedLogger.new(_logger, _mod_name, prefix_formatter)
     
-    func debug(clazz, line, message = null, args = null):
+    func debug(clazz, line = null, message = null, args = null):
         _log(_prefix_formatter, DEBUG, clazz, line, message, args)
 
-    func info(clazz, line, message = null, args = null):
+    func info(clazz, line = null, message = null, args = null):
         _log(_prefix_formatter, INFO, clazz, line, message, args)
         
-    func warn(clazz, line, message = null, args = null):
+    func warn(clazz, line = null, message = null, args = null):
         _log(_prefix_formatter, WARN, clazz, line, message, args)
         
-    func error(clazz, line, message = null, args = null):
+    func error(clazz, line = null, message = null, args = null):
         _log(_prefix_formatter, ERROR, clazz, line, message, args)
     
-    func fatal(clazz, line, message = null, args = null):
+    func fatal(clazz, line = null, message = null, args = null):
         _log(_prefix_formatter, FATAL, clazz, line, message, args)
     
-    func _log(prefix_formatter: FuncRef, level: int, clazz, line, message = null, args = null):
+    func _log(prefix_formatter: FuncRef, level: int, clazz, line = null, message = null, args = null):
         if (args == null):
             if (message == null):
                 if (line is String): # parameters 1 place to the left & args missing
                     _logger._log(prefix_formatter, level, _mod_name, clazz, -1, line)
-                else: # parameters 2 places to the left
-                    _logger._log(prefix_formatter, level, _mod_name, null, -1, clazz, line)
+                else:
+                    if (line == null): # only message provided, contained in clazz
+                        _logger._log(prefix_formatter, level, _mod_name, null, -1, clazz)
+                    else: # parameters 2 places to the left
+                        _logger._log(prefix_formatter, level, _mod_name, null, -1, clazz, line)
             else: 
                 if (message is String): # args missing
                     _logger._log(prefix_formatter, level, _mod_name, clazz, line, message)
