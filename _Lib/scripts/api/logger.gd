@@ -186,10 +186,10 @@ class InstancedLogger:
             _logger._log(prefix_formatter, level, _mod_name, clazz, line, message, args)
     
     func for_class(clazz) -> ClassInstancedLogger:
-        if (clazz is Reference):
-            clazz = clazz.get_script()
         if (clazz is GDScript):
             clazz = clazz.CLASS_NAME
+        if (clazz is Reference):
+            clazz = clazz.get_script().CLASS_NAME
         if clazz in _clazz_loggers:
             return _clazz_loggers[clazz]
         var class_instanced_logger = ClassInstancedLogger.new(self, clazz)
