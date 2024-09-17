@@ -1,7 +1,13 @@
 class_name AccessorApi
 
+const CLASS_NAME = "AccessorApi"
+var LOGGER: Object
+
 var _visitor_indices: Dictionary = {}
 var _config: ConfigFile
+
+func _init(logger: Object):
+    LOGGER = logger.for_class(self)
 
 func accept(visitor: Object) -> Object:
     if (not visitor in _visitor_indices):
@@ -30,6 +36,7 @@ func _check_track(visitor: Object, id) -> Object:
 
 func config() -> ConfigFile:
     if (_config == null):
+        LOGGER.info("Aquiring ConfigFile object.")
         _config = accept(ConfigFileVisitor.new()).result()
     return _config
 

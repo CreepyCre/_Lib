@@ -1,5 +1,8 @@
 class_name ModRegistry
 
+const CLASS_NAME = "ModRegistry"
+var LOGGER: Object
+
 var _api_api
 var _path_to_ddmod_json = {}
 var _unique_id_to_mod_info = {}
@@ -7,7 +10,8 @@ var _registered_mods = []
 
 signal registered(mod_info)
 
-func _init(api_api, active_mods):
+func _init(logger: Object, api_api, active_mods):
+    LOGGER = logger.for_class(self)
     _api_api = api_api
 
     # create and connect to mod registration signal

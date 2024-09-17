@@ -1,12 +1,16 @@
 class_name InputMapApi
 ## https://creepycre.github.io/_Lib/InputMapApi/
 
+const CLASS_NAME = "InputMapApi"
+var LOGGER: Object
+
 var _agents: Dictionary = {}
 var _event_emitters: Dictionary = {}
 var _master_node: Node
 var _mod_actions: Dictionary = {}
 
-func _init(master_node: Node):
+func _init(logger: Object, master_node: Node):
+    LOGGER = logger.for_class(self)
     _master_node = master_node
     # create ActionConfigSyncAgents for vanilla InputMap actions
     for action in InputMap.get_actions(): # action: String

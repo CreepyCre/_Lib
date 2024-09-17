@@ -64,7 +64,7 @@ var MILLIS_PREFIX_FORMATTER: FuncRef = funcref(self, "build_prefix_millis")
 
 # end goal is:
 # [hh:mm:ss] [LEVEL] [Mod Name] [ModClass:<optional line number>]: message
-func _init():
+func _init(_ignored):
     if (File.new().file_exists("user://_Lib.ini")):
         var err_code: int = _config.load("user://_Lib.ini")
         if (err_code):

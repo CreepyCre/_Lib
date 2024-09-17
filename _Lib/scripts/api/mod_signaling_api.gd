@@ -1,6 +1,8 @@
 class_name ModSignalingAPI
 
-var debug_class_name: String = "ModSignalingAPI"
+const CLASS_NAME: String = "ModSignalingAPI"
+var LOGGER: Object
+
 var _deferred_connections: Dictionary = {}
 
 var _infobar
@@ -15,7 +17,8 @@ signal save_begin()
 ## Emitted when map saving ends
 signal save_end()
 
-func _init(infobar: PanelContainer):
+func _init(logger: Object, infobar: PanelContainer):
+    LOGGER = logger.for_class(self)
     _infobar = infobar
     infobar.busyIcon.connect("visibility_changed", self, "_busy_icon_visibility_changed")
 

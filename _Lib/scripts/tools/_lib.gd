@@ -1,6 +1,7 @@
 var script_class = "tool"
 
 const CLASS_NAME = "_LibMain"
+var LOGGER = null
 
 var api
 var loader
@@ -41,18 +42,32 @@ func _post_init(script_instance: Reference = self):
     # see _loading_box_visibility_changed()
     _master.get_node(_master.loadingBoxPath).connect("visibility_changed", self, "_loading_box_visibility_changed")
 
+    var general_logger = init_api("logger")
+    LOGGER = general_logger.InstancedLogger.new(general_logger, "_Lib")
+    LOGGER.info("Creating ApiApi")
     api = init_api("api_api")
-    api.register("Logger", init_api("logger"))
+    LOGGER.info("Registering Logger. Who came first?")
+    api.register("Logger", general_logger)
+    LOGGER.info("Registering ModRegistry")
     api.register("ModRegistry", init_api("mod_registry", api, _script.GetActiveMods()))
     api.ModRegistry.register(self, _global)
+    LOGGER.info("Registering AccessorApi")
     api.register("AccessorApi", init_api("accessor_api"))
+    LOGGER.info("Registering Util")
     api.register("Util", init_api("util", loader_script))
+    LOGGER.info("Registering ModSignalingApi")
     api.register("ModSignalingApi", init_api("mod_signaling_api", _global.Editor.Infobar))
+    LOGGER.info("Registering InputMapApi")
     api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
+    LOGGER.info("Registering PreferencesWindowApi")
     api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
+    LOGGER.info("Registering ModConfigApi")
     api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods()))
+    LOGGER.info("Registering HistoryApi")
     api.register("HistoryApi", init_api("history_api", _global.Editor, api.AccessorApi.config()))
+    LOGGER.info("Registering ComponentsApi")
     api.register("ComponentsApi", init_api("components_api", api.ModSignalingApi, api.HistoryApi, _global.World))
+    LOGGER.info("Registering LayerApi")
     api.register("LayerApi", init_api("layer_api", _global.API.ComponentsApi, _global.World))
 
     # set up _Lib config
@@ -85,27 +100,27 @@ func _loading_box_visibility_changed():
 # varargs hack
 func init_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):
     if (arg9 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
     elif (arg8 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
     elif (arg7 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
     elif (arg6 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
     elif (arg5 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4, arg5)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5)
     elif (arg4 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3, arg4)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4)
     elif (arg3 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2, arg3)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3)
     elif (arg2 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1, arg2)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2)
     elif (arg1 != null):
-        return loader.load_script("api/" + api_name).new(arg0, arg1)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1)
     elif (arg0 != null):
-        return loader.load_script("api/" + api_name).new(arg0)
+        return loader.load_script("api/" + api_name).new(LOGGER, arg0)
     else:
-        return loader.load_script("api/" + api_name).new()
+        return loader.load_script("api/" + api_name).new(LOGGER)
 
 func _unload():
     # disconnect our unload detector

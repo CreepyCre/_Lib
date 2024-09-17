@@ -1,10 +1,15 @@
 class_name ApiApi
 
-var debug_class_name: String = "ApiApi"
+const CLASS_NAME = "ApiApi"
+var LOGGER: Object
+
 var apis: Dictionary = {}
 var api_api_instances: Array = []
 
 signal api_registered(api_id, api)
+
+func _init(logger: Object):
+    LOGGER = logger.for_class(self)
 
 ## Registers a new API and emits [signal api_registered]
 func register(api_id: String, api: Object):
@@ -45,7 +50,7 @@ func _unload():
 
 ## creates instanced ApiApi
 func _instance(mod_info):
-    var api_api_instance = InstancedApiApi.new(self, mod_info)
+    var api_api_instance = InstancedApiApi.new(LOGGER, self, mod_info)
     api_api_instances.append(api_api_instance)
     # forward signal to InstancedApiApi
     connect("api_registered", api_api_instance, "_emit_api_registered")
@@ -53,11 +58,16 @@ func _instance(mod_info):
 
 # Wrapper for ApiApi that supplies some default parameters
 class InstancedApiApi:
+
+    const CLASS_NAME = "InstancedApiApi"
+    var LOGGER: Object
+
     var _mod_info
     var _api_api
     var _instanced_apis: Dictionary = {}
 
-    func _init(api_api, mod_info):
+    func _init(logger: Object, api_api, mod_info):
+        LOGGER = logger.for_class(self)
         _mod_info = mod_info
         _api_api = api_api
     
@@ -65,6 +75,7 @@ class InstancedApiApi:
 
     ## Registers a new API and emits [signal api_registered]
     func register(api_id: String, api: Object):
+        LOGGER.info("Registering %s from %s", [api_id, _mod_info.mod_meta["name"]])
         _api_api.register(api_id, api)
     
     func _get(property):

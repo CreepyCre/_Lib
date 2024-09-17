@@ -1,5 +1,8 @@
 class_name PreferencesWindowApi
 
+const CLASS_NAME = "PreferencesWindowApi"
+var LOGGER: Object
+
 var _preferences: WindowDialog
 var _v_align: VBoxContainer
 var _category_button_h_align: HBoxContainer
@@ -21,7 +24,8 @@ signal back_pressed()
 signal apply_pressed()
 signal about_to_show()
 
-func _init(_pref: WindowDialog):
+func _init(logger: Object, _pref: WindowDialog):
+    LOGGER = logger.for_class(self)
     # get all them nodes
     _preferences = _pref
     _v_align = _preferences.get_node("Margins/VAlign")

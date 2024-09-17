@@ -1,5 +1,8 @@
 class_name LayerApi
 
+const CLASS_NAME = "LayerApi"
+var LOGGER: Object
+
 const LOCKED_LAYERS = {
     -500: "Terrain",
     -300: "Caves",
@@ -13,7 +16,8 @@ const LOCKED_LAYERS = {
 var _world: Node2D
 var _global_layers_component: GlobalLayersComponent
 
-func _init(components_api, world):
+func _init(logger: Object, components_api, world):
+    LOGGER = logger.for_class(self)
     _world = world
     _global_layers_component = components_api.register("global_layers", GlobalLayersComponent, components_api.FLAG_WORLD).get_component(world)
 

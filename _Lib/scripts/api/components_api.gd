@@ -1,5 +1,8 @@
 class_name ComponentsApi
 
+const CLASS_NAME = "ComponentsApi"
+var LOGGER: Object
+
 const _BACKWARDS_COMPAT_TEXT_BOX_POS: Vector2 = Vector2(1.93729e296, 1.08346e301)
 const _TEXT_BOX_POS: Vector2 = Vector2(1.93729e36, 1.08346e37)
 
@@ -94,7 +97,8 @@ var _processing_record: bool = false
 var _queued_history_record = [null, null]
 
 
-func _init(mod_signaling_api, history_api, world: Node2D):
+func _init(logger: Object, mod_signaling_api, history_api, world: Node2D):
+    LOGGER = logger.for_class(self)
     _world = world
 
     mod_signaling_api.connect("save_begin", self, "_save_begin")

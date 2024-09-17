@@ -1,6 +1,9 @@
 class_name Util
 ## https://creepycre.github.io/_Lib/Util/
 
+const CLASS_NAME = "Util"
+var LOGGER: Object
+
 ## see https://docs.python.org/3/library/string.html#format-string-syntax
 const REPLACEMENT_FIELD_PATTERN = "(?<replacement_field>{(?<field_name>(?<arg_name>(?<arg_name_identifier>[a-zA-Z_][0-9a-zA-Z_]*)|(?<arg_name_index>0|[1-9][0-9]*))(?<field>(\\.[a-zA-Z_][0-9a-zA-Z_]*|\\[[^\\[\\]]+\\])*))?(:(?<format_spec>((?<fill>[^{}])?(?<align>[<>=^]))?(?<sign>\\[ +-])?(?<z>z)?(?<hashtag>#)?(?<zero>0)?(?<width>[1-9][0-9]*)?(?<grouping_option>[_,])?(\\.(?<precision>0|[1-9][0-9]*))?(?<type>[bcdeEfFgGnosxX%])?))?})"
 # with conversion
@@ -12,7 +15,8 @@ var _field_regex: RegEx = RegEx.new()
 
 var _loader_script: GDScript
 
-func _init(loader_script: GDScript):
+func _init(logger: Object, loader_script: GDScript):
+    LOGGER = logger.for_class(self)
     _loader_script = loader_script
 
     _regex.compile(REPLACEMENT_FIELD_PATTERN)

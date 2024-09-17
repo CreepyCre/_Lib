@@ -1,5 +1,8 @@
 class_name HistoryApi
 
+const CLASS_NAME = "HistoryApi"
+var LOGGER: Object
+
 enum HistoryType {
     UNDO,
     REDO
@@ -35,7 +38,8 @@ signal redo_begin(history_record)
 signal redo_end(history_record)
 
 # editor is Global.Editor
-func _init(editor: CanvasLayer, config: ConfigFile):
+func _init(logger: Object, editor: CanvasLayer, config: ConfigFile):
+    LOGGER = logger.for_class(self)
     _config = config
     # we can reuse this one to undo/ redo the vanilla DungeonDraft history entries
     _vanilla_history_record = VanillaHistoryRecord.new(editor)

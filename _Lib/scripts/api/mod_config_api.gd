@@ -1,6 +1,9 @@
 class_name ModConfigApi
 ## https://creepycre.github.io/_Lib/ModConfigApi/
 
+const CLASS_NAME = "ModConfigApi"
+var LOGGER: Object
+
 var _preferences_window_api
 var _input_map_api
 var _config_builder_script
@@ -27,7 +30,8 @@ var _pressed_item: TreeItem = null
 var _agents: Array = []
 var _busy: bool = false
 
-func _init(preferences_window_api, input_map_api, loader, active_mods: Array):
+func _init(logger: Object, preferences_window_api, input_map_api, loader, active_mods: Array):
+    LOGGER = logger.for_class(self)
     # grab some of the vanilla icons
     var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
     _edit_icon = theme.get_icon("Edit", "EditorIcons")
