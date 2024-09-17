@@ -25,6 +25,29 @@ func _init(logger: Object, loader_script: GDScript):
 func create_loading_helper(root: String) -> Reference:
     return _loader_script.new(root)
 
+func copy_dir(from: String, to: String):
+    var dir: Directory = Directory.new()
+    var code = dir.open(from)
+    if code != OK:
+        LOGGER.error("Could not access \"%s\"! Error code: %d", [from, code])
+        return
+    if not dir.dir_exists(to):
+        code = dir.make_dir(to)
+        if code != OK:
+            LOGGER.error("Could not create directory \"%s\"! Error code: %d", [to, code])
+            return
+    dir.list_dir_begin(true)
+    var file_name = dir.get_next()
+    while file_name != "":
+        if dir.current_is_dir():
+            copy_dir(from + "/" + file_name, to + "/" + file_name)
+        else:
+            code = dir.copy(from + "/" + file_name, to + "/" + file_name)
+            if code != OK:
+                LOGGER.error("Could not copy \"%s\" to \"%s\"! Error code: %d", [from + "/" + file_name, to + "/" + file_name, code])
+        file_name = dir.get_next()
+    
+
 func pythonic_format(format_string: String, args: Dictionary) -> String:
     var results: Array = _regex.search_all(format_string)
     for index in results.size():

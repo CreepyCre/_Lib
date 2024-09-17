@@ -6,6 +6,8 @@ var LOGGER: Object
 
 var _preferences_window_api
 var _input_map_api
+var _copy_dir_func: FuncRef
+
 var _config_builder_script
 var _mod_config_scene
 var _details_nodes: Array = []
@@ -30,7 +32,7 @@ var _pressed_item: TreeItem = null
 var _agents: Array = []
 var _busy: bool = false
 
-func _init(logger: Object, preferences_window_api, input_map_api, loader, active_mods: Array):
+func _init(logger: Object, preferences_window_api, input_map_api, loader, active_mods: Array, copy_dir_func: FuncRef):
     LOGGER = logger.for_class(self)
     # grab some of the vanilla icons
     var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
@@ -40,6 +42,7 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
 
     _preferences_window_api = preferences_window_api
     _input_map_api = input_map_api
+    _copy_dir_func = copy_dir_func
 
     # load scripts and resources
     _config_builder_script = loader.load_script("api/config/config_builder")
@@ -424,14 +427,19 @@ func _unload():
 
 ## creates instanced ModConfigApi
 func _instance(mod_info):
-    return InstancedModConfigApi.new(self, mod_info)
+    return InstancedModConfigApi.new(LOGGER, self, mod_info)
 
 
 class InstancedModConfigApi:
+
+    const CLASS_NAME = "InstancedModConfigApi"
+    var LOGGER: Object
+
     var _mod_config_api
     var _mod_info
 
-    func _init(mod_config_api, mod_info):
+    func _init(logger: Object, mod_config_api, mod_info):
+        LOGGER = logger.for_class(self)
         _mod_config_api = mod_config_api
         _mod_info = mod_info
     
@@ -441,4 +449,40 @@ class InstancedModConfigApi:
             return _mod_config_api.create_config(mod_id, title, config_file)
         
         return _mod_config_api.create_config(config_file, title, mod_id)
+
+    func get_or_create_path(path = "user://mod_config/" + _mod_info.mod_meta["unique_id"].to_lower().replace(" ", "").replace(".", "_"), default = null):
+        if path == null:
+            path = "user://mod_config/" + _mod_info.mod_meta["unique_id"].to_lower().replace(" ", "").replace(".", "_")
+        if path.is_rel_path():
+            path = "user://mod_config/" + _mod_info.mod_meta["unique_id"].to_lower().replace(" ", "").replace(".", "_") + "/" + path
+        elif not path.is_abs_path(): # if the provided path is not even a path, just return the default one
+            path = "user://mod_config/" + _mod_info.mod_meta["unique_id"].to_lower().replace(" ", "").replace(".", "_")
         
+        var dir: Directory = Directory.new()
+        if dir.dir_exists(path) or dir.file_exists(path): # path already exists
+            return path
+        
+        if default == null: # nothing to copy, assume the target path is a directory
+            dir.make_dir_recursive(path)
+            return path
+        
+        if default.is_rel_path():
+            default = _mod_info.mod.Global.Root + "../../" + default
+        
+        elif not default.is_abs_path():
+            LOGGER.error("default path \"%s\" for \"%s\" is malformed!", [default, _mod_info.mod_meta["name"]])
+            return null # treat null as error
+        
+        var base_dir: String = path.get_base_dir()
+        if not dir.dir_exists(base_dir):
+            dir.make_dir_recursive(base_dir)
+
+        if dir.file_exists(default):
+            dir.copy(default, path)
+        elif dir.dir_exists(default):
+            _mod_config_api._copy_dir_func.call_func(default, path)
+        else:
+            LOGGER.error("default path \"%s\" for \"%s\" does not exist!", [default, _mod_info.mod_meta["name"]])
+            return null # treat null as error
+
+        return path

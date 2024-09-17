@@ -62,7 +62,7 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering PreferencesWindowApi")
     api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
     LOGGER.info("Registering ModConfigApi")
-    api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods()))
+    api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods(), funcref(api.Util, "copy_dir")))
     LOGGER.info("Registering HistoryApi")
     api.register("HistoryApi", init_api("history_api", _global.Editor, api.AccessorApi.config()))
     LOGGER.info("Registering ComponentsApi")
