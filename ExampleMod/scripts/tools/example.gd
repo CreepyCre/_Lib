@@ -80,6 +80,10 @@ func start():
     # We can also use absolute paths instead.
     print(self.Global.API.ModConfigApi.get_or_create_path("exampuru", "example_folder"))
 
+    # running without any inputs will just create and return an appropriate mod config folder:
+    # "user://mod_config/creepycre_examplemod"
+    print(self.Global.API.ModConfigApi.get_or_create_path())
+
     # short example of the PreferencesWindowApi
     var label = Label.new()
     label.text = "TESTO"
