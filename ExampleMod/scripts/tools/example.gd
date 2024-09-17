@@ -75,6 +75,11 @@ func start():
     config.option = 0 # this works
     config.option = "c" # this also works
 
+    # we can set up an entire config file/folder with default files like so. The method returns the absolute path to the file/ folder:
+    # "user://mod_config/creepycre_examplemod/exampuru"
+    # We can also use absolute paths instead.
+    print(self.Global.API.ModConfigApi.get_or_create_path("exampuru", "example_folder"))
+
     # short example of the PreferencesWindowApi
     var label = Label.new()
     label.text = "TESTO"
