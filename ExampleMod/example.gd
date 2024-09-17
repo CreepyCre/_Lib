@@ -10,6 +10,11 @@ func start():
         return
     Engine.emit_signal("_lib_register_mod", self)
     
+    # we can register our own APIs to the ApiApi, so that others can use them as well.
+    # order is important in cross mod compatibility, use [signal api_registered(api_id, api)] if a necessary api is yet to register.
+    self.Global.API.register("SomeApi", SomeApi.new(self.Global.API.Logger))
+    self.Global.API.SomeApi.do_something()
+
     var input_definitions: Dictionary = {
         "Release the Kraken": ["release_kraken", "Ctrl+P", "L"],
         "Some Category":{
@@ -107,7 +112,17 @@ func update(_delta):
     if (Input.is_action_just_released("release_kraken", true)):
         self.Global.API.HistoryApi.record(DummyRecord.new(counter), 10)
         counter = counter + 1
+
+class SomeApi:
+
+    const CLASS_NAME = "SomeApi"
+    var LOGGER: Object
+
+    func _init(logger: Object):
+        LOGGER = logger.for_class(self)
     
+    func do_something():
+        LOGGER.info("SomeApi is doing something!")
 
 class DummyRecord:
     var _num: String
