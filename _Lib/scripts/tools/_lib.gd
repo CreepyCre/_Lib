@@ -143,7 +143,6 @@ func init_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = nu
 # varargs hack
 func set_up_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):
     var snake_case = camel_to_snake_case(api_name)
-    print(instanced_class_loader.load_or_get("api/" + snake_case + ".gd/"))
     if (arg9 != null):
         api.register(api_name, instanced_class_loader.load_or_get("api/" + snake_case + ".gd/").new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
     elif (arg8 != null):
