@@ -9,6 +9,9 @@ func start():
     if (not Engine.has_signal("_lib_register_mod")):
         return
     Engine.emit_signal("_lib_register_mod", self)
+
+    # loading classes via the ClassLoader gives them the super power of imports, see foo.gd and bar.gd
+    self.Global.API.ClassLoader.load_or_get("foo/bar.gd").do_stuff()
     
     # we can register our own APIs to the ApiApi, so that others can use them as well.
     # order is important in cross mod compatibility, use [signal api_registered(api_id, api)] if a necessary api is yet to register.
