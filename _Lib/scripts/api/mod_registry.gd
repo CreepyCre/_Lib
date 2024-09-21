@@ -4,44 +4,21 @@ const CLASS_NAME = "ModRegistry"
 var LOGGER: Object
 
 var _api_api
-var _path_to_ddmod_json = {}
+var _path_to_ddmod_json
 var _unique_id_to_mod_info = {}
 var _registered_mods = []
 
 signal registered(mod_info)
 
-func _init(logger: Object, api_api, active_mods):
+func _init(logger: Object, api_api, path_to_ddmod_json: Dictionary):
     LOGGER = logger.for_class(self)
     _api_api = api_api
+    _path_to_ddmod_json = path_to_ddmod_json
 
     # create and connect to mod registration signal
     if (not Engine.has_signal("_lib_register_mod")):
         Engine.add_user_signal("_lib_register_mod", [{"name": "mod", "type": TYPE_OBJECT}])
     Engine.connect("_lib_register_mod", self, "register")
-
-    # read in some mod directory from DungeonDraft config file
-    var config: ConfigFile = ConfigFile.new()
-    config.load("user://config.ini")
-    var mods_dir: String = config.get_value("Mods", "mods_directory")
-    # get list of .ddmod files
-    var ddmod_files: Array = _get_all_files(mods_dir, "ddmod")
-    
-    var file: File = File.new()
-    for ddmod_file in ddmod_files:
-        # read in .ddmod files as json into dictionary
-        file.open(ddmod_file, File.READ)
-        var ddmod_json: Dictionary = JSON.parse(file.get_as_text()).result
-        file.close()
-
-        # skip mod if not active
-        if (not ddmod_json["unique_id"] in active_mods):
-            continue
-        
-        # add ddmod_json to dictionary with the folder path as key
-        # we can use this later to identify a mod from its root path
-        var folder = ddmod_file.get_base_dir().rstrip("/")
-        _path_to_ddmod_json[folder] = ddmod_json
-        
 
 ## Registers a mod. This is indirectly called when using the Engine signal to register a mod, no clue why you'd want to call this directly.
 func register(mod: Reference, global_instance = null):
@@ -75,31 +52,6 @@ func _unload():
         var signal_name = signal_dict.name
         for callable_dict in get_signal_connection_list(signal_name):
             disconnect(signal_name, callable_dict.target, callable_dict.method)
-            
-# utility method for recursively finding all files with file extension file_ext in path
-static func _get_all_files(path: String, file_ext := "", files := []):
-    var dir = Directory.new()
-
-    if dir.open(path) == OK:
-        dir.list_dir_begin(true, true)
-
-        var file_name = dir.get_next()
-
-        while file_name != "":
-            if dir.current_is_dir():
-                files = _get_all_files(dir.get_current_dir().plus_file(file_name), file_ext, files)
-            else:
-                if file_ext and file_name.get_extension() != file_ext:
-                    file_name = dir.get_next()
-                    continue
-
-                files.append(dir.get_current_dir().plus_file(file_name))
-
-            file_name = dir.get_next()
-    else:
-        print("An error occurred when trying to access %s." % path)
-
-    return files
 
 ## Data class for storing the mod script and the mods ddmod json entries
 class ModInfo:

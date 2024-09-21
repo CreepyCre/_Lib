@@ -1,6 +1,8 @@
 class_name ModConfigApi
 ## https://creepycre.github.io/_Lib/ModConfigApi/
 
+class ConfigBuilder: const import = "api/config/config_builder.gd/"
+
 const CLASS_NAME = "ModConfigApi"
 var LOGGER: Object
 
@@ -8,7 +10,6 @@ var _preferences_window_api
 var _input_map_api
 var _copy_dir_func: FuncRef
 
-var _config_builder_script
 var _mod_config_scene
 var _details_nodes: Array = []
 var _current_details = null
@@ -44,8 +45,7 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
     _input_map_api = input_map_api
     _copy_dir_func = copy_dir_func
 
-    # load scripts and resources
-    _config_builder_script = loader.load_script("api/config/config_builder")
+    # load resources
     var texture_normal: Texture = loader.load_icon("cog_normal.png")
     var texture_disabled: Texture = loader.load_icon("cog_disabled.png")
     
@@ -138,7 +138,7 @@ func create_config(config_file: String, title: String, mod_id: String):
     config_button.set_disabled(false)
     config_button.connect("pressed", self, "_config_button_pressed", [mod_id])
     #create ConfigBuilder and add the configs root node to the mod menu
-    var config_builder = _config_builder_script.config(title, config_file, _mod_config_scene, _input_map_api, _config_builder_script)
+    var config_builder = ConfigBuilder.config(title, config_file, _mod_config_scene, _input_map_api, ConfigBuilder)
     var root: Control = config_builder.get_root()
     _preferences_window_api.connect("apply_pressed", config_builder.get_agent(), "save_cfg")
     _mod_config_panels[mod_id] = root
