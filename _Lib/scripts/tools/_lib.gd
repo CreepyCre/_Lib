@@ -4,7 +4,6 @@ const CLASS_NAME = "_LibMain"
 var LOGGER = null
 
 var api
-var loader
 var instanced_class_loader
 var config
 var _global: Dictionary
@@ -45,48 +44,49 @@ func _post_init(script_instance: Reference = self):
     # read in .ddmod files
     aquire_active_ddmod_files()
 
-    # get a FileLoadingHelper
-    var loader_script = load(_global.Root + "../util/file_loading_helper.gd")
-    loader = loader_script.new(_global.Root + "../../")
-
     var _master = _global.Editor.owner
     # see _loading_box_visibility_changed()
     _master.get_node(_master.loadingBoxPath).connect("visibility_changed", self, "_loading_box_visibility_changed")
 
     uppercase_letter.compile(UPPERCASE_LETTER)
 
-    var general_logger = init_api("logger")
+
+    # create the Logger
+    var general_logger = load(_global.Root + "../api/logger.gd").new()
     LOGGER = general_logger.InstancedLogger.new(general_logger, "_Lib")
-    LOGGER.info("Creating ApiApi")
-    api = init_api("api_api")
+
+    # create the ClassLoader
     LOGGER.info("Initializing ClassLoader")
-    var class_loader = init_api("class_loader", unique_id_to_root)
+    var class_loader = load(_global.Root + "../api/class_loader.gd").new(LOGGER, unique_id_to_root)
     instanced_class_loader = class_loader.InstancedClassLoader.new(class_loader, "CreepyCre._Lib")
+
+    LOGGER.info("Creating ApiApi")
+    api = instanced_class_loader.load_or_get("api/api_api.gd/").new(LOGGER)
+    LOGGER.info("Registering ClassLoader")
     api.register("ClassLoader", class_loader)
     LOGGER.info("Registering Logger. Who came first?")
     api.register("Logger", general_logger)
     LOGGER.info("Registering ModRegistry")
-    api.register("ModRegistry", init_api("mod_registry", api, path_to_ddmod_json))
+    set_up_api("ModRegistry", api, path_to_ddmod_json)
     api.ModRegistry.register(self, _global)
     LOGGER.info("Registering AccessorApi")
-    api.register("AccessorApi", init_api("accessor_api"))
+    set_up_api("AccessorApi")
     LOGGER.info("Registering Util")
-    api.register("Util", init_api("util", loader_script))
+    set_up_api("Util")
     LOGGER.info("Registering ModSignalingApi")
-    api.register("ModSignalingApi", init_api("mod_signaling_api", _global.Editor.Infobar))
+    set_up_api("ModSignalingApi", _global.Editor.Infobar)
     LOGGER.info("Registering InputMapApi")
-    api.register("InputMapApi", init_api("input_map_api", _global.Editor.owner))
+    set_up_api("InputMapApi", _global.Editor.owner)
     LOGGER.info("Registering PreferencesWindowApi")
-    api.register("PreferencesWindowApi", init_api("preferences_window_api", _global.Editor.Windows.Preferences))
+    set_up_api("PreferencesWindowApi", _global.Editor.Windows.Preferences)
     LOGGER.info("Registering ModConfigApi")
-    #api.register("ModConfigApi", init_api("mod_config_api", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods(), funcref(api.Util, "copy_dir")))
-    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, loader, _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
+    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, api.Util.create_loading_helper(_global.Root + "../../"), _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
     LOGGER.info("Registering HistoryApi")
-    api.register("HistoryApi", init_api("history_api", _global.Editor, api.AccessorApi.config()))
+    set_up_api("HistoryApi", _global.Editor, api.AccessorApi.config())
     LOGGER.info("Registering ComponentsApi")
-    api.register("ComponentsApi", init_api("components_api", api.ModSignalingApi, api.HistoryApi, _global.World))
+    set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World)
     LOGGER.info("Registering LayerApi")
-    api.register("LayerApi", init_api("layer_api", _global.API.ComponentsApi, _global.World))
+    set_up_api("LayerApi", _global.API.ComponentsApi, _global.World)
 
     # set up _Lib config
     var builder = _global.API.ModConfigApi.create_config()
@@ -114,31 +114,6 @@ func _loading_box_visibility_changed():
     if not self.Global.Editor.owner.IsLoadingMap:
         return
     _unload()
-
-# varargs hack
-func init_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):
-    if (arg9 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    elif (arg8 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-    elif (arg7 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-    elif (arg6 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    elif (arg5 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4, arg5)
-    elif (arg4 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3, arg4)
-    elif (arg3 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2, arg3)
-    elif (arg2 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1, arg2)
-    elif (arg1 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0, arg1)
-    elif (arg0 != null):
-        return loader.load_script("api/" + api_name).new(LOGGER, arg0)
-    else:
-        return loader.load_script("api/" + api_name).new(LOGGER)
 
 # varargs hack
 func set_up_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):

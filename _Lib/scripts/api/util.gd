@@ -1,6 +1,8 @@
 class_name Util
 ## https://creepycre.github.io/_Lib/Util/
 
+class FileLoadingHelper: const import = "util/file_loading_helper.gd/"
+
 const CLASS_NAME = "Util"
 var LOGGER: Object
 
@@ -13,17 +15,14 @@ const FIELD_PATTERN = "(\\.(?<attribute_name>[a-zA-Z_][0-9a-zA-Z_]*)|\\[(?<eleme
 var _regex: RegEx = RegEx.new()
 var _field_regex: RegEx = RegEx.new()
 
-var _loader_script: GDScript
-
-func _init(logger: Object, loader_script: GDScript):
+func _init(logger):
     LOGGER = logger.for_class(self)
-    _loader_script = loader_script
 
     _regex.compile(REPLACEMENT_FIELD_PATTERN)
     _field_regex.compile(FIELD_PATTERN)
 
 func create_loading_helper(root: String) -> Reference:
-    return _loader_script.new(root)
+    return FileLoadingHelper.new(root)
 
 func copy_dir(from: String, to: String):
     var dir: Directory = Directory.new()
