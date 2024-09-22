@@ -2,6 +2,7 @@ class_name ModConfigApi
 ## https://creepycre.github.io/_Lib/ModConfigApi/
 
 class ConfigBuilder: const import = "api/config/config_builder.gd/"
+class WrappedControlConfigNode: const import = "api/config/config_builder.gd/WrappedControlConfigNode"
 
 const CLASS_NAME = "ModConfigApi"
 var LOGGER: Object
@@ -137,8 +138,15 @@ func create_config(config_file: String, title: String, mod_id: String):
     var config_button = _mod_config_buttons[mod_id]
     config_button.set_disabled(false)
     config_button.connect("pressed", self, "_config_button_pressed", [mod_id])
+    
     #create ConfigBuilder and add the configs root node to the mod menu
-    var config_builder = ConfigBuilder.config(title, config_file, _mod_config_scene, _input_map_api, ConfigBuilder)
+    var mod_config = _mod_config_scene.instance()
+    mod_config.get_node("TitlePanel/Title").text = title
+    var wrapped = [WrappedControlConfigNode][0].new("", mod_config, "ConfigPanel/ScrollContainer/Config")
+    wrapped.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    wrapped.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    var config_builder = [ConfigBuilder][0].new(wrapped, config_file, _input_map_api)
+
     var root: Control = config_builder.get_root()
     _preferences_window_api.connect("apply_pressed", config_builder.get_agent(), "save_cfg")
     _mod_config_panels[mod_id] = root

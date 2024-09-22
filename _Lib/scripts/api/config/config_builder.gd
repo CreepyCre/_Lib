@@ -15,14 +15,6 @@ func _init(root: Control, config_file: String, input_map_api):
     _input_map_api = input_map_api
     _root.set_parent_config_node(_agent)
 
-static func config(title: String, config_file: String, mod_config_scene, input_map_api, self_script: Script) -> ConfigBuilder:
-    var mod_config = mod_config_scene.instance()
-    mod_config.get_node("TitlePanel/Title").text = title
-    var wrapped = WrappedControlConfigNode.new("", mod_config, "ConfigPanel/ScrollContainer/Config")
-    wrapped.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    wrapped.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    return self_script.new(wrapped, config_file, input_map_api)
-
 func enter() -> ConfigBuilder:
     _node_stack.append(_current_node)
     _current_node = _last_child_node
