@@ -3,7 +3,7 @@ class_name ClassLoader
 const CLASS_NAME = "ClassLoader"
 var LOGGER: Object
 
-const IMPORT_REGEX = "class[ \t]+([a-zA-Z]+)[ \t]*:[ \t]*const[ \t]+import[ \t]+=[ \t]+\"(([^:\"]+):)?(([^:\"\\\/]+\\\/)+)([^:\"\\\/]+)?\""
+const IMPORT_REGEX = "class[ \t]+([a-zA-Z]+)[ \t]*:[ \t\n\r]*const[ \t]+import[ \t]+=[ \t]+\"(([^:\"]+):)?(([^:\"\\\/]+\\\/)+)([^:\"\\\/]+)?\""
 
 var _unique_id_to_root: Dictionary
 var _file_id_to_script: Dictionary = {}
