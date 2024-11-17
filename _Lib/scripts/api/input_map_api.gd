@@ -9,6 +9,10 @@ var _event_emitters: Dictionary = {}
 var _master_node: Node
 var _mod_actions: Dictionary = {}
 
+signal added_actions(actions)
+signal erasing_action(action)
+signal erased_actions(actions)
+
 func _init(logger: Object, master_node: Node):
     LOGGER = logger.for_class(self)
     _master_node = master_node
@@ -16,27 +20,63 @@ func _init(logger: Object, master_node: Node):
     for action in InputMap.get_actions(): # action: String
         _create_agent(action, false)
 
-## https://creepycre.github.io/_Lib/InputMapApi/#define_actions
-func define_actions(category: String, actions: Dictionary):
-    _mod_actions[category] = actions
-    _define_actions(actions)
+static func _merge_dicts(from: Dictionary, to: Dictionary):
+    for key in from:
+        if not key in to:
+            to[key] = from[key]
+        elif (to[key] is Dictionary) and (from[key] is Dictionary):
+            _merge_dicts(from[key], to[key])
+
+## https://creepycre.github.io/_Lib/InputMapApi/#add_actions
+func add_actions(actions, category):
+    if not _mod_actions.has(category):
+        _mod_actions[category] = actions
+    else:
+        _merge_dicts(actions, _mod_actions[category])
+    var defined_actions: Array = _define_actions(actions)
+    if len(defined_actions) > 0:
+        emit_signal("added_actions", defined_actions)
+    return
+
+func erase_action(action: String):
+    self.emit_signal("erasing_action", action)
+    if _agents.has(action):
+        _agents[action]._erase_action()
+    for category in _mod_actions:
+        _erase_action(action, _mod_actions[category])
+    InputMap.erase_action(action)
+    self.emit_signal("erased_actions", [action])
+
+func _erase_action(action: String, definitions: Dictionary):
+    for key in definitions:
+        var val = definitions[key]
+        if val is Dictionary:
+            _erase_action(action, val)
+        elif val == action: # would also require it to be String, so checking for String is redundant
+            definitions.erase(key)
+        elif val is Array and val[0] == action:
+            definitions.erase(key)
 
 # adds input actions from actions to InputMap recursively and creates their ActionConfigSyncAgent
-func _define_actions(actions: Dictionary):
+func _define_actions(actions: Dictionary) -> Array:
+    var defined_actions: Array = []
     for key in actions:
         var action = actions[key]
         # recurse if it is a dictionary
         if action is Dictionary:
-            _define_actions(action)
+            defined_actions.append_array(_define_actions(action))
         # action String defines action without keybind
         elif action is String:
             get_or_create_agent(action)
+            defined_actions.append(action)
         # action String array contains action String as first entry, other entries will be deserialized as InputEventKey and added to the action
         elif action is Array:
             action = action.duplicate()
             var agent = get_or_create_agent(action.pop_front())
             for event in action:
                 agent.add_event(deserialize_event(event))
+            defined_actions.append(agent.get_action())
+    return defined_actions
 
 ## Deserializes an InputEventKey from string. 
 func deserialize_event(string: String) -> InputEventKey:
@@ -120,6 +160,63 @@ func _unload():
         emitter._unload()
     _event_emitters.clear()
 
+func _instance(mod_info):
+    return InstancedInputMapApi.new(self, mod_info.mod_meta["name"])
+
+class InstancedInputMapApi:
+    var _input_map_api
+    var _mod_name
+
+    signal added_actions(actions)
+    signal erasing_action(action)
+    signal erased_actions(actions)
+
+    func _init(input_map_api, mod_name):
+        _input_map_api = input_map_api
+        _mod_name = mod_name
+        
+        _input_map_api.connect("added_actions", self, "_emit_sig", ["added_actions"])
+        _input_map_api.connect("erasing_action", self, "_emit_sig", ["erasing_action"])
+        _input_map_api.connect("erased_actions", self, "_emit_sig", ["erased_actions"])
+    
+    func _emit_sig(val, sig):
+        emit_signal(sig, val)
+    
+    ## deprecated
+    func define_actions(category: String, actions: Dictionary):
+        add_actions(actions, category)
+
+    func add_actions(actions, category: String = _mod_name):
+        _input_map_api.add_actions(actions, category)
+    
+    func deserialize_event(string: String) -> InputEventKey:
+        return _input_map_api.deserialize_event(string)
+
+    func serialize_event(event: InputEventKey) -> String:
+        return _input_map_api.serialize_event(event)
+
+    func event_as_string(event: InputEventKey) -> String:
+        return _input_map_api.event_as_string(event)
+
+    func get_agent(action: String) -> ActionConfigSyncAgent:
+        return _input_map_api.get_agent(action)
+
+    func get_or_create_agent(action: String, deadzone: float = 0.5) -> ActionConfigSyncAgent:
+        return _input_map_api.get_or_create_agent(action, deadzone)
+
+    func get_or_append_event_emitter(node: Node) -> InputEventEmitterNode:
+        return _input_map_api.get_or_append_event_emitter(node)
+
+    func master_event_emitter() -> InputEventEmitterNode:
+        return _input_map_api.master_event_emitter()
+
+    func _unload():
+        # disconnect all signals
+        for signal_dict in get_signal_list():
+            var signal_name = signal_dict.name
+            for callable_dict in get_signal_connection_list(signal_name):
+                disconnect(signal_name, callable_dict.target, callable_dict.method)
+
 ## Responsible for synchronization of shortcuts between multiple shortcut config nodes.
 ## https://creepycre.github.io/_Lib/InputMapApi/ActionConfigSyncAgent/
 class ActionConfigSyncAgent:
@@ -130,6 +227,7 @@ class ActionConfigSyncAgent:
     signal switched(from, to, index)
     signal deleted(index)
     signal added()
+    signal erasing_action()
 
     func _init(action: String, erase_on_unload = true, saved = false):
         _action = action
@@ -156,6 +254,14 @@ class ActionConfigSyncAgent:
     
     func add_event(event: InputEventKey):
         InputMap.action_add_event(_action, event)
+    
+    func _erase_action():
+        emit_signal("erasing_action")
+        # disconnect all signals
+        for signal_dict in get_signal_list():
+            var signal_name = signal_dict.name
+            for callable_dict in get_signal_connection_list(signal_name):
+                disconnect(signal_name, callable_dict.target, callable_dict.method)
     
     func _unload():
         # disconnect all signals

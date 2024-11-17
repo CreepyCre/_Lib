@@ -1109,6 +1109,9 @@ class ShortcutsConfigNode:
         connect("button_pressed", self, "_on_tree_button_pressed")
 
         _make_actions_save(definitions)
+
+        input_map_api.connect("added_actions", self, "_added_actions")
+        input_map_api.connect("erased_actions", self, "_erased_actions")
         
         
 
@@ -1219,7 +1222,21 @@ class ShortcutsConfigNode:
     func mark_dirty():
         _parent_config_node.mark_dirty()
     
+    func _added_actions(_actions: Array):
+        _make_actions_save(_definitions)
+        _rebuild_tree()
+
+    # TODO: use signal form ConfigSyncAgent instead
+    func _erased_actions(actions: Array):
+        for action in actions:
+            if action in _action_to_item:
+                _rebuild_tree()
+                return
+    
     func _on_preferences_about_to_show():
+        _rebuild_tree()
+
+    func _rebuild_tree():
         clear()
         for action in _action_to_item:
             var agent = _input_map_api.get_or_create_agent(action)
