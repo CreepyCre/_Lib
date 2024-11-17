@@ -132,6 +132,10 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
     preferences_window_api.connect("about_to_show", self, "_on_preferences_about_to_show")
     preferences_window_api.get_preferences_window().set_process_unhandled_key_input(false)
 
+    # TODO: make this lazy
+    input_map_api.connect("added_actions", self, "rebuild_tree")
+    input_map_api.connect("erased_actions", self, "rebuild_tree")
+
 ## Creates a new ConfigBuilder for the mod with id mod_id. The mod config will automatically be saved into and loaded from config_file. 
 func create_config(config_file: String, title: String, mod_id: String):
     # enable mod config button
@@ -155,6 +159,9 @@ func create_config(config_file: String, title: String, mod_id: String):
     return config_builder
 
 func _on_preferences_about_to_show():
+    rebuild_tree()
+
+func rebuild_tree(_ignored = null):
     # clear the entire shortcut config tree and everything related to it first
     for agent in _agents:
         agent.disconnect("switched", self, "_switched")
