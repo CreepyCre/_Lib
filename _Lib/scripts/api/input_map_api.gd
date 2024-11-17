@@ -189,6 +189,9 @@ class InstancedInputMapApi:
     func add_actions(actions, category: String = _mod_name):
         _input_map_api.add_actions(actions, category)
     
+    func erase_action(action: String):
+        _input_map_api.erase_action(action)
+    
     func deserialize_event(string: String) -> InputEventKey:
         return _input_map_api.deserialize_event(string)
 
