@@ -25,7 +25,12 @@ func start():
             "Put in Complaints": "put_complaints"
         }
     }
-    self.Global.API.InputMapApi.define_actions("Example Mod", input_definitions)
+    self.Global.API.InputMapApi.add_actions(input_definitions)
+    self.Global.API.InputMapApi.add_actions({
+        "test1": "test1",
+        "test2": "test2"
+        })
+    self.Global.API.InputMapApi.erase_action("test1")
 
     # Can't do comments inbetween the lines here, sadge
     # we can use enter() and exit() to go into and out of any nodes created
