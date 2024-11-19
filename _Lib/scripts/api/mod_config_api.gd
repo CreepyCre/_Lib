@@ -164,9 +164,12 @@ func _on_preferences_about_to_show():
 func rebuild_tree(_ignored = null):
     # clear the entire shortcut config tree and everything related to it first
     for agent in _agents:
-        agent.disconnect("switched", self, "_switched")
-        agent.disconnect("added", self, "_added_item")
-        agent.disconnect("deleted", self, "_deleted_item")
+        if agent.is_connected("switched", self, "_switched"):
+            agent.disconnect("switched", self, "_switched")
+        if agent.is_connected("added", self, "_added_item"):
+            agent.disconnect("added", self, "_added_item")
+        if agent.is_connected("deleted", self, "_deleted_item"):
+            agent.disconnect("deleted", self, "_deleted_item")
     _agents.clear()
     for mod in _mod_config_panels:
         var panel = _mod_config_panels[mod]
