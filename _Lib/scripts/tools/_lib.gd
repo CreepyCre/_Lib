@@ -111,9 +111,11 @@ func update(delta):
 # we do this by detecting when the loading box becomes visible
 func _loading_box_visibility_changed():
     # check if new map is actually being loaded
-    if not self.Global.Editor.owner.IsLoadingMap:
-        return
-    _unload()
+    if self.Global.Editor.owner.IsLoadingMap:
+        _unload()
+    else: #finished loading
+        # TODO: VersioningAPI
+        pass
 
 # varargs hack
 func set_up_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):
