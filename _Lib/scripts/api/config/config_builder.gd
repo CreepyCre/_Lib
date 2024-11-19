@@ -1211,6 +1211,8 @@ class ShortcutsConfigNode:
 
 
     func _event_as_string(event: InputEventKey) -> String:
+        if (event == null):
+            return ""
         var code: int = event.get_scancode_with_modifiers()
         return ("Alt+" if code & KEY_MASK_ALT != 0 else "")\
             + ("Ctrl+" if code & KEY_MASK_CTRL != 0 else "")\
@@ -1287,7 +1289,7 @@ class ShortcutsConfigNode:
                     action_item.set_text(1, _event_as_string(first_event))
                     if agent.is_saved():
                         action_item.add_button(2, _edit_icon)
-                        action_item.add_button(3, _add_icon)
+                        action_item.add_button(3, _add_icon, 0)
                     else:
                         action_item.set_selectable(2, false)
                         action_item.set_selectable(3, false)
@@ -1310,21 +1312,24 @@ class ShortcutsConfigNode:
                             event_item.set_selectable(3, false)
                         index += 1
     
-    func _switched(from: InputEventKey, to: InputEventKey, index: int, item: TreeItem):
+    func _switched(from, to, index: int, item: TreeItem):
         if _busy:
             return
         mark_dirty()
         if index == 0:
-            item.set_text(1, _event_as_string(to) if to != null else "")
+            item.set_text(1, _event_as_string(to))
             item.set_meta("event", to)
-            if from == null:
+            if from == null and to != null:
                 item.set_selectable(3, true)
-                item.add_button(3, _add_icon)
+                item.add_button(3, _add_icon, 0)
+            if from != null and to == null:
+                item.set_selectable(3, false)
+                item.erase_button(3, 0)
         else:
             var sub_item: TreeItem = item.get_children()
             while sub_item != null:
                 if sub_item.get_meta("index") == index:
-                    sub_item.set_text(1, _event_as_string(to) if to != null else "")
+                    sub_item.set_text(1, _event_as_string(to))
                     sub_item.set_meta("event", to)
                     break
                 sub_item = sub_item.get_next()
@@ -1403,25 +1408,37 @@ class ShortcutsConfigNode:
             next_index += 1
             child_item = child_item.get_next()
     
+    func _input(event: InputEvent):
+        if (_waiting_for_input and event is InputEventMouseButton and event.doubleclick and event.button_index == BUTTON_RIGHT):
+            _switch_event(null)
+            get_tree().set_input_as_handled()
+
     func _unhandled_key_input(event: InputEventKey):
         if (_waiting_for_input and not event.is_pressed()):
-            _busy = true
-            _pressed_item.set_selectable(1, false)
-            _pressed_item.deselect(1)
-            _pressed_item.set_text(1, _event_as_string(event))
-            _waiting_for_input = false
-            var agent = _pressed_item.get_meta("agent")
-            var prev_event = _pressed_item.get_meta("event") if _pressed_item.has_meta("event") else null
-            event.pressed = true
-            _pressed_item.set_meta("event", event)
-            var index: int = _pressed_item.get_meta("index")
-            agent.switch(prev_event, event, index)
-            if prev_event == null and index == 0:
-                _pressed_item.set_selectable(3, true)
-                _pressed_item.add_button(3, _add_icon)
+            _switch_event(event)
             get_tree().set_input_as_handled()
-            mark_dirty()
-            _busy = false
+    
+    func _switch_event(event):
+        _busy = true
+        _pressed_item.set_selectable(1, false)
+        _pressed_item.deselect(1)
+        _pressed_item.set_text(1, _event_as_string(event))
+        _waiting_for_input = false
+        var agent = _pressed_item.get_meta("agent")
+        var prev_event = _pressed_item.get_meta("event") if _pressed_item.has_meta("event") else null
+        if event != null:
+            event.pressed = true
+        _pressed_item.set_meta("event", event)
+        var index: int = _pressed_item.get_meta("index")
+        agent.switch(prev_event, event, index)
+        if prev_event == null and event != null and index == 0:
+            _pressed_item.set_selectable(3, true)
+            _pressed_item.add_button(3, _add_icon, 0)
+        if prev_event != null and event == null and index == 0:
+            _pressed_item.set_selectable(3, false)
+            _pressed_item.erase_button(3, 0)
+        mark_dirty()
+        _busy = false
 
 
 class ForwardedDictionaryConfig:

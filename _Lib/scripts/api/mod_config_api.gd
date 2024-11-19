@@ -128,7 +128,8 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
     _shortcuts_node.add_child(_mod_tree)
     _mod_tree.owner = _shortcuts_node
     _mod_tree.connect("button_pressed", self, "_on_mod_tree_button_pressed")
-    input_map_api.get_or_append_event_emitter(_mod_tree).connect("unhandled_key_input", self, "_unhandled_key_input")
+    input_map_api.get_or_append_event_emitter(_mod_tree).connect("signal_input", self, "_input_")
+    input_map_api.get_or_append_event_emitter(_mod_tree).connect("unhandled_key_input", self, "_unhandled_key_input_")
     preferences_window_api.connect("about_to_show", self, "_on_preferences_about_to_show")
     preferences_window_api.get_preferences_window().set_process_unhandled_key_input(false)
 
@@ -307,36 +308,52 @@ func _on_mod_tree_button_pressed(item: TreeItem, column: int, id: int):
             agent.deleted_item(index)
         _busy = false
 
+func _input_(event: InputEvent, agent):
+    if (_waiting_for_input and event is InputEventMouseButton and event.doubleclick and event.button_index == BUTTON_RIGHT):
+        _switch_event(null)
+        agent.accept_event()
 
-func _unhandled_key_input(event: InputEventKey, agent):
+
+func _unhandled_key_input_(event: InputEventKey, agent):
     if (_waiting_for_input and not event.is_pressed()):
-        _pressed_item.set_selectable(1, false)
-        _pressed_item.deselect(1)
-        _pressed_item.set_text(1, _input_map_api.event_as_string(event))
-        _waiting_for_input = false
-        var meta = _pressed_item.get_meta("agent")
-        if not meta is TreeItem:
-            _busy = true
-            var prev_event = _pressed_item.get_meta("event") if _pressed_item.has_meta("event") else null
-            event.pressed = true
-            var index: int = _pressed_item.get_meta("index")
-            meta.switch(prev_event, event, index)
-            if prev_event == null and index == 0:
-                _pressed_item.set_selectable(3, true)
-                _pressed_item.add_button(3, _add_icon)
-            _busy = false
+        _switch_event(event)
         agent.accept_event()
     _preferences_window_api.get_preferences_window()._UnhandledKeyInput(event)
 
-func _switched(from: InputEventKey, to: InputEventKey, index: int, item: TreeItem):
+func _switch_event(event):
+    _pressed_item.set_selectable(1, false)
+    _pressed_item.deselect(1)
+    _pressed_item.set_text(1, _input_map_api.event_as_string(event) if event != null else "")
+    _waiting_for_input = false
+    var meta = _pressed_item.get_meta("agent")
+    if not meta is TreeItem:
+        _busy = true
+        var prev_event = _pressed_item.get_meta("event") if _pressed_item.has_meta("event") else null
+        if (event != null):
+            event.pressed = true
+        _pressed_item.set_meta("event", event)
+        var index: int = _pressed_item.get_meta("index")
+        meta.switch(prev_event, event, index)
+        if prev_event == null and index == 0:
+            _pressed_item.set_selectable(3, true)
+            _pressed_item.add_button(3, _add_icon, 0)
+        if event == null and index == 0:
+            _pressed_item.set_selectable(3, false)
+            _pressed_item.erase_button(3, 0)
+        _busy = false
+
+func _switched(from, to, index: int, item: TreeItem):
     if _busy:
         return
     if index == 0:
         item.set_text(1, _input_map_api.event_as_string(to) if to != null else "")
         item.set_meta("event", to)
-        if from == null:
+        if from == null and to != null:
             item.set_selectable(3, true)
-            item.add_button(3, _add_icon)
+            item.add_button(3, _add_icon, 0)
+        if from != null and to == null:
+            item.set_selectable(3, false)
+            item.erase_button(3, 0)
     else:
         var sub_item: TreeItem = item.get_children()
         while sub_item != null:
