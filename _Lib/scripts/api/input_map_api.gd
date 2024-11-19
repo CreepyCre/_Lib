@@ -114,6 +114,10 @@ func event_as_string(event: InputEventKey) -> String:
         + ("Shift+" if code & KEY_MASK_SHIFT != 0 else "")\
         + OS.get_scancode_string(code & KEY_CODE_MASK)
 
+## Checks wether an action has an agent.
+func has_agent(action: String) -> bool:
+    return _agents.has(action)
+
 ## Gets the ActionConfigSyncAgent for action. 
 func get_agent(action: String) -> ActionConfigSyncAgent:
     return _agents[action]
