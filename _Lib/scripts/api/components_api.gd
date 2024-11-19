@@ -299,6 +299,8 @@ func _node_added(node: Node):
                                     component._deserialize(node, component_data_dict[component])
     else:
         yield(_scene_tree, "idle_frame")
+    if not is_instance_valid(node):
+        return
     for component in _non_lazy_components:
         if (component.is_applicable(node)):
             component.get_component(node)
