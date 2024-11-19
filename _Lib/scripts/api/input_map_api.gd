@@ -10,7 +10,7 @@ var _master_node: Node
 var _mod_actions: Dictionary = {}
 
 signal added_actions(actions)
-signal erasing_action(action)
+signal erasing_actions(action)
 signal erased_actions(actions)
 
 func _init(logger: Object, master_node: Node):
@@ -39,13 +39,18 @@ func add_actions(actions, category):
     return
 
 func erase_action(action: String):
-    self.emit_signal("erasing_action", action)
-    if _agents.has(action):
-        _agents[action]._erase_action()
-    for category in _mod_actions:
-        _erase_action(action, _mod_actions[category])
-    InputMap.erase_action(action)
-    self.emit_signal("erased_actions", [action])
+    erase_actions([action])
+
+func erase_actions(actions: Array):
+    self.emit_signal("erasing_actions", actions)
+    for action in actions:
+        if _agents.has(action):
+            _agents[action]._erase_action()
+        for category in _mod_actions:
+            _erase_action(action, _mod_actions[category])
+        InputMap.erase_action(action)
+    self.emit_signal("erased_actions", actions)
+
 
 func _erase_action(action: String, definitions: Dictionary):
     for key in definitions:
@@ -168,7 +173,7 @@ class InstancedInputMapApi:
     var _mod_name
 
     signal added_actions(actions)
-    signal erasing_action(action)
+    signal erasing_actions(action)
     signal erased_actions(actions)
 
     func _init(input_map_api, mod_name):
@@ -176,7 +181,7 @@ class InstancedInputMapApi:
         _mod_name = mod_name
         
         _input_map_api.connect("added_actions", self, "_emit_sig", ["added_actions"])
-        _input_map_api.connect("erasing_action", self, "_emit_sig", ["erasing_action"])
+        _input_map_api.connect("erasing_actions", self, "_emit_sig", ["erasing_actions"])
         _input_map_api.connect("erased_actions", self, "_emit_sig", ["erased_actions"])
     
     func _emit_sig(val, sig):
