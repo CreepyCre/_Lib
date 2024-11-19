@@ -82,6 +82,7 @@ signal text_added(node)
 signal portal_wall_added(node)
 
 var _world: Node2D
+var _mod_map_data: Dictionary
 var _scene_tree: SceneTree
 
 var _components: Dictionary = {}
@@ -97,12 +98,12 @@ var _processing_record: bool = false
 var _queued_history_record = [null, null]
 
 
-func _init(logger: Object, mod_signaling_api, history_api, world: Node2D):
+func _init(logger: Object, mod_signaling_api, history_api, world: Node2D, mod_map_data: Dictionary):
     LOGGER = logger.for_class(self)
     _world = world
+    _mod_map_data = mod_map_data
 
     mod_signaling_api.connect("save_begin", self, "_save_begin")
-    mod_signaling_api.connect("save_end", self, "_save_end")
     history_api.connect("recorded", self, "_recorded")
     history_api.connect("dropped", self, "_dropped")
     history_api.connect("undo_begin", self, "_undo_begin")
@@ -110,7 +111,7 @@ func _init(logger: Object, mod_signaling_api, history_api, world: Node2D):
     history_api.connect("redo_begin", self, "_redo_begin")
     history_api.connect("redo_end", self, "_redo_end")
 
-    _save_data = _hackbox_data()
+    _save_data = _load()
     _scene_tree = world.get_tree()
     _scene_tree.connect("node_added", self, "_node_added")
     _scene_tree.connect("node_removed", self, "_node_removed")
@@ -189,6 +190,31 @@ func _node_path_elements(path: NodePath) -> Array:
         elements.append(path.get_name(i))
     return elements
 
+func _save(save_data: Dictionary):
+    if not _mod_map_data.has("CreepyCre._Lib"):
+        _mod_map_data["CreepyCre._Lib"] = {}
+    var dict = _mod_map_data["CreepyCre._Lib"]
+
+    if not dict.has("ComponentsApi"):
+        dict["ComponentsApi"] = {}
+    dict = dict["ComponentsApi"]
+
+    dict["save_data"] = save_data
+
+func _load() -> Dictionary:
+    if not _mod_map_data.has("CreepyCre._Lib"):
+        return _hackbox_data()
+    var dict = _mod_map_data["CreepyCre._Lib"]
+
+    if not dict.has("ComponentsApi"):
+        return _hackbox_data()
+    dict = dict["ComponentsApi"]
+
+    if not dict.has("save_data"):
+        return _hackbox_data()
+    return dict["save_data"]
+    
+
 func _hackbox_data() -> Dictionary:
     var texts = _world.AllLevels[0].Texts
     for text in texts.get_children():
@@ -197,24 +223,6 @@ func _hackbox_data() -> Dictionary:
             _world.DeleteNodeByID(text.get_meta("node_id"))
             return result
     return {}
-
-func _create_hackbox(save_data: Dictionary):
-    var text: LineEdit = _world.AllLevels[0].Texts.CreateText()
-    text.Load({
-        "text": JSON.print(save_data),
-        "position": var2str(_TEXT_BOX_POS),
-        "font_name": "Aladin",
-        "font_size": 1,
-        "font_color": "00000000",
-        "box_shape": 0
-    })
-
-func _delete_hackbox():
-    var texts = _world.AllLevels[0].Texts
-    for text in texts.get_children():
-        if ((text.rect_position == _TEXT_BOX_POS) or (text.rect_position == _BACKWARDS_COMPAT_TEXT_BOX_POS)):
-            _world.DeleteNodeByID(text.get_meta("node_id"))
-            return
 
 func _load_component(component_accessor, save_data: Array):
     for entry in save_data:
@@ -371,10 +379,7 @@ func _save_begin():
         for key in namespace_components:
             namespace_data[key] = namespace_components[key]._serialize()
         data[namespace] = namespace_data
-    _create_hackbox(data)
-
-func _save_end():
-    _delete_hackbox()
+    _save(data)
 
 func _undo_begin(record):
     _processing_record = true

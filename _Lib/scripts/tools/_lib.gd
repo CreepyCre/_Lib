@@ -84,7 +84,7 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering HistoryApi")
     set_up_api("HistoryApi", _global.Editor, api.AccessorApi.config())
     LOGGER.info("Registering ComponentsApi")
-    set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World)
+    set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World, _global.ModMapData)
     LOGGER.info("Registering LayerApi")
     set_up_api("LayerApi", _global.API.ComponentsApi, _global.World)
 
