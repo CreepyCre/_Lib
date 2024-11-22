@@ -86,7 +86,7 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering ComponentsApi")
     set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World, _global.ModMapData)
     LOGGER.info("Registering LayerApi")
-    set_up_api("LayerApi", _global.API.ComponentsApi, _global.World)
+    set_up_api("LayerApi", _global.API.ComponentsApi, _global.World, _global.Editor.Tools["SelectTool"], _global.Editor.Toolset.GetToolPanel("SelectTool"))
 
     # set up _Lib config
     var builder = _global.API.ModConfigApi.create_config()
