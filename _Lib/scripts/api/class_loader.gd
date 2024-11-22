@@ -3,18 +3,23 @@ class_name ClassLoader
 const CLASS_NAME = "ClassLoader"
 var LOGGER: Object
 
-const IMPORT_REGEX = "class[ \t]+([a-zA-Z]+)[ \t]*:[ \t\n\r]*const[ \t]+import[ \t]+=[ \t]+\"(([^:\"]+):)?(([^:\"\\\/]+\\\/)+)([^:\"\\\/]+)?\""
+const IMPORT_REGEX = "class[ \t]+([a-zA-Z]+)[ \t]*:[ \t]*const[ \t]+import[ \t]+=[ \t]+\"(([^:\"]+):)?(([^:\"\\\/]+\\\/)+)([^:\"\\\/]+)?\""
 
 var _unique_id_to_root: Dictionary
 var _file_id_to_script: Dictionary = {}
 var _import_regex: RegEx = RegEx.new()
+
+var source_transformers: Array = []
 
 func _init(logger: Object, unique_id_to_root: Dictionary):
     LOGGER = logger.for_class(self)
     _unique_id_to_root = unique_id_to_root
     _import_regex.compile(IMPORT_REGEX)
 
-func load_or_get(mod_id: String, script_path: String, default_mod_id = "CreepyCre._Lib") -> GDScript:
+    source_transformers.append(funcref(self, "_transform_imports"))
+    source_transformers.append(funcref(self, "_replace_new"))
+
+func load_or_get(mod_id: String, script_path: String) -> GDScript:
     script_path = script_path.rstrip("/")
     var file_id = mod_id + ":/" + script_path
     if file_id in _file_id_to_script:
@@ -34,11 +39,19 @@ func load_or_get(mod_id: String, script_path: String, default_mod_id = "CreepyCr
     file.open(file_path, File.READ)
     var raw_source_code = file.get_as_text()
     file.close()
-    to_be_loaded.source_code = _transform_source(raw_source_code, default_mod_id)
+    to_be_loaded.source_code = _transform_source(raw_source_code, {
+        "mod_id": mod_id,
+        "path": file_path + "/"
+    })
     to_be_loaded.reload()
     return to_be_loaded
 
-func _transform_source(source_code: String, default_mod_id) -> String:
+func _transform_source(source_code: String, context) -> String:
+    for transformer in source_transformers:
+        source_code = transformer.call_func(source_code, context)
+    return source_code
+
+func _transform_imports(source_code: String, context) -> String:
     var import_statement_matches: Array = _import_regex.search_all(source_code)
     var source_code_pieces: Array = []
     var final_index: int = 0
@@ -49,8 +62,8 @@ func _transform_source(source_code: String, default_mod_id) -> String:
         var clazz_path: String = reg_match.get_string(6)
 
         if mod_id == "":
-            mod_id = default_mod_id
-        load_or_get(mod_id, script_path, default_mod_id)
+            mod_id = context["mod_id"]
+        load_or_get(mod_id, script_path)
 
         source_code_pieces.append(source_code.substr(final_index, reg_match.get_start() - final_index))
         if clazz_path == "":
@@ -61,6 +74,9 @@ func _transform_source(source_code: String, default_mod_id) -> String:
         final_index = reg_match.get_end()
     source_code_pieces.append(source_code.substr(final_index))
     return PoolStringArray(source_code_pieces).join("")
+
+func _replace_new(source_code: String, _ignore):
+    return source_code.replace("._new(", ".new(")
 
 func _instance(mod_info) -> InstancedClassLoader:
     return InstancedClassLoader.new(self, mod_info.mod_meta["unique_id"])
@@ -77,4 +93,4 @@ class InstancedClassLoader:
         if script_path == null:
             script_path = mod_id
             mod_id = _unique_id
-        return _class_loader.load_or_get(mod_id, script_path, _unique_id)
+        return _class_loader.load_or_get(mod_id, script_path)
