@@ -147,10 +147,10 @@ func create_config(config_file: String, title: String, mod_id: String):
     #create ConfigBuilder and add the configs root node to the mod menu
     var mod_config = _mod_config_scene.instance()
     mod_config.get_node("TitlePanel/Title").text = title
-    var wrapped = [WrappedControlConfigNode][0].new("", mod_config, "ConfigPanel/ScrollContainer/Config")
+    var wrapped = WrappedControlConfigNode._new("", mod_config, "ConfigPanel/ScrollContainer/Config")
     wrapped.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     wrapped.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    var config_builder = [ConfigBuilder][0].new(wrapped, config_file, _input_map_api)
+    var config_builder = ConfigBuilder._new(wrapped, config_file, _input_map_api)
 
     var root: Control = config_builder.get_root()
     _preferences_window_api.connect("apply_pressed", config_builder.get_agent(), "save_cfg")
