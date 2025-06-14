@@ -87,14 +87,28 @@ func _post_init(script_instance: Reference = self):
     set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World, _global.ModMapData)
     LOGGER.info("Registering LayerApi")
     set_up_api("LayerApi", _global.API.ComponentsApi, _global.World, _global.Editor.Tools["SelectTool"], _global.Editor.Toolset.GetToolPanel("SelectTool"))
+    LOGGER.info("Registering ScalingApi")
+    set_up_api("ScalingApi", _global.Editor, api.AccessorApi.config().get_value("Preferences", "enlarge_ui", false))
 
     # set up _Lib config
     var builder = _global.API.ModConfigApi.create_config()
     config = builder\
                 .h_box_container().enter()\
-                    .label("Log Level: ")\
+                    .label("Log Level")\
                     .option_button("log_level", api.Logger.get_log_level(), api.Logger._CONFIG_LOOKUP.keys())\
                         .connect_current("updated", api.Logger, "set_log_level")\
+                .exit()\
+                .h_box_container().enter()\
+                    .label("UI Scale: ")\
+                    .label().ref("ui_scale_label")\
+                    .h_slider("ui_scale", 2 if api.AccessorApi.config().get_value("Preferences", "enlarge_ui", false) else 1)\
+                        .size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_FILL)\
+                        .with("min_value", 0.5).with("max_value", 4).with("step", 0.25)\
+                        .connect_to_prop("loaded", builder.get_ref("ui_scale_label"), "text")\
+                        .connect_to_prop("value_changed", builder.get_ref("ui_scale_label"), "text")\
+                        .connect_current("loaded", api.ScalingApi.get_ui_scaling_agent(), "scale")\
+                        .connect_current("updated", api.ScalingApi.get_ui_scaling_agent(), "scale")\
+                        .call_on("share", api.ScalingApi._scale_slider)\
                 .exit()\
                 .build()
     
