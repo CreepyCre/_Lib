@@ -1,5 +1,8 @@
 class_name PreferencesWindowApi
 
+class ScalingAgent: const import = "api/scaling_api.gd/ScalingAgent"
+class PropertyScaler: const import = "api/scaling_api.gd/PropertyScaler"
+
 const CLASS_NAME = "PreferencesWindowApi"
 var LOGGER: Object
 
@@ -24,7 +27,7 @@ signal back_pressed()
 signal apply_pressed()
 signal about_to_show()
 
-func _init(logger: Object, _pref: WindowDialog):
+func _init(logger: Object, _pref: WindowDialog, ui_scaling_agent: ScalingAgent):
     LOGGER = logger.for_class(self)
     # get all them nodes
     _preferences = _pref
@@ -46,10 +49,14 @@ func _init(logger: Object, _pref: WindowDialog):
     _back_button = Button.new()
     _back_button.text = "Back"
     _back_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _back_button.rect_min_size = _close_button.rect_min_size
     _back_button.hide()
     _back_button.connect("pressed", self, "_back_pressed")
     _buttons.add_child(_back_button)
     _back_button.owner = _buttons
+
+    # ensure buttons scale correctly
+    ui_scaling_agent.register(PropertyScaler._new(_back_button, "rect_min_size"))
 
     # make default buttons call _category_pressed
     _general_button.connect("pressed", self, "_category_pressed")

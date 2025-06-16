@@ -4,7 +4,14 @@ const CLASS_NAME = "ScalingApi"
 var LOGGER: Object
 
 var _ui_scaling_agent: ScalingAgent = ScalingAgent.new()
+var _picker_scaling_agent: ScalingAgent = ScalingAgent.new()
 var _scale_slider: HSlider = HSlider.new()
+var _picker_slider: HSlider = HSlider.new()
+
+enum NodeType {
+    TYPE_TOOLBAR
+    TYPE_TOOLSET_BUTTON
+}
 
 func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     LOGGER = logger.for_class(self)
@@ -14,8 +21,11 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     var node_enlarge_ui: Control = node_parent.get_node("EnlargeUI")
     node_enlarge_ui.hide()
     # TODO: make a UI builder akin to the config builder
+    var hsplit = HBoxContainer.new()
+    node_parent.add_child_below_node(node_enlarge_ui, hsplit)
     var hbox = HBoxContainer.new()
-    node_parent.add_child_below_node(node_enlarge_ui, hbox)
+    hsplit.add_child(hbox)
+    hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
     var label = Label.new()
     hbox.add_child(label)
@@ -23,14 +33,37 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
 
     var _scale_label: Label = Label.new()
     hbox.add_child(_scale_label)
+    _scale_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _scale_label.align = Label.ALIGN_RIGHT
 
-    hbox.add_child(_scale_slider)
+    hsplit.add_child(_scale_slider)
     _scale_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     _scale_slider.size_flags_vertical = Control.SIZE_FILL
-    _scale_slider.min_value = 0.5
-    _scale_slider.max_value = 4
-    _scale_slider.step = 0.25
     _scale_slider.connect("value_changed", self, "update_scale_label", [_scale_label])
+
+
+    var hsplit2 = HBoxContainer.new()
+    node_parent.add_child_below_node(hsplit, hsplit2)
+    hbox = HBoxContainer.new()
+    hsplit2.add_child(hbox)
+    hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+    label = Label.new()
+    hbox.add_child(label)
+    label.text = "Picker Scale: "
+
+    _scale_label = Label.new()
+    hbox.add_child(_scale_label)
+    _scale_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _scale_label.align = Label.ALIGN_RIGHT
+
+    hsplit2.add_child(_picker_slider)
+    _picker_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _picker_slider.size_flags_vertical = Control.SIZE_FILL
+    _picker_slider.connect("value_changed", self, "update_scale_label", [_scale_label])
+
+
+
 
     var ui_scaler = funcref(self, "_mult_half") if enlarge_ui else funcref(self, "_mult")
 
@@ -38,13 +71,127 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
 
     # fonts
     _ui_scaling_agent.register(FontScaler.new(Global.Theme.default_font, 16))
-    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Heading", "Fonts", 20)))
-    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Title", "Fonts", 24)))
-    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Subtitle", "Fonts", 16)))
-    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Subelement", "Fonts", 12)))
-    # slidlers
+    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Heading", "Fonts"), 20))
+    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Title", "Fonts"), 24))
+    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Subtitle", "Fonts"), 16))
+    _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Subelement", "Fonts"), 12))
+
+
+
+
+
+    # BoxContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "BoxContainer"))
+    # Button
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "Button"))
+    # CheckBox
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "CheckBox"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "checked", "CheckBox"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "unchecked", "CheckBox"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "radio_checked", "CheckBox"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "radio_unchecked", "CheckBox"))
+    # CheckButton
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "CheckButton"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "off", "CheckButton"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "on", "CheckButton"))
+    # TODO: ColorPicker
+    # TODO: ColorPickerButton
+    # Dialogs
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "button_margin", "Dialogs"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "margin", "Dialogs"))
+    # FileDialog
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "folder", "FileDialog"))
+    # GridContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "GridContainer"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "vseparation", "GridContainer"))
+    # HBoxContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "HBoxContainer"))
+    # HSeparator
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "HSeparator"))
+    # HSlider
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "grabber", "HSlider"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "grabber_highlight", "HSlider"))
     _ui_scaling_agent.register(PropertyScaler.new(Global.Theme.get_stylebox("slider", "HSlider"), "content_margin_top", 2))
     _ui_scaling_agent.register(PropertyScaler.new(Global.Theme.get_stylebox("slider", "HSlider"), "content_margin_bottom", 2))
+    # HSplitContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "HSplitContainer"))
+    # ItemList
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "ItemList"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "icon_margin", ""))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "vseparation", ""))
+    # Label
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "line_spacing", "Label"))
+    # LinkButton
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "underline_spacing", "LinkButton"))
+    # MarginContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "margin_bottom", "MarginContainer"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "margin_left", "MarginContainer"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "margin_right", "MarginContainer"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "margin_top", "MarginContainer"))
+    # MenuButton
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "MenuButton"))
+    # OptionButton
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "arrow_margin", "OptionButton"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "OptionButton"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "arrow", "OptionButton"))
+    # PopupMenu
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "vseparation", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "checked", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "unchecked", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "radio_checked", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "radio_unchecked", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "submenu", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "visibility_hidden", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "visibility_visible", "PopupMenu"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "visibility_xray", "PopupMenu"))
+    # SpinBox
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "updown", "SpinBox"))
+    # TabContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "TabContainer"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "top_margin", "TabContainer"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "decrement", "TabContainer"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "decrement_highlight", "TabContainer"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "increment", "TabContainer"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "increment_highlight", "TabContainer"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "menu", "TabContainer"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "menu_hl", "TabContainer"))
+    # Tabs
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "Tabs"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "top_margin", "Tabs"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "close", "Tabs"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "decrement", "Tabs"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "decrement_highlight", "Tabs"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "increment", "Tabs"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "increment_highlight", "Tabs"))
+    # TextEdit
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "line_spacing", "TextEdit"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "tab", "TextEdit"))
+    # ToolButton
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "ToolButton"))
+    # Tree
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "button_margin", "Tree"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "hseparation", "Tree"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "item_margin", "Tree"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "scroll_border", "Tree"))
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "vseparation", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "checked", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "unchecked", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "arrow", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "arrow_collapsed", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "arrow_up", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "select_arrow", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "updown", "Tree"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "select_option", "Tree"))
+    # VBoxContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "VBoxContainer"))
+    # VSeparator
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "VSeparator"))
+    # VSlider
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "grabber", "VSlider"))
+    _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "grabber_highlight", "VSlider"))
+    # VSplitContainer
+    _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "VSplitContainer"))
     # WindowDialog
     _ui_scaling_agent.register(PropertyScaler.new(Global.Theme.get_stylebox("panel", "WindowDialog"), "border_width_top", 28))
     _ui_scaling_agent.register(PropertyScaler.new(Global.Theme.get_stylebox("panel", "WindowDialog"), "expand_margin_top", 28))
@@ -54,9 +201,16 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "close", "WindowDialog", "res://ui/icons2x/buttons/close.png", Vector2(16, 16)))
     _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "close_highlight", "WindowDialog", "res://ui/icons2x/buttons/close.png", Vector2(16, 16)))
 
+    
     # WindowDialog scale
     for window in editor.Windows.values():
         _ui_scaling_agent.register(PropertyScaler.new(window, "rect_size", null, ui_scaler))
+        _setup_window_scaling(window)
+    _ui_scaling_agent.register(ThemeOverrideConstantScaler.new(editor.Windows["Help"].get_node("MarginContainer"), "margin_right"))
+    _ui_scaling_agent.register(ThemeOverrideConstantScaler.new(editor.Windows["Help"].get_node("MarginContainer"), "margin_top"))
+    _ui_scaling_agent.register(ThemeOverrideConstantScaler.new(editor.Windows["Help"].get_node("MarginContainer"), "margin_left"))
+    _ui_scaling_agent.register(ThemeOverrideConstantScaler.new(editor.Windows["Help"].get_node("MarginContainer"), "margin_bottom"))
+    _ui_scaling_agent.register(PropertyScaler.new(editor.Windows["Help"].get_node("MarginContainer/VBoxContainer/TextureRect/Version"), "rect_position"))
 
     # menu buttons
     _ui_scaling_agent.register(MenuBarScaler.new(menu_bar))
@@ -79,18 +233,102 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     for dropdown in ["ZoomOptions", "LevelOptions"]:
         _ui_scaling_agent.register(PropertyScaler.new(align.get_node(dropdown), "rect_min_size"))
         _ui_scaling_agent.register(PropertyIconScaler.new(align.get_node(dropdown + "/Icon"), "texture"))
-    #checkbox
+    # checkbox
     for checkbox in ["GridToggle", "SnapToggle", "LightingToggle", "CompareToggle"]:
         var box = align.get_node(checkbox)
         _ui_scaling_agent.register(ThemeOverrideIconScaler.new(box, "checked"))
         _ui_scaling_agent.register(ThemeOverrideIconScaler.new(box, "unchecked"))
     _ui_scaling_agent.register(PropertyScaler.new(editor.get_node("Floatbar/Bottom"), "rect_min_size", null, ui_scaler))
+    # controls
+    _setup_control_scaling(editor, ui_scaler)
+    _ui_scaling_agent.register(ToolsetScaler.new(editor.Toolset))
+    
+    for child in editor.Toolset.get_children():
+        if _node_type(child) == NodeType.TYPE_TOOLSET_BUTTON:
+            _toolset_button(child)
+
+    for child in editor.Toolset.anchor.get_children():
+        if _node_type(child) == NodeType.TYPE_TOOLBAR:
+            _toolbar(child)
+
+    editor.get_tree().connect("node_added", self, "_node_added")
+
+    # all the object pickers
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["FloorShapeTool"].Controls["SmartTileId"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["FloorShapeTool"].Controls["WallTexture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["WallTool"].Controls["Texture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["PortalTool"].Controls["Texture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["CaveBrush"].Controls["Texture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["PatternShapeTool"].Controls["Texture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["RoofTool"].Controls["Texture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["TerrainBrush"].Controls["TerrainID"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["MaterialBrush"].Controls["Texture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["LightTool"].Controls["Texture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["MapSettings"].Controls["BuildingWear"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["SelectTool"].Controls["WallTexture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["SelectTool"].Controls["PortalTexture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["SelectTool"].Controls["PatternTexture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.Tools["SelectTool"].Controls["LightTexture"], "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.ObjectLibraryPanel.get_node("Margins/VAlign/ObjectsMenu"), "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.ObjectLibraryPanel, "rect_min_size", null, ui_scaler))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.PathLibraryPanel.get_node("Margins/VAlign/PathsMenu"), "icon_scale"))
+    _picker_scaling_agent.register(PropertyScaler.new(editor.PathLibraryPanel, "rect_min_size", null, ui_scaler))
+
+func _setup_control_scaling(node: Node, ui_scaler):
+    for child in node:
+        _setup_control_scaling(node, ui_scaler)
+        if (child is OptionButton) or (child is SpinBox):
+            _ui_scaling_agent.register(PropertyScaler.new(child, "rect_min_size", null, ui_scaler))
+
+func _setup_window_scaling(node: Node):
+    for child in node.get_children():
+        _setup_window_scaling(child)
+    if node is Control and node.rect_min_size:
+        _ui_scaling_agent.register(PropertyScaler.new(node, "rect_min_size"))
+    if node is Button and node.icon is Texture:
+        _ui_scaling_agent.register(ButtonIconScaler.new(node))
+    if node is TextureRect and node.texture is Texture:
+        _ui_scaling_agent.register(PropertyIconScaler.new(node, "texture"))
+
+func _toolset_button(node: Node):
+    _ui_scaling_agent.register(PropertyScaler.new(node, "rect_min_size", Vector2(0, 48)))
+    _ui_scaling_agent.register(SetScaler.new(funcref(node, "SetLabelOffset"), 48, node.label.rect_position.x))
+
+func _toolbar(node: Node):
+    _ui_scaling_agent.register(PropertyScaler.new(node, "rect_min_size", Vector2(225, 0)))
+    
+
+func _node_added(node: Node):
+    match _node_path_elements(node.get_path()):
+        ["root", "Master", "Editor", "VPartition", "Panels", "Tools", "Anchor", "Toolset", var button]:
+            _toolset_button(button)
+
+func _node_type(node):
+    if not (node is Node):
+        return -1
+    match _node_path_elements(node.get_path()):
+        ["root", "Master", "Editor", "VPartition", "Panels", "Tools", "Anchor", var toolbar]:
+            if _node_type(node.ToolsetButton) == NodeType.TYPE_TOOLSET_BUTTON:
+                return NodeType.TYPE_TOOLBAR
+        ["root", "Master", "Editor", "VPartition", "Panels", "Tools", "Anchor", "Toolset", var button]:
+            if node.name.ends_with("ToolsetButton"):
+                return NodeType.TYPE_TOOLSET_BUTTON
+    return -1
+
+func _node_path_elements(path: NodePath) -> Array:
+    var elements: Array = []
+    for i in path.get_name_count():
+        elements.append(path.get_name(i))
+    return elements
 
 func update_scale_label(value, scale_label):
-    scale_label.text = value
+    scale_label.text = "%.2f" % value
 
 func get_ui_scaling_agent() -> ScalingAgent:
     return _ui_scaling_agent
+
+func get_picker_scaling_agent() -> ScalingAgent:
+    return _picker_scaling_agent
 
 func _mult(value, scale):
     return value * scale
@@ -133,8 +371,8 @@ class ScalingAgent:
 class ScalableImageTexture extends ImageTexture:
     var _default_size: Vector2
 
-    func _init(texture_path, default_size = null):
-        self.create_from_image(load(texture_path).get_data())
+    func _init(texture, default_size = null):
+        self.create_from_image(load(texture).get_data() if texture is String else texture.get_data())
         _default_size = self.get_size() if default_size == null else default_size
 
     func scale(new_scale):
@@ -144,14 +382,22 @@ class FontScaler:
     var _font: DynamicFont
     var _default_size: int
     var original_size: int
+    var original_extra_spacing_top: int
+    var original_extra_spacing_bottom: int
 
     func _init(font: DynamicFont, default_size = null):
         _font = font
         original_size = font.size
+        original_extra_spacing_top = font.extra_spacing_top
+        original_extra_spacing_bottom = font.extra_spacing_bottom
         _default_size = original_size if default_size == null else default_size
     
     func scale(new_scale):
-        _font.size = int(round(original_size * new_scale))
+        var font_size: int = int(round(_default_size * new_scale))
+        _font.size = font_size
+        var spacing = int(round(clamp(font_size, 0, 16) / 4 - 4))
+        _font.extra_spacing_top = spacing
+        _font.extra_spacing_bottom = spacing
         _font.update_changes()
     
     func unload():
@@ -224,6 +470,24 @@ class ThemeIconScaler:
     func unload():
         _theme.set_icon(_name, _node_type, original_icon)
 
+class ThemeOverrideConstantScaler:
+    var _control: Control
+    var _name: String
+    var _default_value: int
+    var original_value: int
+
+    func _init(control: Control, name: String, default_value = null):
+        _control = control
+        _name = name
+        original_value = control.get_constant(name)
+        _default_value = original_value if default_value == null else default_value
+
+    func scale(new_scale):
+        _control.add_constant_override(_name, int(round(_default_value * new_scale)))
+    
+    func unload():
+        _control.add_constant_override(_name, original_value)
+
 class ThemeOverrideIconScaler:
     var _control: Control
     var _name: String
@@ -268,6 +532,22 @@ class MenuBarScaler:
         _menu_bar.rect_min_size = Vector2.ZERO
         _menu_bar.rect_size = original_size
 
+class SetScaler:
+    var _setter
+    var _default_value
+    var _original_value
+
+    func _init(setter, default_value, original_value):
+        _setter = setter
+        _default_value = default_value
+        _original_value = default_value if original_value == null else original_value
+    
+    func scale(new_scale):
+        _setter.call_func(new_scale * _default_value)
+    
+    func unload():
+        _setter.call_func(_original_value)
+
 """
 class SetGetIconScaler:
     var _setter
@@ -300,16 +580,14 @@ class PropertyIconScaler:
     var original_icon: Texture
     var scalable_icon: ScalableImageTexture
 
-    func _init(target, property, texture_path = null, default_icon_size = null):
+    func _init(target, property, texture = null, default_icon_size = null):
         _target = target
         _property = property
         original_icon = target.get(property)
 
-        if texture_path is Vector2:
-            default_icon_size = texture_path
-        if not (texture_path is String):
-            texture_path = original_icon.resource_path
-        scalable_icon = ScalableImageTexture.new(texture_path, default_icon_size)
+        if texture is Vector2:
+            default_icon_size = texture
+        scalable_icon = ScalableImageTexture.new(texture if texture is String else original_icon, default_icon_size)
         _target.set(_property, scalable_icon)
     
     func scale(new_scale):
@@ -318,15 +596,32 @@ class PropertyIconScaler:
     func unload():
         _target.set(_property, original_icon)
 
-    
-
 class ButtonIconScaler:
     extends PropertyIconScaler
 
     func _init(button: Button, texture_path = null, default_icon_size = null).(button, "icon", texture_path, default_icon_size):
         pass
 
+class ToolsetScaler:
+    var _toolset
+    var full_scaler: PropertyScaler
+    var shrunk_scaler: PropertyScaler
+
+    func _init(toolset):
+        _toolset = toolset
+        full_scaler = PropertyScaler.new(toolset, "buttonFullSize", 48)
+        shrunk_scaler = PropertyScaler.new(toolset, "buttonShrunkSize", 32)
+    
+    func scale(new_scale):
+        full_scaler.scale(new_scale)
+        shrunk_scaler.scale(new_scale)
+        if _toolset.IsShrunk:
+            _toolset.rect_min_size = Vector2(_toolset.buttonShrunkSize, 0)
+        else:
+            _toolset.rect_min_size = Vector2(_toolset.buttonFullSize, 0)
+
 # TODO: DELETE
+"""
 class MenuButtonXScaler:
     const TOTAL_X_MARGIN = 16
 
@@ -357,3 +652,4 @@ class MenuButtonXScaler:
             _button.icon = original_icon
         _button.expand_icon = original_expand_icon
         _button.rect_min_size = Vector2.ZERO
+"""

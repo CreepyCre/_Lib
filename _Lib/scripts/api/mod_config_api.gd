@@ -3,12 +3,16 @@ class_name ModConfigApi
 
 class ConfigBuilder: const import = "api/config/config_builder.gd/"
 class WrappedControlConfigNode: const import = "api/config/config_builder.gd/WrappedControlConfigNode"
+class ScalingAgent: const import = "api/scaling_api.gd/ScalingAgent"
+class ScalableImageTexture: const import = "api/scaling_api.gd/ScalableImageTexture"
+class PropertyScaler: const import = "api/scaling_api.gd/PropertyScaler"
 
 const CLASS_NAME = "ModConfigApi"
 var LOGGER: Object
 
 var _preferences_window_api
 var _input_map_api
+var _ui_scaling_agent: ScalingAgent
 var _copy_dir_func: FuncRef
 
 var _mod_config_scene
@@ -34,21 +38,28 @@ var _pressed_item: TreeItem = null
 var _agents: Array = []
 var _busy: bool = false
 
-func _init(logger: Object, preferences_window_api, input_map_api, loader, active_mods: Array, copy_dir_func: FuncRef):
+func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_scaling_agent: ScalingAgent, active_mods: Array, copy_dir_func: FuncRef):
     LOGGER = logger.for_class(self)
-    # grab some of the vanilla icons
-    var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
-    _edit_icon = theme.get_icon("Edit", "EditorIcons")
-    _add_icon = theme.get_icon("Add", "EditorIcons")
-    _remove_icon = theme.get_icon("Remove", "EditorIcons")
 
     _preferences_window_api = preferences_window_api
     _input_map_api = input_map_api
+    _ui_scaling_agent = ui_scaling_agent
     _copy_dir_func = copy_dir_func
 
+    # grab some of the vanilla icons
+    var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
+    _edit_icon = ScalableImageTexture._new(theme.get_icon("Edit", "EditorIcons"))
+    _add_icon = ScalableImageTexture._new(theme.get_icon("Add", "EditorIcons"))
+    _remove_icon = ScalableImageTexture._new(theme.get_icon("Remove", "EditorIcons"))
+    _ui_scaling_agent.register(_edit_icon)
+    _ui_scaling_agent.register(_add_icon)
+    _ui_scaling_agent.register(_remove_icon)
+
     # load resources
-    var texture_normal: Texture = loader.load_icon("cog_normal.png")
-    var texture_disabled: Texture = loader.load_icon("cog_disabled.png")
+    var texture_normal: Texture = ScalableImageTexture._new(loader.load_icon("cog_normal.png"))
+    var texture_disabled: Texture = ScalableImageTexture._new(loader.load_icon("cog_disabled.png"))
+    _ui_scaling_agent.register(texture_normal)
+    _ui_scaling_agent.register(texture_disabled)
     
     # load and prepare scenes
     _mod_config_scene = loader.load_scene("ModConfig")
@@ -76,6 +87,7 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
         if (not active_mods.has(mod_info.get("unique_id"))):
             continue
         var mod_details = mod_details_scene.instance()
+        _ui_scaling_agent.register(PropertyScaler._new(mod_details.get_node("InfoMargins/HBoxContainer/ModIcon"), "rect_min_size"))
         var settings_button: TextureButton = mod_details.get_node("InfoMargins/HBoxContainer/Settings")
         settings_button.texture_normal = texture_normal
         settings_button.texture_disabled = texture_disabled

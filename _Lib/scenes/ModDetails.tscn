@@ -9,7 +9,6 @@ bg_color = Color( 0, 0, 0, 0.25098 )
 visible = false
 size_flags_horizontal = 3
 size_flags_vertical = 3
-rect_min_size = Vector2( 400, 0 )
 
 [node name="InfoMargins" type="MarginContainer" parent="."]
 margin_right = 302.0

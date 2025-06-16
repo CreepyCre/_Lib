@@ -75,20 +75,20 @@ func _post_init(script_instance: Reference = self):
     set_up_api("Util")
     LOGGER.info("Registering ModSignalingApi")
     set_up_api("ModSignalingApi", _global.Editor.Infobar)
+    LOGGER.info("Registering ScalingApi")
+    set_up_api("ScalingApi", _global.Editor, api.AccessorApi.config().get_value("Preferences", "enlarge_ui", false))
     LOGGER.info("Registering InputMapApi")
     set_up_api("InputMapApi", _global.Editor.owner)
     LOGGER.info("Registering PreferencesWindowApi")
-    set_up_api("PreferencesWindowApi", _global.Editor.Windows.Preferences)
+    set_up_api("PreferencesWindowApi", _global.Editor.Windows.Preferences, api.ScalingApi.get_ui_scaling_agent())
     LOGGER.info("Registering ModConfigApi")
-    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, api.Util.create_loading_helper(_global.Root + "../../"), _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
+    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, api.Util.create_loading_helper(_global.Root + "../../"), api.ScalingApi.get_ui_scaling_agent(), _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
     LOGGER.info("Registering HistoryApi")
     set_up_api("HistoryApi", _global.Editor, api.AccessorApi.config())
     LOGGER.info("Registering ComponentsApi")
     set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World, _global.ModMapData)
     LOGGER.info("Registering LayerApi")
     set_up_api("LayerApi", _global.API.ComponentsApi, _global.World, _global.Editor.Tools["SelectTool"], _global.Editor.Toolset.GetToolPanel("SelectTool"))
-    LOGGER.info("Registering ScalingApi")
-    set_up_api("ScalingApi", _global.Editor, api.AccessorApi.config().get_value("Preferences", "enlarge_ui", false))
 
     # set up _Lib config
     var builder = _global.API.ModConfigApi.create_config()
@@ -99,20 +99,43 @@ func _post_init(script_instance: Reference = self):
                         .connect_current("updated", api.Logger, "set_log_level")\
                 .exit()\
                 .h_box_container().enter()\
-                    .label("UI Scale: ")\
-                    .label().ref("ui_scale_label")\
+                    .h_box_container().size_flags_h(Control.SIZE_EXPAND_FILL).enter()\
+                        .label("UI Scale: ")\
+                        .label().ref("ui_scale_label")\
+                            .size_flags_h(Control.SIZE_EXPAND_FILL)\
+                            .with("align", Label.ALIGN_RIGHT)\
+                    .exit()\
                     .h_slider("ui_scale", 2 if api.AccessorApi.config().get_value("Preferences", "enlarge_ui", false) else 1)\
                         .size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_FILL)\
                         .with("min_value", 0.5).with("max_value", 4).with("step", 0.25)\
-                        .connect_to_prop("loaded", builder.get_ref("ui_scale_label"), "text")\
-                        .connect_to_prop("value_changed", builder.get_ref("ui_scale_label"), "text")\
+                        .connect_current("loaded", self, "format_slider_label", [builder.get_ref("ui_scale_label"), 2])\
+                        .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("ui_scale_label"), 2])\
                         .connect_current("loaded", api.ScalingApi.get_ui_scaling_agent(), "scale")\
                         .connect_current("updated", api.ScalingApi.get_ui_scaling_agent(), "scale")\
                         .call_on("share", api.ScalingApi._scale_slider)\
                 .exit()\
+                .h_box_container().enter()\
+                    .h_box_container().size_flags_h(Control.SIZE_EXPAND_FILL).enter()\
+                        .label("Picker Scale: ").size_flags_h(Control.SIZE_EXPAND_FILL)\
+                        .label().ref("picker_scale_label")\
+                            .size_flags_h(Control.SIZE_EXPAND_FILL)\
+                            .with("align", Label.ALIGN_RIGHT)\
+                    .exit()\
+                    .h_slider("picker_scale", 1)\
+                        .size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_FILL)\
+                        .with("min_value", 0.5).with("max_value", 4).with("step", 0.25)\
+                        .connect_current("loaded", self, "format_slider_label", [builder.get_ref("picker_scale_label"), 2])\
+                        .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("picker_scale_label"), 2])\
+                        .connect_current("loaded", api.ScalingApi.get_picker_scaling_agent(), "scale")\
+                        .connect_current("updated", api.ScalingApi.get_picker_scaling_agent(), "scale")\
+                        .call_on("share", api.ScalingApi._picker_slider)\
+                .exit()\
                 .build()
     
     api.Logger.set_log_level(config.log_level)
+
+func format_slider_label(value, label: Label, precision: int):
+    label.text = "%.*f" % [precision, value]
 
 func start():
     pass
