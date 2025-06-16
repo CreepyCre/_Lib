@@ -334,10 +334,14 @@ class ConfigAgent:
         file.close()
     
     func load_cfg():
-        var file = File.new()
+        var file: File = File.new()
         if (not file.file_exists(_config_file)):
             if _root.has_method("_on_preferences_about_to_show"):
                 _root._on_preferences_about_to_show()
+            var dir: Directory = Directory.new()
+            var config_dir: String = _config_file.get_base_dir()
+            if not dir.dir_exists(config_dir):
+                dir.make_dir_recursive(config_dir)
             save_cfg(true)
             return
         file.open(_config_file, File.READ)
