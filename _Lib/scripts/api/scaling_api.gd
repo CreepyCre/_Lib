@@ -8,6 +8,8 @@ var _picker_scaling_agent: ScalingAgent = ScalingAgent.new()
 var _scale_slider: HSlider = HSlider.new()
 var _picker_slider: HSlider = HSlider.new()
 
+var _handled: Array = []
+
 enum NodeType {
     TYPE_TOOLBAR
     TYPE_TOOLSET_BUTTON
@@ -291,17 +293,25 @@ func _setup_window_scaling(node: Node):
         _ui_scaling_agent.register(PropertyIconScaler.new(node, "texture"))
 
 func _toolset_button(node: Node):
+    if node in _handled:
+        return
+    _handled.append(node)
     _ui_scaling_agent.register(PropertyScaler.new(node, "rect_min_size", Vector2(0, 48)))
     _ui_scaling_agent.register(SetScaler.new(funcref(node, "SetLabelOffset"), 48, node.label.rect_position.x))
 
 func _toolbar(node: Node):
+    if node in _handled:
+        return
+    _handled.append(node)
     _ui_scaling_agent.register(PropertyScaler.new(node, "rect_min_size", Vector2(225, 0)))
     
 
 func _node_added(node: Node):
-    match _node_path_elements(node.get_path()):
-        ["root", "Master", "Editor", "VPartition", "Panels", "Tools", "Anchor", "Toolset", var button]:
-            _toolset_button(button)
+    match _node_type(node):
+        NodeType.TYPE_TOOLBAR:
+            _toolbar(node)
+        NodeType.TYPE_TOOLSET_BUTTON:
+            _toolset_button(node)
 
 func _node_type(node):
     if not (node is Node):
