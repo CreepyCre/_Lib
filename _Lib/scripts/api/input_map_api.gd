@@ -88,16 +88,20 @@ func deserialize_event(string: String) -> InputEventKey:
     var codes: Array = string.to_lower().split("+")
     var event: InputEventKey = InputEventKey.new()
     var key_string = codes.pop_back()
-    var alt: int = KEY_MASK_ALT if codes.has("alt") else 0
-    var ctrl: int = KEY_MASK_CTRL if codes.has("ctrl") else 0
-    var cmd: int = KEY_MASK_META if codes.has("cmd") else 0
-    var shift: int = KEY_MASK_SHIFT if codes.has("shift") else 0
-    var key = int(key_string) if key_string.is_valid_integer() else OS.find_scancode_from_string(key_string.capitalize())
-    event.set_scancode(alt + ctrl + cmd + shift + key)
+    if codes.has("alt"):
+        event.alt = true
+    if codes.has("ctrl"):
+        event.control = true
+    if codes.has("cmd"):
+        event.command = true
+    if codes.has("shift"):
+        event.shift = true
+    event.set_scancode(int(key_string) if key_string.is_valid_integer() else OS.find_scancode_from_string(key_string.capitalize()))
     return event
 
 ## Serializes event into a String. 
 func serialize_event(event: InputEventKey) -> String:
+    print(event.as_text())
     var code: int = event.get_scancode_with_modifiers()
     return ("Alt+" if code & KEY_MASK_ALT != 0 else "")\
         + ("Ctrl+" if code & KEY_MASK_CTRL != 0 else "")\
