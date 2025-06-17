@@ -13,8 +13,14 @@ enum {
     REDO
 }
 
-var _config: ConfigFile
-var _vanilla_history_record
+enum RecordType {
+    DEFAULT
+}
+
+var history
+var history_mirror: Array = []
+var _master
+var custom_record_clazz
 
 var _menu_align: HBoxContainer
 var _undo_button: Button
@@ -22,13 +28,6 @@ var _redo_button: Button
 
 var _replacement_undo_button: Button
 var _replacement_redo_button: Button
-
-var _ignore_history_changed: bool = true
-
-var history: Array = []
-var redo_history: Array = []
-
-var _locked: bool = false
 
 signal recorded(history_record)
 signal dropped(history_record, type)
@@ -38,11 +37,13 @@ signal redo_begin(history_record)
 signal redo_end(history_record)
 
 # editor is Global.Editor
-func _init(logger: Object, editor: CanvasLayer, config: ConfigFile):
+func _init(logger: Object, editor: CanvasLayer):
     LOGGER = logger.for_class(self)
-    _config = config
-    # we can reuse this one to undo/ redo the vanilla DungeonDraft history entries
-    _vanilla_history_record = VanillaHistoryRecord.new(editor)
+    history = editor.History
+    _master = editor.owner
+    custom_record_clazz = history.CreateCustomRecord(null).get_script()
+    history.Clear()
+
     # contains undo/ redo buttons
     _menu_align = editor.get_node("VPartition/MenuBar/MenuAlign")
 
@@ -59,127 +60,40 @@ func _init(logger: Object, editor: CanvasLayer, config: ConfigFile):
 ## Adds history_record to the undo history.
 ## history_record needs to implement undo() and redo() methods.
 func record(history_record: Object, max_count = null, record_type = null):
-    # wrap record if methods are missing
-    if (not history_record.has_method("max_count")):
-        max_count = -1
-    if (not history_record.has_method("record_type")):
-        record_type = history_record.get_script()
-    # ensure every record is a unique instance, small hack to make a record itself usable as identifier.
-    history_record = RecordWrapper.new(history_record, max_count, record_type)
-    # new record voids redo history
-    var old_redo_history: Array = redo_history
-    redo_history = []
-    history.append(history_record)
-    emit_signal("recorded", history_record)
-    # drop oldest record if there's more than configurated
-    var dropped_history: Array = []
-    while (history.size() > _config.get_value("Preferences", "max_undos", 32)):
-        dropped_history.append(history.pop_front())
-    
-    # shorten history if one of the record types goes over its max count
-    var counts: Dictionary = {}
-    var slice: int = 0
-    for i in range(history.size() - 1, -1, -1):
-        var rec = history[i]
-        var rec_type = rec.record_type()
-        var count = 0
-        if (rec_type in counts):
-            count = counts[rec_type] + 1
-        else:
-            count = 1
-        
-        if ((rec.max_count() > 0) and count > (rec.max_count())):
-            slice = i + 1
-            break
-        counts[rec_type] = count
-    
-    for i in slice:
-        dropped_history.append(history.pop_front())
-    
-    for rec in old_redo_history:
-        if (rec.has_method("dropped")):
-            rec.dropped(REDO)
-        emit_signal("dropped", rec, REDO)
-    
-    for rec in dropped_history:
-        if (rec.has_method("dropped")):
-            rec.dropped(UNDO)
-        emit_signal("dropped", rec, UNDO)
+    _verify_history()
+    var wrapper = RecordWrapper.new(self, history_record, max_count, record_type)
+    history_mirror.append(history.CreateCustomRecord(wrapper))
+    _record(wrapper)
+    _verify_history()
 
+    
     # update undo/ redo button state
-    _replacement_undo_button.disabled = false
-    _replacement_redo_button.disabled = true
+    _replacement_redo_button.disabled = _redo_button.disabled
+    _replacement_undo_button.disabled = _undo_button.disabled
 
 ## Undoes relevant record in history by calling its undo() method
 ## Is called by undo button or undo shortcut
 func undo() -> bool:
-    # safeguard
-    if (history.empty()):
+    _verify_history()
+    if _master.IsBusy or history.locked:
         return false
-    if (not _aquire_lock()):
-        return false
-    # make sure we don't trigger our vanilla record detection wrongfully
-    _ignore_history_changed = true
-    # undo history_record and move it into the redo history
-    var history_record = history.pop_back()
-    emit_signal("undo_begin", history_record)
-    history_record.undo()
-    redo_history.append(history_record)
-
-    # update undo/ redo button state
-    _replacement_undo_button.disabled = history.empty()
-    _replacement_redo_button.disabled = false
-
-    _emit_signal_delayed("undo_end", history_record)
-
+    history.Undo()
+    _replacement_redo_button.disabled = _redo_button.disabled
+    _replacement_undo_button.disabled = _undo_button.disabled
+    
     return true
 
 ## Redoes relevant record in history by calling its redo() method
 ## Is called by undo button or undo shortcut
 func redo() -> bool:
-    # safeguard
-    if (redo_history.empty()):
+    _verify_history()
+    if _master.IsBusy or history.locked:
         return false
-    if (not _aquire_lock()):
-        return false
-    # make sure we don't trigger our vanilla record detection wrongfully
-    _ignore_history_changed = true
-    # redo history_record and move it into the undo history
-    var history_record = redo_history.pop_back()
-    emit_signal("redo_begin", history_record)
-    history_record.redo()
-    history.append(history_record)
-
-    # update undo/ redo button state
-    _replacement_undo_button.disabled = false
-    _replacement_redo_button.disabled = redo_history.empty()
-
-    _emit_signal_delayed("redo_end", history_record)
-
+    history.Redo()
+    _replacement_redo_button.disabled = _redo_button.disabled
+    _replacement_undo_button.disabled = _undo_button.disabled
+    
     return true
-
-func _emit_signal_delayed(sig: String, history_record):
-    for i in history_record.idle_frames():
-        yield(_menu_align.get_tree(), "idle_frame")
-    emit_signal(sig, history_record)
-
-# call to make sure we aren't spamming undos/ redos
-func _aquire_lock() -> bool:
-    if (_locked):
-        return false
-    else:
-        _lock()
-        return true
-
-func _lock():
-    _locked = true
-
-    # wait three idle frames before allowing next undo/ redo
-    yield(_menu_align.get_tree(), "idle_frame")
-    yield(_menu_align.get_tree(), "idle_frame")
-    yield(_menu_align.get_tree(), "idle_frame")
-
-    _locked = false
 
 # creates our homebrew buttons to replace the original unload/ reload buttons
 func _get_replacement_button(button: Button):
@@ -189,7 +103,6 @@ func _get_replacement_button(button: Button):
     _menu_align.add_child_below_node(button, out)
     # enable and hide button
     # hidden buttons can't press (even via shortcut) so we don't have to disconnect any signals
-    button.disabled = false
     button.hide()
     
     return out
@@ -200,13 +113,64 @@ func _copy_props(from: Object, to: Object, props: Array):
         to.set(prop, from.get(prop))
 
 func _update(_delta):
-    if (_redo_button.disabled):
-        _redo_button.disabled = false
-        # if this button is disabled unexpectedly then a new record was added to the vanilla history, so we add a corresponding record
-        if (not _ignore_history_changed):
-            record(_vanilla_history_record)
-    
-    _ignore_history_changed = false
+    _verify_history()
+    _replacement_redo_button.disabled = _redo_button.disabled
+    _replacement_undo_button.disabled = _undo_button.disabled
+
+func _verify_history():
+    var recorded: Array = []
+    var i: int = history.history.size() - 1
+    while i > 0 and not history.history[i].ScriptInstance is RecordWrapper and not history.history[i].ScriptInstance is CSharpRecordWrapper:
+        if history.history[i].ScriptInstance == null:
+            var record = custom_record_clazz.new()
+            record.ScriptInstance = CSharpRecordWrapper.new(self, history.history[i])
+            history.history[i] = record
+            recorded.push_front(record.ScriptInstance)
+        else:
+            var wrapper = RecordWrapper.new(self, history.history[i].ScriptInstance)
+            history.history[i].ScriptInstance = wrapper
+            recorded.push_front(wrapper)
+        i = i - 1
+    for record in recorded:
+        _record(record)
+    # verify dropped
+    while history_mirror.size() > 0 and not history_mirror.back() in history.history:
+        var record = history_mirror.pop_back().ScriptInstance
+        record.dropped(REDO)
+        emit_signal("dropped", record, REDO)
+    while history_mirror.size() > 0 and not history_mirror.front() in history.history:
+        var record = history_mirror.pop_front().ScriptInstance
+        record.dropped(UNDO)
+        emit_signal("dropped", record, UNDO)
+    history_mirror = history.history
+
+func _record(record):
+    print(record)
+    LOGGER.info("AAAA")
+    var max_count:int = record.max_count()
+    LOGGER.debug("max_count: %d", [max_count])
+    if max_count < 1:
+        emit_signal("recorded", record)
+        return
+    var record_type = record.record_type()
+    var count: int = 0
+    var to_be_dropped: Array = []
+    var i = history.history.size() - 1
+    while i >= 0:
+        if history.history[i].ScriptInstance.record_type() == record_type:
+            count = count + 1
+            LOGGER.debug("count: %d", [count])
+        if count > max_count:
+            break
+        i = i - 1
+    if i >= 0:
+        to_be_dropped = history.history.slice(0, i)
+        history.history = history.history.slice(i + 1, history.history.size() - 1)
+        history.bookmark -= 0 + 1
+    emit_signal("recorded", record)
+    for record in to_be_dropped:
+        record.ScriptInstance.dropped(UNDO)
+        emit_signal("dropped", record.ScriptInstance, UNDO)
 
 func _unload():
     # bring back original undo button
@@ -223,14 +187,6 @@ func _unload():
     _replacement_redo_button.disconnect("pressed", self, "_try_redo")
     _menu_align.remove_child(_replacement_redo_button)
 
-    # clear history
-    for entry in history:
-        entry.free()
-    history.clear()
-    for entry in redo_history:
-        entry.free()
-    redo_history.clear()
-
     # disconnect all signals
     for signal_dict in get_signal_list():
         var signal_name = signal_dict.name
@@ -238,20 +194,44 @@ func _unload():
             disconnect(signal_name, callable_dict.target, callable_dict.method)
 
 class RecordWrapper:
+    var _history_api
     var _record
     var _max_count
     var _record_type
 
-    func _init(rec, max_c, record_type):
+    func _init(history_api, rec, max_count = null, record_type = null):
+        _history_api = history_api
         _record = rec
-        _max_count = max_c
+        if max_count != null and not max_count is int:
+            record_type = max_count
+            max_count = null
+        _max_count = max_count
         _record_type = record_type
 
     func undo():
-        _record.undo()
+        _history_api._verify_history()
+        _history_api.emit_signal("undo_begin", self)
+        var result = _record.undo()
+        if result is GDScriptFunctionState:
+            yield(result, "completed")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        _history_api.emit_signal("undo_end", self)
     
     func redo():
-        _record.redo()
+        _history_api._verify_history()
+        _history_api.emit_signal("redo_begin", self)
+        var result = _record.redo()
+        if result is GDScriptFunctionState:
+            yield(result, "completed")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        _history_api.emit_signal("redo_end", self)
+
+    func get_record():
+        return _record
     
     func dropped(type: int):
         if (_record.has_method("dropped")):
@@ -260,17 +240,18 @@ class RecordWrapper:
     func max_count() -> int:
         if (_max_count != null):
             return _max_count
-        return _record.max_count()
+        if _record.has_method("max_count"):
+            return _record.max_count()
+        return -1
     
     func record_type():
-        if (_record_type != null):
+        if _record_type != null:
             return _record_type
-        return _record.record_type()
-    
-    func idle_frames() -> int:
-        if (_record.has_method("idle_frames")):
-            return _record.idle_frames()
-        return 0
+        if _record.has_method("record_type"):
+            return _record.record_type()
+        if _max_count == null:
+            return RecordType.DEFAULT
+        return _record.get_script()
 
 # corresponds to a record in the vanilla history
 class VanillaHistoryRecord:
@@ -280,12 +261,42 @@ class VanillaHistoryRecord:
         _editor = editor
 
     # equivalent to pressing original undo button
-    func undo():
-        _editor._on_UndoButton_pressed()
-    
-    # equivalent to pressing original redo button
-    func redo():
-        _editor._on_RedoButton_pressed()
 
-    func idle_frames() -> int:
-        return 1
+
+class CSharpRecordWrapper:
+    var _history_api
+    var _record
+
+    func _init(history_api, rec):
+        _history_api = history_api
+        _record = rec
+
+    func undo():
+        _history_api._verify_history()
+        _history_api.emit_signal("undo_begin", self)
+        _record.Undo()
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        _history_api.emit_signal("undo_end", self)
+    
+    func redo():
+        _history_api._verify_history()
+        _history_api.emit_signal("redo_begin", self)
+        _record.Redo()
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        yield(_history_api._menu_align.get_tree(), "idle_frame")
+        _history_api.emit_signal("redo_end", self)
+
+    func get_record():
+        return _record
+    
+    func dropped(_type: int):
+        pass
+
+    func max_count() -> int:
+        return -1
+    
+    func record_type():
+        return RecordType.DEFAULT

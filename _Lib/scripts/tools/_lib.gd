@@ -84,7 +84,7 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering ModConfigApi")
     set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, api.Util.create_loading_helper(_global.Root + "../../"), api.ScalingApi.get_ui_scaling_agent(), _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
     LOGGER.info("Registering HistoryApi")
-    set_up_api("HistoryApi", _global.Editor, api.AccessorApi.config())
+    set_up_api("HistoryApi", _global.Editor)
     LOGGER.info("Registering ComponentsApi")
     set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World, _global.ModMapData)
     LOGGER.info("Registering LayerApi")
