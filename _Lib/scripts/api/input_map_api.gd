@@ -101,7 +101,6 @@ func deserialize_event(string: String) -> InputEventKey:
 
 ## Serializes event into a String. 
 func serialize_event(event: InputEventKey) -> String:
-    print(event.as_text())
     var code: int = event.get_scancode_with_modifiers()
     return ("Alt+" if code & KEY_MASK_ALT != 0 else "")\
         + ("Ctrl+" if code & KEY_MASK_CTRL != 0 else "")\
