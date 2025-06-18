@@ -145,7 +145,6 @@ func _verify_history():
     history_mirror = history.history
 
 func _record(record):
-    print(record)
     var max_count:int = record.max_count()
     if max_count < 1:
         emit_signal("recorded", record)
