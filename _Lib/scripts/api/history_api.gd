@@ -120,7 +120,7 @@ func _update(_delta):
 func _verify_history():
     var recorded: Array = []
     var i: int = history.history.size() - 1
-    while i > 0 and not history.history[i].ScriptInstance is RecordWrapper and not history.history[i].ScriptInstance is CSharpRecordWrapper:
+    while i >= 0 and not history.history[i].ScriptInstance is RecordWrapper and not history.history[i].ScriptInstance is CSharpRecordWrapper:
         if history.history[i].ScriptInstance == null:
             var record = custom_record_clazz.new()
             record.ScriptInstance = CSharpRecordWrapper.new(self, history.history[i])
@@ -142,7 +142,7 @@ func _verify_history():
         var record = history_mirror.pop_front().ScriptInstance
         record.dropped(UNDO)
         emit_signal("dropped", record, UNDO)
-    history_mirror = history.history
+    history_mirror = history.history.duplicate()
 
 func _record(record):
     var max_count:int = record.max_count()
