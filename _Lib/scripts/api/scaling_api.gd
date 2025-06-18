@@ -347,7 +347,7 @@ func _node_path_elements(path: NodePath) -> Array:
     return elements
 
 func update_scale_label(value, scale_label):
-    scale_label.text = "%.2f" % value
+    scale_label.text = "%4d%%" % (value * 100)
 
 func get_ui_scaling_agent() -> ScalingAgent:
     return _ui_scaling_agent

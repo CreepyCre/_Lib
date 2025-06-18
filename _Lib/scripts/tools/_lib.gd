@@ -109,9 +109,9 @@ func _post_init(script_instance: Reference = self):
                     .exit()\
                     .h_slider("ui_scale", 2 if api.AccessorApi.config().get_value("Preferences", "enlarge_ui", false) else 1)\
                         .size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_FILL)\
-                        .with("min_value", 0.5).with("max_value", 4).with("step", 0.25)\
-                        .connect_current("loaded", self, "format_slider_label", [builder.get_ref("ui_scale_label"), 2])\
-                        .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("ui_scale_label"), 2])\
+                        .with("min_value", 0.5).with("max_value", 4).with("step", 0.01)\
+                        .connect_current("loaded", self, "format_slider_label", [builder.get_ref("ui_scale_label")])\
+                        .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("ui_scale_label")])\
                         .connect_current("loaded", api.ScalingApi.get_ui_scaling_agent(), "scale")\
                         .connect_current("updated", api.ScalingApi.get_ui_scaling_agent(), "scale")\
                         .call_on("share", api.ScalingApi._scale_slider)\
@@ -125,9 +125,9 @@ func _post_init(script_instance: Reference = self):
                     .exit()\
                     .h_slider("picker_scale", 1)\
                         .size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_FILL)\
-                        .with("min_value", 0.5).with("max_value", 4).with("step", 0.25)\
-                        .connect_current("loaded", self, "format_slider_label", [builder.get_ref("picker_scale_label"), 2])\
-                        .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("picker_scale_label"), 2])\
+                        .with("min_value", 0.5).with("max_value", 4).with("step", 0.01)\
+                        .connect_current("loaded", self, "format_slider_label", [builder.get_ref("picker_scale_label")])\
+                        .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("picker_scale_label")])\
                         .connect_current("loaded", api.ScalingApi.get_picker_scaling_agent(), "scale")\
                         .connect_current("updated", api.ScalingApi.get_picker_scaling_agent(), "scale")\
                         .call_on("share", api.ScalingApi._picker_slider)\
@@ -136,8 +136,8 @@ func _post_init(script_instance: Reference = self):
     
     api.Logger.set_log_level(config.log_level)
 
-func format_slider_label(value, label: Label, precision: int):
-    label.text = "%.*f" % [precision, value]
+func format_slider_label(value, label: Label):
+    label.text = "%4d%%" % (value * 100)
 
 func start():
     pass
