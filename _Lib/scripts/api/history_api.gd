@@ -173,14 +173,14 @@ func _unload():
     _undo_button.disabled = true
     _undo_button.show()
     # destroy homebrew undo button
-    _replacement_undo_button.disconnect("pressed", self, "_try_undo")
+    _replacement_undo_button.disconnect("pressed", self, "undo")
     _menu_align.remove_child(_replacement_undo_button)
 
     # bring back original redo button
     _redo_button.disabled = true
     _redo_button.show()
     # destroy homebrew redo button
-    _replacement_redo_button.disconnect("pressed", self, "_try_redo")
+    _replacement_redo_button.disconnect("pressed", self, "redo")
     _menu_align.remove_child(_replacement_redo_button)
 
     # disconnect all signals

@@ -170,7 +170,7 @@ func _on_preferences_about_to_show():
 func _unload():
     # revert preferences about_to_show signal rerouting
     _preferences.connect("about_to_show", _preferences, "_on_Preferences_about_to_show")
-    _preferences.disconnect("about_to_show", self, "_on_Preferences_about_to_show")
+    _preferences.disconnect("about_to_show", self, "_on_preferences_about_to_show")
 
     # disconnect all signals
     _apply_button.disconnect("pressed", self, "_apply_pressed")
