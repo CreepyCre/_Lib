@@ -146,9 +146,7 @@ func _verify_history():
 
 func _record(record):
     print(record)
-    LOGGER.info("AAAA")
     var max_count:int = record.max_count()
-    LOGGER.debug("max_count: %d", [max_count])
     if max_count < 1:
         emit_signal("recorded", record)
         return
@@ -159,7 +157,6 @@ func _record(record):
     while i >= 0:
         if history.history[i].ScriptInstance.record_type() == record_type:
             count = count + 1
-            LOGGER.debug("count: %d", [count])
         if count > max_count:
             break
         i = i - 1
