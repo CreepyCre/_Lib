@@ -13,6 +13,7 @@ var _handled: Array = []
 enum NodeType {
     TYPE_TOOLBAR
     TYPE_TOOLSET_BUTTON
+    TYPE_HOTBAR_BUTTON
 }
 
 func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
@@ -77,10 +78,6 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Title", "Fonts"), 24))
     _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Subtitle", "Fonts"), 16))
     _ui_scaling_agent.register(FontScaler.new(Global.Theme.get_font("Subelement", "Fonts"), 12))
-
-
-
-
 
     # BoxContainer
     _ui_scaling_agent.register(ThemeConstantScaler.new(Global.Theme, "separation", "BoxContainer"))
@@ -203,7 +200,13 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "close", "WindowDialog", "res://ui/icons2x/buttons/close.png", Vector2(16, 16)))
     _ui_scaling_agent.register(ThemeIconScaler.new(Global.Theme, "close_highlight", "WindowDialog", "res://ui/icons2x/buttons/close.png", Vector2(16, 16)))
 
-    
+    # Hotbar
+    var hotbar = editor.get_node_or_null("Floatbar/Hotbar/HotbarGrid")
+    if hotbar != null:
+        for child in hotbar.get_children():
+            if _node_type(child) == NodeType.TYPE_HOTBAR_BUTTON:
+                _hotbar_button(child)
+
     # WindowDialog scale
     for window in editor.Windows.values():
         _ui_scaling_agent.register(PropertyScaler.new(window, "rect_size", null, ui_scaler))
@@ -304,6 +307,13 @@ func _toolbar(node: Node):
         return
     _handled.append(node)
     _ui_scaling_agent.register(PropertyScaler.new(node, "rect_min_size", Vector2(225, 0)))
+
+func _hotbar_button(node: Node):
+    if node in _handled:
+        return
+    _handled.append(node)
+    if node.icon != null:
+        _ui_scaling_agent.register(ButtonIconScaler.new(node))
     
 
 func _node_added(node: Node):
@@ -312,6 +322,8 @@ func _node_added(node: Node):
             _toolbar(node)
         NodeType.TYPE_TOOLSET_BUTTON:
             _toolset_button(node)
+        NodeType.TYPE_HOTBAR_BUTTON:
+            _hotbar_button(node)
 
 func _node_type(node):
     if not (node is Node):
@@ -323,6 +335,9 @@ func _node_type(node):
         ["root", "Master", "Editor", "VPartition", "Panels", "Tools", "Anchor", "Toolset", var button]:
             if node.name.ends_with("ToolsetButton"):
                 return NodeType.TYPE_TOOLSET_BUTTON
+        ["root", "Master", "Editor", "Floatbar", "Hotbar", "HotbarGrid", var button]:
+            if node is Button:
+                return NodeType.TYPE_HOTBAR_BUTTON
     return -1
 
 func _node_path_elements(path: NodePath) -> Array:
