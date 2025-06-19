@@ -147,7 +147,6 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_sca
     _shortcuts_node.add_child(_mod_tree)
     _mod_tree.owner = _shortcuts_node
     _mod_tree.connect("button_pressed", self, "_on_mod_tree_button_pressed")
-    input_map_api.get_or_append_event_emitter(_mod_tree).connect("signal_input", self, "_input_")
     input_map_api.get_or_append_event_emitter(_mod_tree).connect("unhandled_key_input", self, "_unhandled_key_input_")
     preferences_window_api.connect("about_to_show", self, "_on_preferences_about_to_show")
     preferences_window_api.get_preferences_window().set_process_unhandled_key_input(false)
@@ -337,13 +336,11 @@ func _accept_input():
     for event in _ui_cancel_events:
         InputMap.action_add_event("ui_cancel", event)
 
-func _input_(event: InputEvent, agent):
+func _unhandled_key_input_(event: InputEventKey, agent):
     if (_waiting_for_input and InputMap.event_is_action(event, "clear_shortcut") and not _pressed_item.get_meta("agent") is TreeItem):
         _switch_event(null)
         agent.accept_event()
-
-
-func _unhandled_key_input_(event: InputEventKey, agent):
+        return
     if (_waiting_for_input and not event.is_pressed()):
         _switch_event(event)
         agent.accept_event()
