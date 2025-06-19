@@ -1194,7 +1194,6 @@ class ShortcutsConfigNode:
                     InputMap.action_add_event(def, _deserialize_event(event))
             
     func _deserialize_event(string: String) -> InputEventKey:
-        print(string)
         var codes: Array = string.to_lower().split("+")
         var event: InputEventKey = InputEventKey.new()
         var key_string = codes.pop_back()
