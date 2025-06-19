@@ -156,6 +156,7 @@ func _create_agent(action: String, erase_on_unload = true) -> ActionConfigSyncAg
     return agent
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
     # disconnect all signals
     for signal_dict in get_signal_list():
         var signal_name = signal_dict.name
@@ -285,7 +286,7 @@ class ActionConfigSyncAgent:
             for callable_dict in get_signal_connection_list(signal_name):
                 disconnect(signal_name, callable_dict.target, callable_dict.method)
         # erase action from InputMap if needed. Usually only vanilla actions won't be erased.
-        if _erase_on_unload:
+        if _erase_on_unload and InputMap.has_action(_action):
             InputMap.erase_action(_action)
     
     func is_saved() -> bool:

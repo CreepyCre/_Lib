@@ -363,6 +363,7 @@ func _mult_half(value, scale):
 
 func _unload():
     _ui_scaling_agent._unload()
+    _picker_scaling_agent._unload()
     for signal_dict in get_signal_list():
         var signal_name = signal_dict.name
         for callable_dict in get_signal_connection_list(signal_name):

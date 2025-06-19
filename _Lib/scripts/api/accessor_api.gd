@@ -41,6 +41,7 @@ func config() -> ConfigFile:
     return _config
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
     _visitor_indices.clear()
 
 class ConfigFileVisitor:

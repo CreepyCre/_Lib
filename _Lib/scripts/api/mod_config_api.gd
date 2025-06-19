@@ -475,6 +475,8 @@ static func _get_all_files(path: String, file_ext := "", files := []):
         return files
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
+    # TODO: delete redundant scene cleanup, scene is reloaded on unload anyways.
     InputMap.erase_action("clear_shortcut")
     _preferences_window_api.get_preferences_window().set_process_unhandled_key_input(true)
     _mod_list.disconnect("item_selected", self, "_mod_selected")

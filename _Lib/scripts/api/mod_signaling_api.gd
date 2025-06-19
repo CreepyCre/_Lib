@@ -53,6 +53,8 @@ func _update(_delta):
 
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
+    # TODO: delete redundant scene cleanup, scene is reloaded on unload anyways.
     _infobar.busyIcon.disconnect("visibility_changed", self, "_busy_icon_visibility_changed")
     _deferred_connections.clear()
     # disconnect all signals

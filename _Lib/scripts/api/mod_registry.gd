@@ -46,6 +46,7 @@ func get_mod_list():
     return _registered_mods.duplicate()
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
     # disconnect all signals
     Engine.disconnect("_lib_register_mod", self, "register")
     for signal_dict in get_signal_list():

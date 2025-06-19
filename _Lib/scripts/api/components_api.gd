@@ -447,6 +447,7 @@ func _update(_delta):
 
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
     _scene_tree.disconnect("node_added", self, "_node_added")
     _scene_tree.disconnect("node_removed", self, "_node_removed")
 

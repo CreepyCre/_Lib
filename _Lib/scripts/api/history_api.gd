@@ -169,6 +169,8 @@ func _record(record):
         emit_signal("dropped", record.ScriptInstance, UNDO)
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
+    # TODO: delete redundant scene cleanup, scene is reloaded on unload anyways.
     # bring back original undo button
     _undo_button.disabled = true
     _undo_button.show()

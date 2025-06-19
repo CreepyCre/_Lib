@@ -44,11 +44,9 @@ func _post_init(script_instance: Reference = self):
     # read in .ddmod files
     aquire_active_ddmod_files()
 
-    # unload if new map is created
-    _global.Editor.Windows["New"].find_node("OkayButton").connect("pressed", self, "_unload")
-    # see _loading_box_visibility_changed()
+    # unload on scene unload
     var _master = _global.Editor.owner
-    _master.get_node(_master.loadingBoxPath).connect("visibility_changed", self, "_loading_box_visibility_changed")
+    _master.connect("tree_exiting", self, "_unload")
 
     uppercase_letter.compile(UPPERCASE_LETTER)
 
@@ -145,17 +143,6 @@ func start():
 func update(delta):
     api._update(delta)
 
-# this is a trick to detect when mods are unloaded
-# it happens when another map is loaded (or a new map is created, this is detected differently) wich fully unloads and then loads mods again
-# we do this by detecting when the loading box becomes visible
-func _loading_box_visibility_changed():
-    # check if new map is actually being loaded
-    if self.Global.Editor.owner.IsLoadingMap:
-        _unload()
-    else: #finished loading
-        # TODO: VersioningAPI
-        pass
-
 # varargs hack
 func set_up_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):
     var snake_case = camel_to_snake_case(api_name)
@@ -245,11 +232,7 @@ static func _get_all_files(path: String, file_ext := "", files := []):
     return files
 
 func _unload():
-    # disconnect our unload detector
-    _global.Editor.Windows["New"].find_node("OkayButton").disconnect("pressed", self, "_unload")
-    var _master = _global.Editor.owner
-    _master.get_node(_master.loadingBoxPath).disconnect("visibility_changed", self, "_loading_box_visibility_changed")
     # unload everything recursively
     api.ModSignalingApi.emit_signal("unload")
+    LOGGER.info("Unloading _Lib components.")
     api._unload()
-

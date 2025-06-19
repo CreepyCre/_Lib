@@ -34,6 +34,7 @@ func _update(delta):
             api._update(delta)
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
     # unload InstancedApiApi objects
     for api_api_instance in api_api_instances:
         api_api_instance._unload()

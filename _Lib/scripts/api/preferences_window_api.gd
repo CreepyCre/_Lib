@@ -168,6 +168,8 @@ func _on_preferences_about_to_show():
     emit_signal("about_to_show")
 
 func _unload():
+    LOGGER.info("Unloading %s.", [CLASS_NAME])
+    # TODO: delete redundant scene cleanup, scene is reloaded on unload anyways.
     # revert preferences about_to_show signal rerouting
     _preferences.connect("about_to_show", _preferences, "_on_Preferences_about_to_show")
     _preferences.disconnect("about_to_show", self, "_on_preferences_about_to_show")
