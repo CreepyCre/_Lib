@@ -37,6 +37,7 @@ var _waiting_for_input: bool = false
 var _pressed_item: TreeItem = null
 var _agents: Array = []
 var _busy: bool = false
+var _ui_cancel_events: Array = []
 
 func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_scaling_agent: ScalingAgent, active_mods: Array, copy_dir_func: FuncRef):
     LOGGER = logger.for_class(self)
@@ -45,6 +46,12 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_sca
     _input_map_api = input_map_api
     _ui_scaling_agent = ui_scaling_agent
     _copy_dir_func = copy_dir_func
+
+    # add action for clearing shortcut
+    InputMap.add_action("clear_shortcut")
+    var clear_shortcut = InputEventKey.new()
+    clear_shortcut.scancode = KEY_ESCAPE
+    InputMap.action_add_event("clear_shortcut", clear_shortcut)
 
     # grab some of the vanilla icons
     var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
@@ -282,7 +289,7 @@ func _on_mod_tree_button_pressed(item: TreeItem, column: int, id: int):
         if meta is TreeItem:
             _preferences_window_api.get_preferences_window()._on_Tree_button_pressed(meta, column, id)
         _pressed_item = item
-        _waiting_for_input = true
+        _await_input()
         item.set_selectable(1, true)
         item.select(1)
         item.set_text(1, "--- press new shortcut key ---")
@@ -308,7 +315,7 @@ func _on_mod_tree_button_pressed(item: TreeItem, column: int, id: int):
             new_item.set_meta("index", new_index)
             agent.added_item()
             _pressed_item = new_item
-            _waiting_for_input = true
+            _await_input()
         else:
             var child_item: TreeItem = item.get_next()
             item.free()
@@ -320,8 +327,18 @@ func _on_mod_tree_button_pressed(item: TreeItem, column: int, id: int):
             agent.deleted_item(index)
         _busy = false
 
+func _await_input():
+    _waiting_for_input = true
+    _ui_cancel_events = InputMap.get_action_list("ui_cancel")
+    InputMap.action_erase_events("ui_cancel")
+
+func _accept_input():
+    _waiting_for_input = false
+    for event in _ui_cancel_events:
+        InputMap.action_add_event("ui_cancel", event)
+
 func _input_(event: InputEvent, agent):
-    if (_waiting_for_input and event is InputEventMouseButton and event.doubleclick and event.button_index == BUTTON_RIGHT):
+    if (_waiting_for_input and InputMap.event_is_action(event, "clear_shortcut") and not _pressed_item.get_meta("agent") is TreeItem):
         _switch_event(null)
         agent.accept_event()
 
@@ -336,7 +353,7 @@ func _switch_event(event):
     _pressed_item.set_selectable(1, false)
     _pressed_item.deselect(1)
     _pressed_item.set_text(1, _input_map_api.event_as_string(event) if event != null else "")
-    _waiting_for_input = false
+    _accept_input()
     var meta = _pressed_item.get_meta("agent")
     if not meta is TreeItem:
         _busy = true
@@ -461,6 +478,7 @@ static func _get_all_files(path: String, file_ext := "", files := []):
         return files
 
 func _unload():
+    InputMap.erase_action("clear_shortcut")
     _preferences_window_api.get_preferences_window().set_process_unhandled_key_input(true)
     _mod_list.disconnect("item_selected", self, "_mod_selected")
     _mod_list.disconnect("nothing_selected", self, "_mod_selected")
