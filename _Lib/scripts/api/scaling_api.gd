@@ -9,6 +9,7 @@ var _scale_slider: HSlider = HSlider.new()
 var _picker_slider: HSlider = HSlider.new()
 
 var _handled: Array = []
+var _centering_terrain_window: bool = false
 
 enum NodeType {
     TYPE_TOOLBAR
@@ -255,6 +256,10 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     for child in editor.Toolset.anchor.get_children():
         if _node_type(child) == NodeType.TYPE_TOOLBAR:
             _toolbar(child)
+    
+    var terrain_window = editor.Windows["TerrainWindow"]
+    terrain_window.disconnect("about_to_show", terrain_window, "_on_TerrainWindow_about_to_show")
+    terrain_window.connect("visibility_changed", self, "_center_terrain_window", [terrain_window])
 
     editor.get_tree().connect("node_added", self, "_node_added")
 
@@ -278,6 +283,12 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     _picker_scaling_agent.register(PropertyScaler.new(editor.ObjectLibraryPanel, "rect_min_size", null, ui_scaler))
     _picker_scaling_agent.register(PropertyScaler.new(editor.PathLibraryPanel.get_node("Margins/VAlign/PathsMenu"), "icon_scale"))
     _picker_scaling_agent.register(PropertyScaler.new(editor.PathLibraryPanel, "rect_min_size", null, ui_scaler))
+
+func _center_terrain_window(window: WindowDialog):
+    if window.visible and not _centering_terrain_window:
+        _centering_terrain_window = true
+        window.popup_centered()
+        _centering_terrain_window = false
 
 func _setup_control_scaling(node: Node, ui_scaler):
     for child in node:
