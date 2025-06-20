@@ -4,11 +4,13 @@ const CLASS_NAME = "ClassLoader"
 var LOGGER: Object
 
 const IMPORT_REGEX = "class[ \t]+([a-zA-Z]+)[ \t]*:[ \t]*const[ \t]+import[ \t]+=[ \t]+\"(([^:\"]+):)?(([^:\"\\\/]+\\\/)*)([^:\"\\\/]+)\\\/([^:\"\\\/]+)?\""
+const EXTENDS_REGEX = "const[ \t]+Extends[ \t]+=[ \t]+\"(([^:\"]+):)?(([^:\"\\\/]+\\\/)*)([^:\"\\\/]+)\\\/([^:\"\\\/]+)?\""
 const UPPERCASE_LETTER: String = "[^A-Z]([A-Z])"
 
 var _unique_id_to_root: Dictionary
 var _file_id_to_script: Dictionary = {}
 var _import_regex: RegEx = RegEx.new()
+var _extends_regex: RegEx = RegEx.new()
 var _uppercase_letter: RegEx = RegEx.new()
 
 var source_transformers: Array = []
@@ -17,9 +19,11 @@ func _init(logger: Object, unique_id_to_root: Dictionary):
     LOGGER = logger.for_class(self)
     _unique_id_to_root = unique_id_to_root
     _import_regex.compile(IMPORT_REGEX)
+    _extends_regex.compile(EXTENDS_REGEX)
     _uppercase_letter.compile(UPPERCASE_LETTER)
 
     source_transformers.append(funcref(self, "_transform_imports"))
+    source_transformers.append(funcref(self, "_transform_extends"))
     source_transformers.append(funcref(self, "_replace_new"))
 
 func load_or_get(mod_id: String, script_path: String) -> GDScript:
@@ -75,6 +79,31 @@ func _transform_imports(source_code: String, context) -> String:
             source_code_pieces.append("const %s = preload(\"%s:/%s\")" % [clazz_name, mod_id, script_path])
         else:
             source_code_pieces.append("const %s = preload(\"%s:/%s\").%s" % [clazz_name, mod_id, script_path, clazz_path])
+
+        final_index = reg_match.get_end()
+    source_code_pieces.append(source_code.substr(final_index))
+    return PoolStringArray(source_code_pieces).join("")
+
+func _transform_extends(source_code: String, context) -> String:
+    var extends_statement_matches: Array = _extends_regex.search_all(source_code)
+    var source_code_pieces: Array = []
+    var final_index: int = 0
+    for reg_match in extends_statement_matches:
+        var mod_id: String = reg_match.get_string(2)
+        var script_folder: String = reg_match.get_string(3)
+        var script_file: String = reg_match.get_string(5)
+        var clazz_path: String = reg_match.get_string(6)
+
+        var script_path: String = "%s%s/" % [script_folder, script_file if script_file.ends_with("gd") else "%s.gd" % camel_to_snake_case(script_file)]
+        if mod_id == "":
+            mod_id = context["mod_id"]
+        load_or_get(mod_id, script_path)
+
+        source_code_pieces.append(source_code.substr(final_index, reg_match.get_start() - final_index))
+        if clazz_path == "":
+            source_code_pieces.append("extends \"%s:/%s\"" % [mod_id, script_path])
+        else:
+            source_code_pieces.append("extends \"%s:/%s\".%s" % [mod_id, script_path, clazz_path])
 
         final_index = reg_match.get_end()
     source_code_pieces.append(source_code.substr(final_index))
