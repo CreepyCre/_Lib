@@ -1,185 +1,53 @@
 class_name ConfigBuilder
+const Extends = "util/UiBuilder/"
 
 const CLASS_NAME = "ConfigBuilder"
 
 var _agent: ConfigAgent
 var _input_map_api
-var _root: Control
-var _node_stack: Array = []
-var _current_node: Control
-var _last_child_node: Control = null
-var _references: Dictionary = {}
 
 func _init(root: Control, config_file: String, input_map_api):
-    _root = root
-    _current_node = root
-    _agent = ConfigAgent.new(_root, config_file)
+    self._root = root
+    self._current_node = root
+    _agent = ConfigAgent.new(root, config_file)
     _input_map_api = input_map_api
-    _root.set_parent_config_node(_agent)
+    root.set_parent_config_node(_agent)
 
 func enter() -> ConfigBuilder:
-    _node_stack.append(_current_node)
-    _current_node = _last_child_node
-    var children = _get_target(_last_child_node).get_children()
-    _last_child_node = children.back() if children.size() > 0 else null
-    return self
-
-func exit() -> ConfigBuilder:
-    _last_child_node = _current_node
-    _current_node = _node_stack.pop_back()
+    self._node_stack.append(self._current_node)
+    self._current_node = self._last_child_node
+    var children = _get_target(self._last_child_node).get_children()
+    self._last_child_node = children.back() if children.size() > 0 else null
     return self
 
 func add_node(node: Control, legible_unique_name: bool = false) -> ConfigBuilder:
-    if (_current_node.has_method("add_node")):
-        _current_node.add_node(node, legible_unique_name)
+    if (self._current_node.has_method("add_node")):
+        self._current_node.add_node(node, legible_unique_name)
     else:
-        var target = _get_target(_current_node)
-        target.add_child(node, legible_unique_name)
+        var target = _get_target(self._current_node)
+        if self._last_child_node != null:
+            target.add_child_below_node(self._last_child_node, node, legible_unique_name)
+        else:
+            target.add_child(node, legible_unique_name)
         node.owner = target
     if node.has_method("set_parent_config_node"):
-        node.set_parent_config_node(_current_node)
-    _last_child_node = node
+        node.set_parent_config_node(self._current_node)
+    self._last_child_node = node
     return self
 
 func add_node_direct(node: Control, legible_unique_name: bool = false) -> ConfigBuilder:
-    _current_node.add_child(node, legible_unique_name)
-    node.owner = _current_node
-    return self
+    return .add_node(node, legible_unique_name)
 
 func with(property: String, value) -> ConfigBuilder:
-    if (_last_child_node.has_method("with")):
-        _last_child_node.with(property, value)
+    if (self._last_child_node.has_method("with")):
+        self._last_child_node.with(property, value)
     else:
-        _last_child_node.set(property, value)
-    return self
-
-func size_flags_h(flags: int) -> ConfigBuilder:
-    _last_child_node.size_flags_horizontal = flags
-    return self
-
-func size_flags_v(flags: int) -> ConfigBuilder:
-    _last_child_node.size_flags_vertical = flags
-    return self
-
-func size_expand_fill() -> ConfigBuilder:
-    return size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_EXPAND_FILL)
-
-func rect_min_size(min_size: Vector2) -> ConfigBuilder:
-    _last_child_node.rect_min_size = min_size
-    return self
-
-func rect_min_x(min_x: float) -> ConfigBuilder:
-    _last_child_node.rect_min_size = Vector2(min_x, _last_child_node.rect_min_size.y)
-    return self
-
-func rect_min_y(min_y: float) -> ConfigBuilder:
-    _last_child_node.rect_min_size = Vector2(_last_child_node.rect_min_size.x, min_y)
-    return self
-
-func rect_size(size: Vector2) -> ConfigBuilder:
-    _last_child_node.rect_min_size = size
-    return self
-
-func rect_x(x: float) -> ConfigBuilder:
-    _last_child_node.rect_size = Vector2(x, _last_child_node.rect_size.y)
-    return self
-
-func rect_y(y: float) -> ConfigBuilder:
-    _last_child_node.rect_size = Vector2(_last_child_node.rect_size.x, y)
+        return .with(property, value)
     return self
 
 func flatten(value: bool = true) -> ConfigBuilder:
-    if _last_child_node.has_method("flatten"):
-        _last_child_node.flatten(value)
-    return self
-
-func get_current() -> Control:
-    return _last_child_node
-
-func ref(reference_name: String) -> ConfigBuilder:
-    _references[reference_name] = _last_child_node
-    return self
-
-func get_ref(reference_name: String) -> Control:
-    return _references[reference_name]
-
-func call_on(method_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null) -> ConfigBuilder:
-    return _call_on(_last_child_node, method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-
-func call_on_ref(reference_name: String, method_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null) -> ConfigBuilder:
-    var ref = _references[reference_name]
-    if ref == null:
-        return self
-    else:
-        return _call_on(ref, method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-
-func _call_on(target, method_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null) -> ConfigBuilder:
-    if (arg9 != null):
-        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    elif (arg8 != null):
-        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-    elif (arg7 != null):
-        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-    elif (arg6 != null):
-        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    elif (arg5 != null):
-        target.call(method_name, arg0, arg1, arg2, arg3, arg4, arg5)
-    elif (arg4 != null):
-        target.call(method_name, arg0, arg1, arg2, arg3, arg4)
-    elif (arg3 != null):
-        target.call(method_name, arg0, arg1, arg2, arg3)
-    elif (arg2 != null):
-        target.call(method_name, arg0, arg1, arg2)
-    elif (arg1 != null):
-        target.call(method_name, arg0, arg1)
-    elif (arg0 != null):
-        target.call(method_name, arg0)
-    else:
-        target.call(method_name)
-    return self
-
-func connect_current(signal_name: String, target: Object, method_name: String, binds: Array = [], flags: int = 0) -> ConfigBuilder:
-    _last_child_node.connect(signal_name, target, method_name, binds, flags)
-    return self
-
-func connect_ref(reference_name: String, signal_name: String, target: Object, method_name: String, binds: Array = [], flags: int = 0) -> ConfigBuilder:
-    var ref = _references[reference_name]
-    if ref != null:
-        ref.connect(signal_name, target, method_name, binds, flags)
-    return self
-
-func connect_to_prop(signal_name: String, target, property: String) -> ConfigBuilder:
-    _last_child_node.connect(signal_name, _agent, "_forward_prop", [target, property])
-    return self
-
-func connect_ref_to_prop(reference_name: String, signal_name: String, target, property: String) -> ConfigBuilder:
-    var ref = _references[reference_name]
-    if ref != null:
-        ref.connect(signal_name, _agent, "_forward_prop", [target, property])
-    return self
-
-func add_color_override(name: String, color: Color) -> ConfigBuilder:
-    _last_child_node.add_color_override(name, color)
-    return self
-
-func add_constant_override(name: String, constant: int) -> ConfigBuilder:
-    _last_child_node.add_constant_override(name, constant)
-    return self
-
-func add_font_override(name: String, font: Font) -> ConfigBuilder:
-    _last_child_node.add_font_override(name, font)
-    return self
-
-func add_icon_override(name: String, texture: Texture) -> ConfigBuilder:
-    _last_child_node.add_icon_override(name, texture)
-    return self
-
-func add_shader_override(name: String, shader: Shader) -> ConfigBuilder:
-    _last_child_node.add_shader_override(name, shader)
-    return self
-
-func add_stylebox_override(name: String, stylebox: StyleBox) -> ConfigBuilder:
-    _last_child_node.add_stylebox_override(name, stylebox)
+    if self._last_child_node.has_method("flatten"):
+        self._last_child_node.flatten(value)
     return self
 
 func wrap(save_entry: String, root_node: Control, target_node = null) -> ConfigBuilder:
@@ -269,30 +137,6 @@ func tab_container(save_entry: String = "") -> ConfigBuilder:
 func color_rect(color: Color) -> ConfigBuilder:
     return add_node(ColorRect.new()).with("color", color)
 
-func h_separator() -> ConfigBuilder:
-    return add_node(HSeparator.new())
-
-func v_separator() -> ConfigBuilder:
-    return add_node(VSeparator.new())
-
-func label(text: String = "") -> ConfigBuilder:
-    return add_node(Label.new()).with("text", text)
-
-func nine_patch_rect() -> ConfigBuilder:
-    return add_node(NinePatchRect.new())
-
-func panel() -> ConfigBuilder:
-    return add_node(Panel.new())
-
-func reference_rect() -> ConfigBuilder:
-    return add_node(ReferenceRect.new())
-
-func rich_text_label(bbcode_text: String = "") -> ConfigBuilder:
-    return add_node(RichTextLabel.new()).with("bbcode_enabled", true).with("bbcode_text", bbcode_text)
-
-func texture_rect(texture: Texture) -> ConfigBuilder:
-    return add_node(TextureRect.new()).with("texture", texture)
-
 func build(should_load: bool = true, should_free: bool = true) -> ConfigAgent:
     if should_load:
         _agent.load_cfg()
@@ -303,9 +147,6 @@ func build(should_load: bool = true, should_free: bool = true) -> ConfigAgent:
 
 func get_agent() -> ConfigAgent:
     return _agent
-
-func get_root() -> Control:
-    return _root
 
 static func _get_target(node: Control):
     if node.has_method("get_target"):
