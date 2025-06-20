@@ -1,5 +1,7 @@
 class_name ScalingApi
 
+class UiBuilder: const import = "util/UiBuilder/"
+
 const CLASS_NAME = "ScalingApi"
 var LOGGER: Object
 
@@ -24,50 +26,36 @@ func _init(logger: Object, editor: CanvasLayer, enlarge_ui: bool):
     var node_parent = editor.get_node("Windows/Preferences/Margins/VAlign/Interface")
     var node_enlarge_ui: Control = node_parent.get_node("EnlargeUI")
     node_enlarge_ui.hide()
-    # TODO: make a UI builder akin to the config builder
-    var hsplit = HBoxContainer.new()
-    node_parent.add_child_below_node(node_enlarge_ui, hsplit)
-    var hbox = HBoxContainer.new()
-    hsplit.add_child(hbox)
-    hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-    var label = Label.new()
-    hbox.add_child(label)
-    label.text = "UI Scale: "
+    var builder: UiBuilder = UiBuilder._new(node_parent)
+    builder.target_child_node(node_enlarge_ui)\
+        .h_box_container().enter()\
+            .h_box_container().size_flags_h(Control.SIZE_EXPAND_FILL).enter()\
+                .label("UI Scale: ")\
+                .label().ref("ui_scale_label")\
+                    .size_flags_h(Control.SIZE_EXPAND_FILL)\
+                    .with("align", Label.ALIGN_RIGHT)\
+            .exit()\
+            .h_slider().ref("scale_slider")\
+                .size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_FILL)\
+                .with("min_value", 0.5).with("max_value", 4).with("step", 0.01)\
+                .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("ui_scale_label")])\
+        .exit()\
+        .h_box_container().enter()\
+            .h_box_container().size_flags_h(Control.SIZE_EXPAND_FILL).enter()\
+                .label("Picker Scale: ").size_flags_h(Control.SIZE_EXPAND_FILL)\
+                .label().ref("picker_scale_label")\
+                    .size_flags_h(Control.SIZE_EXPAND_FILL)\
+                    .with("align", Label.ALIGN_RIGHT)\
+            .exit()\
+            .h_slider().ref("picker_slider")\
+                .size_flags_h(Control.SIZE_EXPAND_FILL).size_flags_v(Control.SIZE_FILL)\
+                .with("min_value", 0.5).with("max_value", 4).with("step", 0.01)\
+                .connect_current("value_changed", self, "format_slider_label", [builder.get_ref("picker_scale_label")])\
+        .exit()\
 
-    var _scale_label: Label = Label.new()
-    hbox.add_child(_scale_label)
-    _scale_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    _scale_label.align = Label.ALIGN_RIGHT
-
-    hsplit.add_child(_scale_slider)
-    _scale_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    _scale_slider.size_flags_vertical = Control.SIZE_FILL
-    _scale_slider.connect("value_changed", self, "update_scale_label", [_scale_label])
-
-
-    var hsplit2 = HBoxContainer.new()
-    node_parent.add_child_below_node(hsplit, hsplit2)
-    hbox = HBoxContainer.new()
-    hsplit2.add_child(hbox)
-    hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-    label = Label.new()
-    hbox.add_child(label)
-    label.text = "Picker Scale: "
-
-    _scale_label = Label.new()
-    hbox.add_child(_scale_label)
-    _scale_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    _scale_label.align = Label.ALIGN_RIGHT
-
-    hsplit2.add_child(_picker_slider)
-    _picker_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    _picker_slider.size_flags_vertical = Control.SIZE_FILL
-    _picker_slider.connect("value_changed", self, "update_scale_label", [_scale_label])
-
-
-
+    _scale_slider = builder.get_ref("scale_slider")
+    _picker_slider = builder.get_ref("picker_slider")
 
     var ui_scaler = funcref(self, "_mult_half") if enlarge_ui else funcref(self, "_mult")
 
@@ -357,8 +345,8 @@ func _node_path_elements(path: NodePath) -> Array:
         elements.append(path.get_name(i))
     return elements
 
-func update_scale_label(value, scale_label):
-    scale_label.text = "%4d%%" % (value * 100)
+func format_slider_label(value, label: Label):
+    label.text = "%4d%%" % (value * 100)
 
 func get_ui_scaling_agent() -> ScalingAgent:
     return _ui_scaling_agent
