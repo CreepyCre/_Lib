@@ -1,11 +1,11 @@
 class_name ModConfigApi
 ## https://creepycre.github.io/_Lib/ModConfigApi/
 
-class ConfigBuilder: const import = "api/config/config_builder.gd/"
-class WrappedControlConfigNode: const import = "api/config/config_builder.gd/WrappedControlConfigNode"
-class ScalingAgent: const import = "api/scaling_api.gd/ScalingAgent"
-class ScalableImageTexture: const import = "api/scaling_api.gd/ScalableImageTexture"
-class PropertyScaler: const import = "api/scaling_api.gd/PropertyScaler"
+class ConfigBuilder: const import = "api/config/ConfigBuilder/"
+class WrappedControlConfigNode: const import = "api/config/ConfigBuilder/WrappedControlConfigNode"
+class ScalingAgent: const import = "api/ScalingApi/ScalingAgent"
+class ScalableImageTexture: const import = "api/ScalingApi/ScalableImageTexture"
+class PropertyScaler: const import = "api/ScalingApi/PropertyScaler"
 
 const CLASS_NAME = "ModConfigApi"
 var LOGGER: Object

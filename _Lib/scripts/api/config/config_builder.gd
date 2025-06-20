@@ -1,5 +1,7 @@
 class_name ConfigBuilder
 
+const CLASS_NAME = "ConfigBuilder"
+
 var _agent: ConfigAgent
 var _input_map_api
 var _root: Control

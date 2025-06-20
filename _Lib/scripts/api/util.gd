@@ -1,7 +1,7 @@
 class_name Util
 ## https://creepycre.github.io/_Lib/Util/
 
-class FileLoadingHelper: const import = "util/file_loading_helper.gd/"
+class FileLoadingHelper: const import = "util/FileLoadingHelper/"
 
 const CLASS_NAME = "Util"
 var LOGGER: Object

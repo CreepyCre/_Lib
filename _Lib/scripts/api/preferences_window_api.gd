@@ -1,7 +1,7 @@
 class_name PreferencesWindowApi
 
-class ScalingAgent: const import = "api/scaling_api.gd/ScalingAgent"
-class PropertyScaler: const import = "api/scaling_api.gd/PropertyScaler"
+class ScalingAgent: const import = "api/ScalingApi/ScalingAgent"
+class PropertyScaler: const import = "api/ScalingApi/PropertyScaler"
 
 const CLASS_NAME = "PreferencesWindowApi"
 var LOGGER: Object
