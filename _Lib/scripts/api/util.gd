@@ -12,17 +12,20 @@ const REPLACEMENT_FIELD_PATTERN = "(?<replacement_field>{(?<field_name>(?<arg_na
 #const REPLACEMENT_FIELD_PATTERN = "(?<replacement_field>{(?<field_name>(?<arg_name>(?<arg_name_identifier>[a-zA-Z_][0-9a-zA-Z_]*)|(?<arg_name_index>0|[1-9][0-9]*))(?<field>(\\.[a-zA-Z_][0-9a-zA-Z_]*|\\[[^\\[\\]]+\\])*))?(!(?<conversion>[s]))?(:(?<format_spec>((?<fill>[^{}])?(?<align>[<>=^]))?(?<sign>\\[ +-])?(?<z>z)?(?<hashtag>#)?(?<zero>0)?(?<width>[1-9][0-9]*)?(?<grouping_option>[_,])?(\\.(?<precision>0|[1-9][0-9]*))?(?<type>[bcdeEfFgGnosxX%])?))?})"
 const FIELD_PATTERN = "(\\.(?<attribute_name>[a-zA-Z_][0-9a-zA-Z_]*)|\\[(?<element_name>[^\\[\\]1-9][^\\[\\]]*)|(?<element_index>0|[1-9][0-9])\\])"
 
+var _master_node
+
 var _regex: RegEx = RegEx.new()
 var _field_regex: RegEx = RegEx.new()
 
-func _init(logger):
-    LOGGER = logger.for_class(self)
+func _init(logger, master_node):
+    LOGGER = logger.for_class(self)#
+    _master_node = master_node
 
     _regex.compile(REPLACEMENT_FIELD_PATTERN)
     _field_regex.compile(FIELD_PATTERN)
 
 func create_loading_helper(root: String) -> Reference:
-    return FileLoadingHelper.new(root)
+    return FileLoadingHelper._new(root)
 
 func copy_dir(from: String, to: String):
     var dir: Directory = Directory.new()
@@ -45,7 +48,18 @@ func copy_dir(from: String, to: String):
             if code != OK:
                 LOGGER.error("Could not copy \"%s\" to \"%s\"! Error code: %d", [from + "/" + file_name, to + "/" + file_name, code])
         file_name = dir.get_next()
-    
+
+func single_use_http_request(callback) -> HTTPRequest:
+    var http_request = HTTPRequest.new()
+    _master_node.add_child(http_request)
+    http_request.connect("request_completed", self, "_http_callback", [http_request, callback])
+    return http_request
+
+func _http_callback(result, response_code, headers, body, http_request, callback):
+    http_request.disconnect("request_completed", self, "_http_callback")
+    _master_node.remove_child(http_request)
+    callback.call_func(http_request, result, response_code, headers, body)
+
 
 func pythonic_format(format_string: String, args: Dictionary) -> String:
     var results: Array = _regex.search_all(format_string)
@@ -251,6 +265,9 @@ class InstancedUtil:
     
     func create_loading_helper(root: String = _mod_info.mod.Global.Root + "../../") -> Reference:
         return _util.create_loading_helper(root)
+    
+    func single_use_http_request(callback) -> HTTPRequest:
+        return _util.single_use_http_request(callback)
     
     func pythonic_format(format_string: String, args: Dictionary) -> String:
         return _util.pythonic_format(format_string, args)
