@@ -214,7 +214,8 @@ func aquire_active_ddmod_files():
     var mods_dir: String = config.get_value("Mods", "mods_directory")
     # get list of .ddmod files
     var ddmod_files: Array = _get_all_files(mods_dir, "ddmod")
-    
+    ddmod_files.append_array(_get_all_files("%s/mods" % OS.get_executable_path().get_base_dir(), "ddmod"))
+
     var file: File = File.new()
     for ddmod_file in ddmod_files:
         # read in .ddmod files as json into dictionary
