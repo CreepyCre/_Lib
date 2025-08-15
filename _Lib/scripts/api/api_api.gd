@@ -14,6 +14,9 @@ func _init(logger: Object):
 ## Registers a new API and emits [signal api_registered]
 func register(api_id: String, api: Object):
     apis[api_id] = api
+    if api.has_method("_is_lazy") and not api._is_lazy():
+        for instance in api_api_instances:
+            instance.get(api_id)
     emit_signal("api_registered", api_id, api)
 
 func _get(property):
@@ -55,6 +58,9 @@ func _instance(mod_info):
     api_api_instances.append(api_api_instance)
     # forward signal to InstancedApiApi
     connect("api_registered", api_api_instance, "_emit_api_registered")
+    for api_id in apis:
+        if apis[api_id].has_method("_is_lazy") and not apis[api_id]._is_lazy():
+            api_api_instance.get(api_id)
     return api_api_instance
 
 # Wrapper for ApiApi that supplies some default parameters
