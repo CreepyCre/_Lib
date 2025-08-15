@@ -17,6 +17,8 @@ var _master_node
 var _regex: RegEx = RegEx.new()
 var _field_regex: RegEx = RegEx.new()
 
+var _added_windows: Array = []
+
 func _init(logger, master_node):
     LOGGER = logger.for_class(self)#
     _master_node = master_node
@@ -48,6 +50,29 @@ func copy_dir(from: String, to: String):
             if code != OK:
                 LOGGER.error("Could not copy \"%s\" to \"%s\"! Error code: %d", [from + "/" + file_name, to + "/" + file_name, code])
         file_name = dir.get_next()
+
+func add_window(window: WindowDialog, name = null) -> bool:
+    if name == null:
+        name = window.name
+    if _added_windows.has(window) or name in _master_node.Editor.Windows:
+        return false
+    _added_windows.append(window)
+    _master_node.Editor.Windows[name] = window
+    window.connect("about_to_show", _master_node.Editor, "OnWindowOpen", [window])
+    window.connect("popup_hide", _master_node.Editor, "OnWindowClose", [window])
+    _master_node.Editor.windowsNode.add_child(window)
+    return true
+
+func remove_window(window) -> bool:
+    if not window in _added_windows:
+        return false
+    _added_windows.erase(window)
+    _master_node.Editor.windowsNode.remove_child(window)
+    window.disconnect("about_to_show", _master_node.Editor, "OnWindowOpen")
+    window.disconnect("popup_hide", _master_node.Editor, "OnWindowClose")
+    _master_node.Editor.Windows.erase(window)
+    return true
+    
 
 func single_use_http_request(callback) -> HTTPRequest:
     var http_request = HTTPRequest.new()
@@ -265,6 +290,12 @@ class InstancedUtil:
     
     func create_loading_helper(root: String = _mod_info.mod.Global.Root + "../../") -> Reference:
         return _util.create_loading_helper(root)
+    
+    func add_window(window: WindowDialog, name = null) -> bool:
+        return _util.add_window(window, name)
+
+    func remove_window(window) -> bool:
+        return _util.remove_window(window)
     
     func single_use_http_request(callback) -> HTTPRequest:
         return _util.single_use_http_request(callback)
