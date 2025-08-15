@@ -42,7 +42,6 @@ func _init(logger: Object, util, loader, mod_registry):
         _item_to_agent[item] = agent
         item.set_text(0, ddmod["name"])
         item.set_text(1, ddmod["version"])
-        item.set_icon(2, Global.Theme.get_icon("Throbber", "CreepyCre._Lib"))
 
 func _update_clicked(item, _column, _id):
     _item_to_agent[item].download()
@@ -52,6 +51,7 @@ func _sort_ddmod_array(a, b):
 
 func register(mod_id: String, agent: UpdateAgent):
     _item_agents[mod_id].set_update_agent(agent)
+    _item_agents[mod_id].item.set_icon(2, Global.Theme.get_icon("Throbber", "CreepyCre._Lib"))
     agent.fetch_version(funcref(_item_agents[mod_id], "version_callback"))
 
 func _update(_delta):
