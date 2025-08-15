@@ -72,7 +72,10 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering AccessorApi")
     set_up_api("AccessorApi")
     LOGGER.info("Registering Util")
-    set_up_api("Util")
+    set_up_api("Util", _master)
+    var loading_helper = api.Util.create_loading_helper(_global.Root + "../../")
+    LOGGER.info("Loading _Lib icons.")
+    load_icons(loading_helper)
     LOGGER.info("Registering ModSignalingApi")
     set_up_api("ModSignalingApi", _global.Editor.Infobar)
     LOGGER.info("Registering ScalingApi")
@@ -142,6 +145,20 @@ func start():
 
 func update(delta):
     api._update(delta)
+
+# loads all _Lib textures and adds them into the default theme.
+func load_icons(loader):
+    register_icon("Config", loader.load_icon("cog_normal.png"))
+    register_icon("ConfigDisabled", loader.load_icon("cog_disabled.png"))
+    var throbber: AnimatedTexture = AnimatedTexture.new()
+    throbber.frames = 8
+    throbber.fps = 8
+    for frame in [1, 2, 3, 4, 5, 6, 7, 8]:
+        throbber.set_frame_texture(frame - 1, Misc.get_global().Theme.get_icon("Progress%d" % frame, "EditorIcons"))
+    register_icon("Throbber", throbber)
+
+func register_icon(name: String, texture: Texture):
+    Misc.get_global().Theme.set_icon(name, "CreepyCre._Lib", texture)
 
 # varargs hack
 func set_up_api(api_name: String, arg0 = null, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null, arg6 = null, arg7 = null, arg8 = null, arg9 = null):
@@ -236,3 +253,7 @@ func _unload():
     api.ModSignalingApi.emit_signal("unload")
     LOGGER.info("Unloading _Lib components.")
     api._unload()
+
+class Misc:
+    static func get_global():
+        return Global

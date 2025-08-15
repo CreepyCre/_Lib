@@ -63,8 +63,8 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_sca
     _ui_scaling_agent.register(_remove_icon)
 
     # load resources
-    var texture_normal: Texture = ScalableImageTexture._new(loader.load_icon("cog_normal.png"))
-    var texture_disabled: Texture = ScalableImageTexture._new(loader.load_icon("cog_disabled.png"))
+    var texture_normal: Texture = ScalableImageTexture._new(Global.Theme.get_icon("Config", "CreepyCre._Lib"))
+    var texture_disabled: Texture = ScalableImageTexture._new(Global.Theme.get_icon("ConfigDisabled", "CreepyCre._Lib"))
     _ui_scaling_agent.register(texture_normal)
     _ui_scaling_agent.register(texture_disabled)
     
