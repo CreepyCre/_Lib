@@ -1,10 +1,9 @@
 name: Deploy Release
 
 on:
-  release:
-    push:
-      branches: ['main']
-      paths: ['_Lib/scripts/tools/_Lib.ddmod']
+  push:
+    branches: ['master']
+    paths: ['_Lib/scripts/tools/_Lib.ddmod']
 
 jobs:
   check-version:
@@ -33,7 +32,7 @@ jobs:
       with:
         name: ${{ needs.check-version.outputs.version }}
         tag_name: ${{ needs.check-version.outputs.version }}
-        prerelease: contains(needs.check-version.outputs.version, '-')
+        prerelease: ${{ contains(needs.check-version.outputs.version, '-') }}
         files: ${{ github.event.repository.name }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
