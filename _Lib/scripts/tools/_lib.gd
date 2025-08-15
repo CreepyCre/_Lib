@@ -86,13 +86,20 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering PreferencesWindowApi")
     set_up_api("PreferencesWindowApi", _global.Editor.Windows.Preferences, api.ScalingApi.get_ui_scaling_agent())
     LOGGER.info("Registering ModConfigApi")
-    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, api.Util.create_loading_helper(_global.Root + "../../"), api.ScalingApi.get_ui_scaling_agent(), _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
+    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, loading_helper, api.ScalingApi.get_ui_scaling_agent(), _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
     LOGGER.info("Registering HistoryApi")
     set_up_api("HistoryApi", _global.Editor)
     LOGGER.info("Registering ComponentsApi")
     set_up_api("ComponentsApi", api.ModSignalingApi, api.HistoryApi, _global.World, _global.ModMapData)
     LOGGER.info("Registering LayerApi")
     set_up_api("LayerApi", _global.API.ComponentsApi, _global.World, _global.Editor.Tools["SelectTool"], _global.Editor.Toolset.GetToolPanel("SelectTool"))
+    LOGGER.info("Registering UpdateChecker")
+    set_up_api("UpdateChecker", _global.API.Util, loading_helper, _global.API.ModRegistry)
+    var update_checker = _global.API.UpdateChecker
+    update_checker.register(_global.API.UpdateChecker.builder()\
+                                                    .fetcher(update_checker.github_fetcher("CreepyCre", "_Lib"))\
+                                                    .downloader(update_checker.github_downloader("CreepyCre", "_Lib"))\
+                                                    .build())
 
     # set up _Lib config
     var builder = _global.API.ModConfigApi.create_config()
@@ -137,6 +144,7 @@ func _post_init(script_instance: Reference = self):
                 .build()
     
     api.Logger.set_log_level(config.log_level)
+    LOGGER.info("Finished Loading.")
 
 func format_slider_label(value, label: Label):
     label.text = "%4d%%" % (value * 100)
