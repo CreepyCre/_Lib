@@ -9,6 +9,8 @@ var config
 var _global: Dictionary
 var _script
 
+var all_ddmod_jsons = {}
+var all_roots = {}
 var unique_id_to_root = {}
 var path_to_unique_id = {}
 var unique_id_to_ddmod = {}
@@ -223,16 +225,28 @@ func aquire_active_ddmod_files():
         var ddmod_json: Dictionary = JSON.parse(file.get_as_text()).result
         file.close()
 
-        # skip mod if not active
-        if (not ddmod_json["unique_id"] in active_mods):
-            continue
-        
-        # add ddmod_json to dictionary with the folder path as key
-        # we can use this later to identify a mod from its root path
-        var folder = ddmod_file.get_base_dir().rstrip("/")
-        path_to_unique_id[folder] = ddmod_json["unique_id"]
-        unique_id_to_root[ddmod_json["unique_id"]] = folder
-        unique_id_to_ddmod[ddmod_json["unique_id"]] = ddmod_json
+        all_ddmod_jsons[ddmod_json["unique_id"]] = ddmod_json
+        all_roots[ddmod_json["unique_id"]] = ddmod_file.get_base_dir().rstrip("/")
+
+    for mod_id in active_mods:
+        index_mod(mod_id)
+
+func index_mod(mod_id):
+    if mod_id in unique_id_to_ddmod:
+        return
+    # checks if mod even exists
+    if not mod_id in all_ddmod_jsons:
+        return
+    var root = all_roots[mod_id]
+    path_to_unique_id[root] = mod_id
+    unique_id_to_root[mod_id] = root
+    var ddmod = all_ddmod_jsons[mod_id]
+    unique_id_to_ddmod[mod_id] = ddmod
+    if "dependencies" in ddmod:
+        for mod_id in ddmod["dependencies"]:
+            index_mod(mod_id)
+    
+    
 
 # utility method for recursively finding all files with file extension file_ext in path
 static func _get_all_files(path: String, file_ext := "", files := []):
