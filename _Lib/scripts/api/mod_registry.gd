@@ -4,16 +4,18 @@ const CLASS_NAME = "ModRegistry"
 var LOGGER: Object
 
 var _api_api
-var _path_to_ddmod_json
+var _path_to_unique_id
+var _unique_id_to_ddmod
 var _unique_id_to_mod_info = {}
 var _registered_mods = []
 
 signal registered(mod_info)
 
-func _init(logger: Object, api_api, path_to_ddmod_json: Dictionary):
+func _init(logger: Object, api_api, path_to_unique_id: Dictionary, unique_id_to_ddmod: Dictionary):
     LOGGER = logger.for_class(self)
     _api_api = api_api
-    _path_to_ddmod_json = path_to_ddmod_json
+    _path_to_unique_id = path_to_unique_id
+    _unique_id_to_ddmod = unique_id_to_ddmod
 
     # create and connect to mod registration signal
     if (not Engine.has_signal("_lib_register_mod")):
@@ -28,8 +30,8 @@ func register(mod: Reference, global_instance = null):
     var mod_root: String = global_instance.Root.rstrip("/")
     var mod_info
     # create ModInfo with the .ddmod file dictionary we collected in _init
-    if (mod_root in _path_to_ddmod_json):
-        mod_info = ModInfo.new(mod, _path_to_ddmod_json[mod_root])
+    if (mod_root in _path_to_unique_id):
+        mod_info = ModInfo.new(mod, get_ddmod(_path_to_unique_id[mod_root]))
         _unique_id_to_mod_info[mod_info.mod_meta["unique_id"]] = mod_info
     else:
         mod_info = ModInfo.new(mod)
@@ -44,6 +46,12 @@ func get_mod_info(mod_id: String):
 
 func get_mod_list():
     return _registered_mods.duplicate()
+
+func get_ddmod(mod_id: String):
+    return _unique_id_to_ddmod[mod_id]
+
+func get_ddmods():
+    return _unique_id_to_ddmod
 
 func _unload():
     LOGGER.info("Unloading %s.", [CLASS_NAME])

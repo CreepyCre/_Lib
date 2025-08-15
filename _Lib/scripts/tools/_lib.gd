@@ -10,7 +10,8 @@ var _global: Dictionary
 var _script
 
 var unique_id_to_root = {}
-var path_to_ddmod_json = {}
+var path_to_unique_id = {}
+var unique_id_to_ddmod = {}
 
 const UPPERCASE_LETTER: String = "[^A-Z]([A-Z])"
 var uppercase_letter: RegEx = RegEx.new()
@@ -67,7 +68,7 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering Logger. Who came first?")
     api.register("Logger", general_logger)
     LOGGER.info("Registering ModRegistry")
-    set_up_api("ModRegistry", api, path_to_ddmod_json)
+    set_up_api("ModRegistry", api, path_to_unique_id, unique_id_to_ddmod)
     api.ModRegistry.register(self, _global)
     LOGGER.info("Registering AccessorApi")
     set_up_api("AccessorApi")
@@ -220,8 +221,9 @@ func aquire_active_ddmod_files():
         # add ddmod_json to dictionary with the folder path as key
         # we can use this later to identify a mod from its root path
         var folder = ddmod_file.get_base_dir().rstrip("/")
-        path_to_ddmod_json[folder] = ddmod_json
+        path_to_unique_id[folder] = ddmod_json["unique_id"]
         unique_id_to_root[ddmod_json["unique_id"]] = folder
+        unique_id_to_ddmod[ddmod_json["unique_id"]] = ddmod_json
 
 # utility method for recursively finding all files with file extension file_ext in path
 static func _get_all_files(path: String, file_ext := "", files := []):
