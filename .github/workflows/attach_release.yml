@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Zip Folder
-      run: zip -r ${{ github.event.repository.name }}.zip . -x "${{ github.event.repository.name }}"
+      run: zip -r ${{ github.event.repository.name }}.zip ${{ github.event.repository.name }}
 
     - name: Release
       uses: softprops/action-gh-release@v2
