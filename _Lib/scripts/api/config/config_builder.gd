@@ -155,6 +155,10 @@ static func _get_target(node: Control):
         return node
 
 class ConfigAgent:
+
+    signal loaded()
+    signal updated()
+
     var _root: Control
     var _config_file: String
     var _dirty: bool = false
@@ -175,6 +179,7 @@ class ConfigAgent:
         file.open(_config_file, File.WRITE)
         file.store_string(JSON.print(_root.save_cfg(), "\t"))
         file.close()
+        emit_signal("updated")
     
     func load_cfg():
         var file: File = File.new()
@@ -190,6 +195,7 @@ class ConfigAgent:
         file.open(_config_file, File.READ)
         _root.load_cfg(JSON.parse(file.get_as_text()).result)
         _dirty = false
+        emit_signal("loaded")
     
     #func serialize():
     #    return _root.save_cfg()
