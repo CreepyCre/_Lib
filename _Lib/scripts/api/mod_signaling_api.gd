@@ -42,7 +42,7 @@ func add_user_signal(signal_id: String, arguments: Array = []):
 
 func _busy_icon_visibility_changed():
     match _infobar.cornerInfo.text:
-        "Saving...", "Backing up...":
+        "Saving...", "Backing up...", "SAVING", "BACKING_UP":
             _begun_save = true
             emit_signal("save_begin")
 
