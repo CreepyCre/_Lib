@@ -292,7 +292,7 @@ class ActionConfigSyncAgent:
     func is_saved() -> bool:
         return _saved
 
-# refer to https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html for order of input signals
+# refer to https://docs.godotengine.org/en/3.4/tutorials/inputs/inputevent.html for order of input signals
 class InputEventEmitterNode:
     extends Node
 

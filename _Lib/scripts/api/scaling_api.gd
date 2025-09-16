@@ -644,37 +644,3 @@ class ToolsetScaler:
             _toolset.rect_min_size = Vector2(_toolset.buttonShrunkSize, 0)
         else:
             _toolset.rect_min_size = Vector2(_toolset.buttonFullSize, 0)
-
-# TODO: DELETE
-"""
-class MenuButtonXScaler:
-    const TOTAL_X_MARGIN = 16
-
-    var _button: Button
-    var _default_icon_size: Vector2
-    
-    var original_icon = null
-    var original_expand_icon: bool
-
-    func _init(button: Button, default_icon_size = null, icon = null):
-        _button = button
-        if default_icon_size == null:
-            _default_icon_size = _button.icon.get_size()
-        else:
-            _default_icon_size = default_icon_size
-
-        if icon != null:
-            original_icon = _button.icon
-            _button.icon = icon
-        original_expand_icon = _button.expand_icon
-        _button.expand_icon = true
-
-    func scale(new_scale):
-        _button.rect_min_size = Vector2(round(_default_icon_size.x * new_scale + TOTAL_X_MARGIN + _button.get_font("font").get_string_size(_button.text).x), 0)
-
-    func unload():
-        if original_icon != null:
-            _button.icon = original_icon
-        _button.expand_icon = original_expand_icon
-        _button.rect_min_size = Vector2.ZERO
-"""
