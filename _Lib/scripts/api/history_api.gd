@@ -20,6 +20,7 @@ enum RecordType {
 var history
 var history_mirror: Array = []
 var _master
+var _editor
 var custom_record_clazz
 
 var _menu_align: HBoxContainer
@@ -41,6 +42,7 @@ func _init(logger: Object, editor: CanvasLayer):
     LOGGER = logger.for_class(self)
     history = editor.History
     _master = editor.owner
+    _editor = editor
     custom_record_clazz = history.CreateCustomRecord(null).get_script()
     history.Clear()
 
@@ -77,7 +79,8 @@ func undo() -> bool:
     _verify_history()
     if _master.IsBusy or history.locked:
         return false
-    history.Undo()
+    # trick to ensure we correctly undo Polyline points by using built-in logic. We cannot manually achieve this, since WorldUI.Polyline is a List which cannot be transformed into a Godot data structure.
+    _editor._on_UndoButton_pressed()
     _replacement_redo_button.disabled = _redo_button.disabled
     _replacement_undo_button.disabled = _undo_button.disabled
     
