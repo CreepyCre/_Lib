@@ -96,7 +96,7 @@ var _record_entries = {}
 var _processing_record: bool = false
 
 var _queued_history_record = [null, null]
-
+var _one_time_silenced_nodes = []
 
 func _init(logger: Object, mod_signaling_api, history_api, world: Node2D, mod_map_data: Dictionary):
     LOGGER = logger.for_class(self)
@@ -259,7 +259,13 @@ func _load_component(component_accessor, save_data: Array):
                                     component_accessor._deserialize(material_mesh, entry["data"])
                                     break
 
+func _silence(node: Node):
+    _one_time_silenced_nodes.append(node)
+
 func _node_added(node: Node):
+    if node in _one_time_silenced_nodes:
+        _one_time_silenced_nodes.erase(node)
+        return
     var _node_type: int = node_type(node)
     if (_node_type < 0):
         return
@@ -315,6 +321,9 @@ func _node_added(node: Node):
     emit_signal(TYPE_TO_SIGNAL[_node_type], node)
         
 func _node_removed(node: Node):
+    if node in _one_time_silenced_nodes:
+        _one_time_silenced_nodes.erase(node)
+        return
     var _node_type: int = node_type(node)
     if (_node_type < 0):
         return
