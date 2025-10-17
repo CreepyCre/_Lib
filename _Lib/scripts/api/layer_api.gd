@@ -75,7 +75,7 @@ func _remove_layers(layers: Array, level: Node2D, delete_nodes: bool) -> void:
         return
     for pattern_layer in level.PatternShapes.get_children():
         if (pattern_layer.z_index in layers):
-            for child in pattern_layer:
+            for child in pattern_layer.get_children():
                 _world.DeleteNodeByID(child.get_meta("node_id"))
 
     for child in level.Walls.get_children():
