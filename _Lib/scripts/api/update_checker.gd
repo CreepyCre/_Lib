@@ -13,7 +13,7 @@ var _mod_versions_window
 var _mv_tree: Tree
 var _show_mod_versions: Once = Once.new()
 
-func _init(logger: Object, util, loader, mod_registry):
+func _init(logger: Object, util, loader, mod_registry, menu_bar_api):
     LOGGER = logger.for_class(self)
     _util = util
 
@@ -42,6 +42,8 @@ func _init(logger: Object, util, loader, mod_registry):
         _item_to_agent[item] = agent
         item.set_text(0, ddmod["name"])
         item.set_text(1, ddmod["version"])
+    
+    menu_bar_api.get_menu("Mods").add_item("Mod Versions").connect("pressed", _mod_versions_window, "popup_centered")
 
 func _update_clicked(item, _column, _id):
     _item_to_agent[item].download()
@@ -250,6 +252,9 @@ class Once:
             return false
         has_triggered = true
         return true
+    
+    func disable():
+        has_triggered = true
 
 class Result:
     func is_exception() -> bool:

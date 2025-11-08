@@ -98,12 +98,14 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering LayerApi")
     set_up_api("LayerApi", _global.API.ComponentsApi, _global.World, _global.Editor.Tools["SelectTool"], _global.Editor.Toolset.GetToolPanel("SelectTool"))
     LOGGER.info("Registering UpdateChecker")
-    set_up_api("UpdateChecker", _global.API.Util, loading_helper, _global.API.ModRegistry)
+    set_up_api("UpdateChecker", _global.API.Util, loading_helper, _global.API.ModRegistry, _global.API.MenuBarApi)
     var update_checker = _global.API.UpdateChecker
-    update_checker.register(_global.API.UpdateChecker.builder()\
-                                                    .fetcher(update_checker.github_fetcher("CreepyCre", "_Lib"))\
-                                                    .downloader(update_checker.github_downloader("CreepyCre", "_Lib"))\
-                                                    .build())
+    update_checker.register(update_checker.builder()\
+                                            .fetcher(update_checker.github_fetcher("CreepyCre", "_Lib"))\
+                                            .downloader(update_checker.github_downloader("CreepyCre", "_Lib"))\
+                                            .build())
+
+    var no_show_button: Button = api.UpdateChecker._mod_versions_window.get_node("MarginContainer/VBoxContainer/HBoxContainer/NoShow")
 
     # set up _Lib config
     var builder = _global.API.ModConfigApi.create_config()
@@ -111,8 +113,11 @@ func _post_init(script_instance: Reference = self):
                 .h_box_container().enter()\
                     .label("Log Level")\
                     .option_button("log_level", api.Logger.get_log_level(), api.Logger._CONFIG_LOOKUP.keys())\
-                        .connect_current("updated", api.Logger, "set_log_level")\
+                        .connect_prop("updated", api.Logger, "set_log_level")\
                 .exit()\
+                .check_box("show_mod_versions_on_launch", true, "Show mod versions window on launch.")\
+                    .connect_to_prop("loaded", no_show_button, "visible")\
+                    .connect_to_prop("updated", no_show_button, "visible")\
                 .h_box_container().enter()\
                     .h_box_container().size_flags_h(Control.SIZE_EXPAND_FILL).enter()\
                         .label("UI Scale: ")\
@@ -148,10 +153,17 @@ func _post_init(script_instance: Reference = self):
                 .build()
     
     api.Logger.set_log_level(config.log_level)
+    if not config.show_mod_versions_on_launch:
+        api.UpdateChecker._show_mod_versions.disable()
+    no_show_button.connect("pressed", self, "disable_show_mod_versions_on_launch")
     LOGGER.info("Finished Loading.")
 
 func format_slider_label(value, label: Label):
     label.text = "%4d%%" % (value * 100)
+
+func disable_show_mod_versions_on_launch():
+    config.show_mod_versions_on_launch = false
+    config.save_cfg(true)
 
 func start():
     pass

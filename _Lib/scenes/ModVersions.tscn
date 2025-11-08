@@ -32,10 +32,18 @@ margin_right = 776.0
 margin_bottom = 576.0
 
 [node name="Close" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 362.0
-margin_right = 413.0
+margin_left = 167.0
+margin_right = 218.0
 margin_bottom = 31.0
 size_flags_horizontal = 6
 text = "Close"
 
+[node name="NoShow" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+margin_left = 517.0
+margin_right = 648.0
+margin_bottom = 31.0
+size_flags_horizontal = 6
+text = "Don't show again"
+
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Close" to="." method="hide"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/NoShow" to="." method="hide"]
