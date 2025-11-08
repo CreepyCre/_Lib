@@ -99,6 +99,14 @@ func start():
     config_container.add_child(label)
     label.owner = config_container
 
+    # example of MenuBarApi
+    # creates a new Menu
+    self.Global.API.MenuBarApi.get_menu("MyMenu").add_item("MyItem")
+    # gets existing menu
+    self.Global.API.MenuBarApi.get_menu("Menu").add_item("Dummy")
+    # turns existing button into menu
+    self.Global.API.MenuBarApi.get_menu("About").add_item("CoolButton")
+
     # generally omit the last value/ set it to true. Setting to false will attach the component to every applicable node when the node enters the scene.
     # for most props just having it be created when you access it is sufficient.
     var component_key = self.Global.API.ComponentsApi.register("test_component", PropComponent, self.Global.API.ComponentsApi.FLAG_PROP, false)

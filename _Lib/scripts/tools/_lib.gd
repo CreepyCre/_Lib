@@ -85,6 +85,8 @@ func _post_init(script_instance: Reference = self):
     set_up_api("ScalingApi", _global.Editor, api.AccessorApi.config().get_value("Preferences", "enlarge_ui", false))
     LOGGER.info("Registering InputMapApi")
     set_up_api("InputMapApi", _global.Editor.owner)
+    LOGGER.info("Registering MenuBarApi")
+    set_up_api("MenuBarApi", _global.Editor.get_node("VPartition/MenuBar/MenuAlign"))
     LOGGER.info("Registering PreferencesWindowApi")
     set_up_api("PreferencesWindowApi", _global.Editor.Windows.Preferences, api.ScalingApi.get_ui_scaling_agent())
     LOGGER.info("Registering ModConfigApi")
