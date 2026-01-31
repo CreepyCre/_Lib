@@ -85,7 +85,7 @@ func _define_actions(actions: Dictionary) -> Array:
 
 ## Deserializes an InputEventKey from string. 
 func deserialize_event(string: String) -> InputEventKey:
-    var codes: Array = string.to_lower().split("+")
+    var codes: Array = Array(string.to_lower().split("+"))
     var event: InputEventKey = InputEventKey.new()
     var key_string = codes.pop_back()
     if codes.has("alt"):
