@@ -82,7 +82,7 @@ class InstancedApiApi:
 
     ## Registers a new API and emits [signal api_registered]
     func register(api_id: String, api: Object):
-        LOGGER.info("Registering %s from %s", [api_id, _mod_info.mod_meta["name"]])
+        LOGGER.debug("Registering %s from %s", [api_id, _mod_info.mod_meta["name"]])
         _api_api.register(api_id, api)
     
     func _get(property):

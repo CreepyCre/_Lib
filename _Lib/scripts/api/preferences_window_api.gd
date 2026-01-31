@@ -1,8 +1,5 @@
 class_name PreferencesWindowApi
 
-class ScalingAgent: const import = "api/ScalingApi/ScalingAgent"
-class PropertyScaler: const import = "api/ScalingApi/PropertyScaler"
-
 const CLASS_NAME = "PreferencesWindowApi"
 var LOGGER: Object
 
@@ -27,7 +24,7 @@ signal back_pressed()
 signal apply_pressed()
 signal about_to_show()
 
-func _init(logger: Object, _pref: WindowDialog, ui_scaling_agent: ScalingAgent):
+func _init(logger: Object, _pref: WindowDialog):
     LOGGER = logger.for_class(self)
     # get all them nodes
     _preferences = _pref
@@ -55,9 +52,6 @@ func _init(logger: Object, _pref: WindowDialog, ui_scaling_agent: ScalingAgent):
     _buttons.add_child(_back_button)
     _back_button.owner = _buttons
 
-    # ensure buttons scale correctly
-    ui_scaling_agent.register(PropertyScaler._new(_back_button, "rect_min_size"))
-
     # make default buttons call _category_pressed
     _general_button.connect("pressed", self, "_category_pressed")
     _interface_button.connect("pressed", self, "_category_pressed")
@@ -67,6 +61,10 @@ func _init(logger: Object, _pref: WindowDialog, ui_scaling_agent: ScalingAgent):
     _preferences.disconnect("about_to_show", _preferences, "_on_Preferences_about_to_show")
     _preferences.connect("about_to_show", self, "_on_preferences_about_to_show")
 
+func scaling_api_registered(scaling_api):
+    # ensure buttons scale correctly
+    var ui_scaling_agent = scaling_api.get_ui_scaling_agent()
+    ui_scaling_agent.register(scaling_api.PropertyScaler._new(_back_button, "rect_min_size"))
 
 ## https://creepycre.github.io/_Lib/PreferencesWindowApi/#create_category
 ## use provided category container or _create_default_container()

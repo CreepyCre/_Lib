@@ -3,16 +3,12 @@ class_name ModConfigApi
 
 class ConfigBuilder: const import = "api/config/ConfigBuilder/"
 class WrappedControlConfigNode: const import = "api/config/ConfigBuilder/WrappedControlConfigNode"
-class ScalingAgent: const import = "api/ScalingApi/ScalingAgent"
-class ScalableImageTexture: const import = "api/ScalingApi/ScalableImageTexture"
-class PropertyScaler: const import = "api/ScalingApi/PropertyScaler"
 
 const CLASS_NAME = "ModConfigApi"
 var LOGGER: Object
 
 var _preferences_window_api
 var _input_map_api
-var _ui_scaling_agent: ScalingAgent
 var _copy_dir_func: FuncRef
 
 var _mod_config_scene
@@ -39,12 +35,11 @@ var _agents: Array = []
 var _busy: bool = false
 var _ui_cancel_events: Array = []
 
-func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_scaling_agent: ScalingAgent, active_mods: Array, copy_dir_func: FuncRef):
+func _init(logger: Object, preferences_window_api, input_map_api, loader, active_mods: Array, copy_dir_func: FuncRef):
     LOGGER = logger.for_class(self)
 
     _preferences_window_api = preferences_window_api
     _input_map_api = input_map_api
-    _ui_scaling_agent = ui_scaling_agent
     _copy_dir_func = copy_dir_func
 
     # add action for clearing shortcut
@@ -55,18 +50,13 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_sca
 
     # grab some of the vanilla icons
     var theme = load(ProjectSettings.get_setting("gui/theme/custom"))
-    _edit_icon = ScalableImageTexture._new(theme.get_icon("Edit", "EditorIcons"))
-    _add_icon = ScalableImageTexture._new(theme.get_icon("Add", "EditorIcons"))
-    _remove_icon = ScalableImageTexture._new(theme.get_icon("Remove", "EditorIcons"))
-    _ui_scaling_agent.register(_edit_icon)
-    _ui_scaling_agent.register(_add_icon)
-    _ui_scaling_agent.register(_remove_icon)
+    _edit_icon = theme.get_icon("Edit", "EditorIcons")
+    _add_icon = theme.get_icon("Add", "EditorIcons")
+    _remove_icon = theme.get_icon("Remove", "EditorIcons")
 
     # load resources
-    var texture_normal: Texture = ScalableImageTexture._new(Global.Theme.get_icon("Config", "CreepyCre._Lib"))
-    var texture_disabled: Texture = ScalableImageTexture._new(Global.Theme.get_icon("ConfigDisabled", "CreepyCre._Lib"))
-    _ui_scaling_agent.register(texture_normal)
-    _ui_scaling_agent.register(texture_disabled)
+    var texture_normal: Texture = Global.Theme.get_icon("Config", "CreepyCre._Lib")
+    var texture_disabled: Texture = Global.Theme.get_icon("ConfigDisabled", "CreepyCre._Lib")
     
     # load and prepare scenes
     _mod_config_scene = loader.load_scene("ModConfig")
@@ -94,7 +84,6 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_sca
         if (not active_mods.has(mod_info.get("unique_id"))):
             continue
         var mod_details = mod_details_scene.instance()
-        _ui_scaling_agent.register(PropertyScaler._new(mod_details.get_node("InfoMargins/HBoxContainer/ModIcon"), "rect_min_size"))
         var settings_button: TextureButton = mod_details.get_node("InfoMargins/HBoxContainer/Settings")
         settings_button.texture_normal = texture_normal
         settings_button.texture_disabled = texture_disabled
@@ -154,6 +143,31 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, ui_sca
     # TODO: make this lazy
     input_map_api.connect("added_actions", self, "rebuild_tree")
     input_map_api.connect("erased_actions", self, "rebuild_tree")
+
+
+func scaling_api_registered(scaling_api):
+    var ui_scaling_agent = scaling_api.get_ui_scaling_agent()
+    var ScalableImageTexture = scaling_api.ScalableImageTexture
+    var PropertyScaler = scaling_api.PropertyScaler
+
+    _edit_icon = ScalableImageTexture._new(_edit_icon)
+    _add_icon = ScalableImageTexture._new(_add_icon)
+    _remove_icon = ScalableImageTexture._new(_remove_icon)
+    ui_scaling_agent.register(_edit_icon)
+    ui_scaling_agent.register(_add_icon)
+    ui_scaling_agent.register(_remove_icon)
+    
+    var texture_normal: Texture = ScalableImageTexture._new(Global.Theme.get_icon("Config", "CreepyCre._Lib"))
+    var texture_disabled: Texture = ScalableImageTexture._new(Global.Theme.get_icon("ConfigDisabled", "CreepyCre._Lib"))
+    ui_scaling_agent.register(texture_normal)
+    ui_scaling_agent.register(texture_disabled)
+
+    for mod_details in _details_nodes:
+        ui_scaling_agent.register(PropertyScaler._new(mod_details.get_node("InfoMargins/HBoxContainer/ModIcon"), "rect_min_size"))
+        var settings_button: TextureButton = mod_details.get_node("InfoMargins/HBoxContainer/Settings")
+        settings_button.texture_normal = texture_normal
+        settings_button.texture_disabled = texture_disabled
+
 
 ## Creates a new ConfigBuilder for the mod with id mod_id. The mod config will automatically be saved into and loaded from config_file. 
 func create_config(config_file: String, title: String, mod_id: String):
