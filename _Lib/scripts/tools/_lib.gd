@@ -9,12 +9,6 @@ var config
 var _global: Dictionary
 var _script
 
-var all_ddmod_jsons = {}
-var all_roots = {}
-var unique_id_to_root = {}
-var path_to_unique_id = {}
-var unique_id_to_ddmod = {}
-
 const UPPERCASE_LETTER: String = "[^A-Z]([A-Z])"
 var uppercase_letter: RegEx = RegEx.new()
 
@@ -44,9 +38,6 @@ func _post_init(script_instance: Reference = self):
     _global = script_instance.Global
     _script = script_instance.Script
 
-    # read in .ddmod files
-    aquire_active_ddmod_files()
-
     # unload on scene unload
     var _master = _global.Editor.owner
     _master.connect("tree_exiting", self, "_unload")
@@ -58,8 +49,20 @@ func _post_init(script_instance: Reference = self):
     var general_logger = load(_global.Root + "../api/logger.gd").new()
     LOGGER = general_logger.InstancedLogger.new(general_logger, "_Lib")
 
+    # create AccessorApi
+    LOGGER.info("Initializing AccessorApi")
+    var accessor_api = load(_global.Root + "../api/accessor_api.gd").new(LOGGER)
+
+    LOGGER.info("Indexing active mods")
+    var active_mods: Dictionary = {}
+    var core_mods: Dictionary = {}
+    index_active_mods(active_mods, core_mods, accessor_api.config().get_value("Mods", "mods_directory"))
+
     # create the ClassLoader
     LOGGER.info("Initializing ClassLoader")
+    var unique_id_to_root: Dictionary = {}
+    for mod_id in active_mods:
+        unique_id_to_root[mod_id] = active_mods[mod_id].root
     var class_loader = load(_global.Root + "../api/class_loader.gd").new(LOGGER, unique_id_to_root)
     instanced_class_loader = class_loader.InstancedClassLoader.new(class_loader, "CreepyCre._Lib")
 
@@ -71,10 +74,10 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering Logger. Who came first?")
     api.register("Logger", general_logger)
     LOGGER.info("Registering ModRegistry")
-    set_up_api("ModRegistry", api, path_to_unique_id, unique_id_to_ddmod)
+    set_up_api("ModRegistry", api, active_mods)
     api.ModRegistry.register(self, _global)
     LOGGER.info("Registering AccessorApi")
-    set_up_api("AccessorApi")
+    api.register("AccessorApi", accessor_api)
     LOGGER.info("Registering Util")
     set_up_api("Util", _master)
     var loading_helper = api.Util.create_loading_helper(_global.Root + "../../")
@@ -89,7 +92,7 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering PreferencesWindowApi")
     set_up_api("PreferencesWindowApi", _global.Editor.Windows.Preferences)
     LOGGER.info("Registering ModConfigApi")
-    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, loading_helper, _script.GetActiveMods(), funcref(api.Util, "copy_dir"))
+    set_up_api("ModConfigApi", api.PreferencesWindowApi, api.InputMapApi, loading_helper, core_mods, funcref(api.Util, "copy_dir"))
     LOGGER.info("Registering HistoryApi")
     set_up_api("HistoryApi", _global.Editor)
     LOGGER.info("Registering ComponentsApi")
@@ -97,7 +100,7 @@ func _post_init(script_instance: Reference = self):
     LOGGER.info("Registering LayerApi")
     set_up_api("LayerApi", _global.API.ComponentsApi, _global.World, _global.Editor.Tools["SelectTool"], _global.Editor.Toolset.GetToolPanel("SelectTool"))
     LOGGER.info("Registering UpdateChecker")
-    set_up_api("UpdateChecker", _global.API.Util, loading_helper, _global.API.ModRegistry, _global.API.MenuBarApi)
+    set_up_api("UpdateChecker", _global.API.Util, loading_helper, core_mods, _global.API.MenuBarApi)
     var update_checker = _global.API.UpdateChecker
     update_checker.register(update_checker.builder()\
                                             .fetcher(update_checker.github_fetcher("CreepyCre", "_Lib"))\
@@ -196,16 +199,16 @@ func camel_to_snake_case(string: String) -> String:
     string_pieces.append(string.substr(final_index))
     return PoolStringArray(string_pieces).join("").to_lower()
 
-func aquire_active_ddmod_files():
-    var active_mods = _script.GetActiveMods()
-    # read in some mod directory from DungeonDraft config file
-    var config: ConfigFile = ConfigFile.new()
-    config.load("user://config.ini")
-    var mods_dir: String = config.get_value("Mods", "mods_directory")
-    # get list of .ddmod files
-    var ddmod_files: Array = _get_all_files(mods_dir, "ddmod")
-    ddmod_files.append_array(_get_all_files("%s/mods" % OS.get_executable_path().get_base_dir(), "ddmod"))
-
+func index_active_mods(active_mods: Dictionary, core_mods: Dictionary, mods_dir):
+    # discover all ddmod files within mods folders
+    var ddmod_files: Array = _get_all_files(OS.get_executable_path().get_base_dir().plus_file("mods"), "ddmod")
+    if mods_dir != null:
+        for file in _get_all_files(mods_dir, "ddmod"):
+            if not file in ddmod_files:
+                ddmod_files.append(file)
+    
+    # read in all ddmod files, index them via unique_id
+    var all_mod_infos: Dictionary = {}
     var file: File = File.new()
     for ddmod_file in ddmod_files:
         # read in .ddmod files as json into dictionary
@@ -213,29 +216,31 @@ func aquire_active_ddmod_files():
         var ddmod_json: Dictionary = JSON.parse(file.get_as_text()).result
         file.close()
 
-        all_ddmod_jsons[ddmod_json["unique_id"]] = ddmod_json
-        all_roots[ddmod_json["unique_id"]] = ddmod_file.get_base_dir().rstrip("/")
+        all_mod_infos[ddmod_json["unique_id"]] = ModInfo.new(null, ddmod_file.get_base_dir().rstrip("/"), ddmod_json)
+    
+    # index all active mods (recursively in case of dependencies)
+    for mod_id in _script.GetActiveMods():
+        _index_mod(active_mods, core_mods, mod_id, all_mod_infos)
 
-    for mod_id in active_mods:
-        index_mod(mod_id)
-
-func index_mod(mod_id):
-    if mod_id in unique_id_to_ddmod:
-        return
+func _index_mod(active_mods: Dictionary, core_mods: Dictionary, mod_id: String, all_mod_infos: Dictionary):
     # checks if mod even exists
-    if not mod_id in all_ddmod_jsons:
+    if not mod_id in all_mod_infos:
+        LOGGER.error("Could not find ddmod file while indexing mod with id \"%s\"!", [mod_id])
         return
-    var root = all_roots[mod_id]
-    path_to_unique_id[root] = mod_id
-    unique_id_to_root[mod_id] = root
-    var ddmod = all_ddmod_jsons[mod_id]
-    unique_id_to_ddmod[mod_id] = ddmod
-    if "dependencies" in ddmod:
-        for mod_id in ddmod["dependencies"]:
-            index_mod(mod_id)
+    var mod_info = all_mod_infos[mod_id]
+    # this ordering ensures that dependencies are indexed first
+    if "dependencies" in mod_info.mod_meta:
+        for mod_id in mod_info.mod_meta["dependencies"]:
+            _index_mod(active_mods, core_mods, mod_id, all_mod_infos)
+    if mod_id in active_mods:
+         return
+    active_mods[mod_id] = mod_info
+    # build module tree, this is why the ordering is important
+    if "parent" in mod_info.mod_meta:
+        active_mods[mod_info.mod_meta["parent"]].modules[mod_id] = mod_info
+    else:
+        core_mods[mod_id] = mod_info
     
-    
-
 # utility method for recursively finding all files with file extension file_ext in path
 static func _get_all_files(path: String, file_ext := "", files := []):
     var dir = Directory.new()
@@ -270,3 +275,15 @@ func _unload():
 class Misc:
     static func get_global():
         return Global
+
+## Data class for storing the mod script and the mods ddmod json entries
+class ModInfo:
+    var mod # optional
+    var root
+    var mod_meta: Dictionary
+    var modules: Dictionary
+
+    func _init(_mod, _root, ddmod_json: Dictionary = {}):
+        mod = _mod
+        root = _root
+        mod_meta = ddmod_json

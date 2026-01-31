@@ -13,16 +13,14 @@ var _mod_versions_window
 var _mv_tree: Tree
 var _show_mod_versions: Once = Once.new()
 
-func _init(logger: Object, util, loader, mod_registry, menu_bar_api):
+func _init(logger: Object, util, loader, core_mods, menu_bar_api):
     LOGGER = logger.for_class(self)
     _util = util
 
     _mod_versions_window = loader.load_scene("ModVersions").instance()
     util.add_window(_mod_versions_window)
-    # aquire sorted ddmods
-    var ddmods: Dictionary = mod_registry.get_ddmods()
-    var ddmod_array: Array = ddmods.values()
-    ddmod_array.sort_custom(self, "_sort_ddmod_array")
+
+
     # set up the mod versions tree
     _mv_tree = _mod_versions_window.get_node("MarginContainer/VBoxContainer/Mods")
     _mv_tree.connect("button_pressed", self, "_update_clicked")
@@ -33,23 +31,32 @@ func _init(logger: Object, util, loader, mod_registry, menu_bar_api):
     _mv_tree.set_column_min_width(3, 32)
     _mv_tree.set_column_expand(3, false)
     var root = _mv_tree.create_item()
-    for ddmod in ddmod_array:
-        var mod_id = ddmod["unique_id"]
-        var current_version = ddmod["version"]
+
+    add_to_mod_list(root, core_mods)
+    
+    menu_bar_api.get_menu("Mods").add_item("Mod Versions").connect("pressed", _mod_versions_window, "popup_centered")
+
+func add_to_mod_list(root: TreeItem, mods: Dictionary):
+    # aquire sorted mod_info
+    var mod_info_array = mods.values()
+    mod_info_array.sort_custom(self, "_sort_mod_info_array")
+
+    for mod_info in mod_info_array:
+        var mod_id = mod_info.mod_meta["unique_id"]
         var item = _mv_tree.create_item(root)
+        item.collapsed = true
         var agent = ItemAgent._new(LOGGER, item)
         _item_agents[mod_id] = agent
         _item_to_agent[item] = agent
-        item.set_text(0, ddmod["name"])
-        item.set_text(1, ddmod["version"])
-    
-    menu_bar_api.get_menu("Mods").add_item("Mod Versions").connect("pressed", _mod_versions_window, "popup_centered")
+        item.set_text(0, mod_info.mod_meta["name"])
+        item.set_text(1, mod_info.mod_meta["version"])
+        add_to_mod_list(item, mod_info.modules)
 
 func _update_clicked(item, _column, _id):
     _item_to_agent[item].download()
 
-func _sort_ddmod_array(a, b):
-    return AlphabeticalComparator.compare(a["name"], b["name"]) == -1
+func _sort_mod_info_array(a, b):
+    return AlphabeticalComparator.compare(a.mod_meta["name"], b.mod_meta["name"]) == -1
 
 func register(mod_id: String, agent: UpdateAgent):
     _item_agents[mod_id].set_update_agent(agent)

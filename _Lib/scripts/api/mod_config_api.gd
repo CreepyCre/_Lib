@@ -12,12 +12,13 @@ var _input_map_api
 var _copy_dir_func: FuncRef
 
 var _mod_config_scene
-var _details_nodes: Array = []
+var _details_nodes: Dictionary = {}
 var _current_details = null
 var _mod_menu: Control
 var _mods_panel: Control
 var _mod_v_sep: VSeparator
-var _mod_list: ItemList
+var _mod_list: Tree
+var _mod_details_scene: PackedScene
 var _mod_config_buttons: Dictionary = {}
 var _mod_config_panels: Dictionary = {}
 var _active_mod_config = null
@@ -35,7 +36,7 @@ var _agents: Array = []
 var _busy: bool = false
 var _ui_cancel_events: Array = []
 
-func _init(logger: Object, preferences_window_api, input_map_api, loader, active_mods: Array, copy_dir_func: FuncRef):
+func _init(logger: Object, preferences_window_api, input_map_api, loader, core_mods: Dictionary, copy_dir_func: FuncRef):
     LOGGER = logger.for_class(self)
 
     _preferences_window_api = preferences_window_api
@@ -53,10 +54,6 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
     _edit_icon = theme.get_icon("Edit", "EditorIcons")
     _add_icon = theme.get_icon("Add", "EditorIcons")
     _remove_icon = theme.get_icon("Remove", "EditorIcons")
-
-    # load resources
-    var texture_normal: Texture = Global.Theme.get_icon("Config", "CreepyCre._Lib")
-    var texture_disabled: Texture = Global.Theme.get_icon("ConfigDisabled", "CreepyCre._Lib")
     
     # load and prepare scenes
     _mod_config_scene = loader.load_scene("ModConfig")
@@ -65,46 +62,12 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
     _mod_list = _mods_panel.get_node("ModList")
     _mod_list.connect("item_selected", self, "_mod_selected")
     _mod_list.connect("nothing_selected", self, "_mod_selected")
+    var root = _mod_list.create_item()
     _mod_v_sep = _mods_panel.get_node("VSeparator")
-    var mod_details_scene = loader.load_scene("ModDetails")
+    _mod_details_scene = loader.load_scene("ModDetails")
 
-    # read mod dir from config and find all .ddmod files
-    var config: ConfigFile = ConfigFile.new()
-    config.load("user://config.ini")
-    var mods_dir: String = config.get_value("Mods", "mods_directory")
-    var ddmod_files: Array = _get_all_files(mods_dir, "ddmod")
-    var file: File = File.new()
-
-    # read in .ddmod files as json and use the entries to construct mod details screen
-    for ddmod_file in ddmod_files:
-        file.open(ddmod_file, File.READ)
-        var mod_info: Dictionary = JSON.parse(file.get_as_text()).result
-        file.close()
-        # ignore mod if not active
-        if (not active_mods.has(mod_info.get("unique_id"))):
-            continue
-        var mod_details = mod_details_scene.instance()
-        var settings_button: TextureButton = mod_details.get_node("InfoMargins/HBoxContainer/Settings")
-        settings_button.texture_normal = texture_normal
-        settings_button.texture_disabled = texture_disabled
-        _mod_config_buttons[mod_info.get("unique_id")] = settings_button
-        var icon_location: String = ddmod_file.get_base_dir() + "/preview.png"
-        if file.file_exists(icon_location):
-            mod_details.get_node("InfoMargins/HBoxContainer/ModIcon").texture = loader.load_texture_full_path(icon_location)
-        if mod_info.has("name"):
-            _mod_list.add_item(mod_info.get("name"))
-            mod_details.get_node("InfoMargins/HBoxContainer/Info/ModName").append_bbcode("[u]" + mod_info.get("name") + "[/u]")
-        else:
-            _mod_list.add_item(mod_info.get("unique_id"))
-            mod_details.get_node("InfoMargins/HBoxContainer/Info/ModName").append_bbcode("[u]" + mod_info.get("unique_id") + "[/u]")
-        if mod_info.has("version"):
-            mod_details.get_node("InfoMargins/HBoxContainer/Info/Version").append_bbcode("[color=gray]Version " + mod_info.get("version") + "[/color]")
-        if mod_info.has("author"):
-            mod_details.get_node("InfoMargins/HBoxContainer/Info/Author").append_bbcode("[color=gray]By " + mod_info.get("author") + "[/color]")
-        if mod_info.has("description"):
-            mod_details.get_node("DescriptionScroller/Margins/Description").append_bbcode(mod_info.get("description"))
-        _details_nodes.append(mod_details)
-        _mods_panel.add_child(mod_details)
+    # add each mod to the list
+    add_to_mod_list(root, core_mods, loader)
     
     # use PreferencesWindowApi to add mod menu to preferences window and connect the back button signal
     preferences_window_api.create_category("Mods", _mod_menu)
@@ -144,6 +107,38 @@ func _init(logger: Object, preferences_window_api, input_map_api, loader, active
     input_map_api.connect("added_actions", self, "rebuild_tree")
     input_map_api.connect("erased_actions", self, "rebuild_tree")
 
+func add_to_mod_list(root: TreeItem, mods: Dictionary, loader):
+    for mod_id in mods:
+        var mod_details = _mod_details_scene.instance()
+        var settings_button: TextureButton = mod_details.get_node("InfoMargins/HBoxContainer/Settings")
+        settings_button.texture_normal = Global.Theme.get_icon("Config", "CreepyCre._Lib")
+        settings_button.texture_disabled = Global.Theme.get_icon("ConfigDisabled", "CreepyCre._Lib")
+        _mod_config_buttons[mod_id] = settings_button
+        
+        var icon_location: String = "%s/preview.png" % mods[mod_id].root
+        var file: File = File.new()
+        if file.file_exists(icon_location):
+            mod_details.get_node("InfoMargins/HBoxContainer/ModIcon").texture = loader.load_texture_full_path(icon_location)
+        var mod_meta = mods[mod_id].mod_meta
+        var item: TreeItem = _mod_list.create_item(root)
+        item.collapsed = true
+        item.set_meta("mod_id", mod_id)
+        if mod_meta.has("name"):
+            item.set_text(0, mod_meta.get("name"))
+            mod_details.get_node("InfoMargins/HBoxContainer/Info/ModName").append_bbcode("[u]" + mod_meta.get("name") + "[/u]")
+        else:
+            item.set_text(0, mod_meta.get("unique_id"))
+            mod_details.get_node("InfoMargins/HBoxContainer/Info/ModName").append_bbcode("[u]" + mod_meta.get("unique_id") + "[/u]")
+        if mod_meta.has("version"):
+            mod_details.get_node("InfoMargins/HBoxContainer/Info/Version").append_bbcode("[color=gray]Version " + mod_meta.get("version") + "[/color]")
+        if mod_meta.has("author"):
+            mod_details.get_node("InfoMargins/HBoxContainer/Info/Author").append_bbcode("[color=gray]By " + mod_meta.get("author") + "[/color]")
+        if mod_meta.has("description"):
+            mod_details.get_node("DescriptionScroller/Margins/Description").append_bbcode(mod_meta.get("description"))
+        _details_nodes[mod_id] = mod_details
+        _mods_panel.add_child(mod_details)
+        add_to_mod_list(item, mods[mod_id].modules, loader)
+
 
 func scaling_api_registered(scaling_api):
     var ui_scaling_agent = scaling_api.get_ui_scaling_agent()
@@ -162,7 +157,7 @@ func scaling_api_registered(scaling_api):
     ui_scaling_agent.register(texture_normal)
     ui_scaling_agent.register(texture_disabled)
 
-    for mod_details in _details_nodes:
+    for mod_details in _details_nodes.values():
         ui_scaling_agent.register(PropertyScaler._new(mod_details.get_node("InfoMargins/HBoxContainer/ModIcon"), "rect_min_size"))
         var settings_button: TextureButton = mod_details.get_node("InfoMargins/HBoxContainer/Settings")
         settings_button.texture_normal = texture_normal
@@ -451,17 +446,19 @@ func _back_pressed():
         _active_mod_config = null
     _preferences_window_api.show_close()
 
-func _mod_selected(id: int = -1):
+func _mod_selected():
+    var selected: TreeItem = _mod_list.get_selected()
     if _current_details != null:
         _current_details.hide()
-    if id < 0:
+    if selected == null:
         _mod_v_sep.hide()
         _mod_list.unselect_all()
         _current_details = null
-    else:
-        _mod_v_sep.show()
-        _current_details = _details_nodes[id]
-        _current_details.show()
+        return
+    var mod_id: String = selected.get_meta("mod_id")
+    _mod_v_sep.show()
+    _current_details = _details_nodes[mod_id]
+    _current_details.show()
 
 # utility method for recursively finding all files with file extension file_ext in path
 static func _get_all_files(path: String, file_ext := "", files := []):

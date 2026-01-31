@@ -15,11 +15,13 @@ margin_bottom = 385.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ModList" type="ItemList" parent="ModPanel"]
+[node name="ModList" type="Tree" parent="ModPanel"]
 margin_right = 608.0
 margin_bottom = 385.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+hide_root = true
+select_mode = 1
 
 [node name="VSeparator" type="VSeparator" parent="ModPanel"]
 margin_left = 612.0

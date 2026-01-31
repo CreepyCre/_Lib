@@ -4,18 +4,18 @@ const CLASS_NAME = "ModRegistry"
 var LOGGER: Object
 
 var _api_api
-var _path_to_unique_id
-var _unique_id_to_ddmod
-var _unique_id_to_mod_info = {}
-var _registered_mods = []
+var _active_mods: Dictionary = {}
+var _registered_mods: Dictionary = {}
+var _root_to_mod_info: Dictionary = {}
 
 signal registered(mod_info)
 
-func _init(logger: Object, api_api, path_to_unique_id: Dictionary, unique_id_to_ddmod: Dictionary):
+func _init(logger: Object, api_api: Object, active_mods: Dictionary):
     LOGGER = logger.for_class(self)
     _api_api = api_api
-    _path_to_unique_id = path_to_unique_id
-    _unique_id_to_ddmod = unique_id_to_ddmod
+    _active_mods = active_mods
+    for mod_info in active_mods.values():
+        _root_to_mod_info[mod_info.root] = mod_info
 
     # create and connect to mod registration signal
     if (not Engine.has_signal("_lib_register_mod")):
@@ -30,28 +30,29 @@ func register(mod: Reference, global_instance = null):
     var mod_root: String = global_instance.Root.rstrip("/")
     var mod_info
     # create ModInfo with the .ddmod file dictionary we collected in _init
-    if (mod_root in _path_to_unique_id):
-        mod_info = ModInfo.new(mod, get_ddmod(_path_to_unique_id[mod_root]))
-        _unique_id_to_mod_info[mod_info.mod_meta["unique_id"]] = mod_info
+    if (mod_root in _root_to_mod_info):
+        mod_info = _root_to_mod_info[mod_root]
+        mod_info.mod = mod
     else:
-        mod_info = ModInfo.new(mod)
-    # add mod to registry 
-    _registered_mods.append(mod_info)
+        LOGGER.error("Failed to register mod in directory \"%s\" since ddmod file could not be found!", [mod_root])
+        return
+    # add mod to registry
+    _registered_mods[mod_info.mod_meta["unique_id"]] = mod_info
     # add InstancedApiApi to mod global dictionary
     global_instance["API"] = _api_api._instance(mod_info)
     emit_signal("registered", mod_info)
 
-func get_mod_info(mod_id: String):
-    return _unique_id_to_mod_info[mod_id]
+func get_active_mods() -> Dictionary:
+    return _active_mods.duplicate()
 
-func get_mod_list():
+func get_registered_mods() -> Dictionary:
     return _registered_mods.duplicate()
 
-func get_ddmod(mod_id: String):
-    return _unique_id_to_ddmod[mod_id]
+func get_mod_info(mod_id: String):
+    return _active_mods[mod_id]
 
-func get_ddmods():
-    return _unique_id_to_ddmod
+func get_ddmod(mod_id: String) -> Dictionary:
+    return _active_mods[mod_id].mod_meta
 
 func _unload():
     LOGGER.info("Unloading %s.", [CLASS_NAME])
@@ -61,12 +62,3 @@ func _unload():
         var signal_name = signal_dict.name
         for callable_dict in get_signal_connection_list(signal_name):
             disconnect(signal_name, callable_dict.target, callable_dict.method)
-
-## Data class for storing the mod script and the mods ddmod json entries
-class ModInfo:
-    var mod
-    var mod_meta: Dictionary
-
-    func _init(_mod, ddmod_json: Dictionary = {}):
-        mod = _mod
-        mod_meta = ddmod_json
