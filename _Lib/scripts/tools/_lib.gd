@@ -128,9 +128,6 @@ func _post_init(script_instance: Reference = self):
     no_show_button.connect("pressed", self, "disable_show_mod_versions_on_launch")
     LOGGER.info("Finished Loading.")
 
-func format_slider_label(value, label: Label):
-    label.text = "%4d%%" % (value * 100)
-
 func disable_show_mod_versions_on_launch():
     config.show_mod_versions_on_launch = false
     config.save_cfg(true)

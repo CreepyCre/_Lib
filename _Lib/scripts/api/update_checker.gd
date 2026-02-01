@@ -87,7 +87,7 @@ class ItemAgent:
     func version_callback(result):
         if result.is_exception():
             item.set_icon(2, Global.Theme.get_icon("StatusError", "EditorIcons"))
-            item.set_text(2, "Error")
+            item.set_text(2, "Failed to check for update")
             LOGGER.error("Could not fetch recent version for {mod}. Reason: {reason}".format({"mod": item.get_text(0), "reason": result.get_exception()}))
             return
         recent_version = result.get_value()
