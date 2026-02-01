@@ -19,7 +19,14 @@ static func compare(v1, v2):
         return -1 if v1.minor < v2.minor else 1
     if v1.patch != v2.patch:
         return -1 if v1.patch < v2.patch else 1
-    var max_size: int = int(min(v1.pre_release.size(), v2.pre_release.size()))
+    var size1: int = v1.pre_release.size()
+    var size2: int = v2.pre_release.size()
+    var max_size: int = int(min(size1, size2))
+    if max_size == 0:
+        if size1 == size2:
+            return 0
+        # flipped logic in comparison to later check; special case for 0 tags which is full release
+        return 1 if size1 < size2 else -1
     var i: int = 0
     while i < max_size:
         i = i + 1
