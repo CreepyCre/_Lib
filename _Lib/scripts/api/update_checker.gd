@@ -218,7 +218,6 @@ class GitHubFetcher:
         callback.call_func(version_parser.call_func(json.result["tag_name"]))
     
     func parse_version(tag: String) -> Result:
-        print(tag)
         if not SemVer.is_sem_ver(tag):
             return Result.exception("Version tag \"{tag}\" is not SemVer.".format({"tag": tag}))
         return Result.of(SemVer._new(tag.lstrip("v")))
