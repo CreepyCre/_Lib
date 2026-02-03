@@ -19,6 +19,9 @@ func register(api_id: String, api: Object):
             instance.get(api_id)
     emit_signal("api_registered", api_id, api)
 
+func has(property) -> bool:
+    return apis.has(property)
+
 func _get(property):
     # make APIs available as properties
     return apis.get(property)
@@ -85,10 +88,15 @@ class InstancedApiApi:
         LOGGER.debug("Registering %s from %s", [api_id, _mod_info.mod_meta["name"]])
         _api_api.register(api_id, api)
     
+    func has(property) -> bool:
+        return _api_api.has(property)
+    
     func _get(property):
         # return instanced api if already available
         if (property in _instanced_apis):
             return _instanced_apis[property]
+        if not property in _api_api:
+            return null
         var api = _api_api[property]
         # if api can't be instanced just return it
         if (not api.has_method("_instance")):
