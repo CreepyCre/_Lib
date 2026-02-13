@@ -115,14 +115,14 @@ func _post_init(script_instance: Reference = self):
                 .h_box_container().enter()\
                     .label("Log Level")\
                     .option_button("log_level", api.Logger.get_log_level(), api.Logger._CONFIG_LOOKUP.keys())\
-                        .connect_prop("updated", api.Logger, "set_log_level")\
+                        .connect_current("loaded", api.Logger, "set_log_level")\
+                        .connect_current("updated", api.Logger, "set_log_level")\
                 .exit()\
                 .check_box("show_mod_versions_on_launch", true, "Show mod versions window on launch.")\
                     .connect_to_prop("loaded", no_show_button, "visible")\
                     .connect_to_prop("updated", no_show_button, "visible")\
                 .build()
-    
-    api.Logger.set_log_level(config.log_level)
+
     if not config.show_mod_versions_on_launch:
         api.UpdateChecker._show_mod_versions.disable()
     no_show_button.connect("pressed", self, "disable_show_mod_versions_on_launch")

@@ -92,6 +92,11 @@ func get_log_level():
     return _log_level
 
 func set_log_level(level):
+    if level is String:
+        if not level in _CONFIG_LOOKUP:
+            self.log(ERROR, "_Lib", CLASS_NAME, -1, "Cannot set '%s' as log level.", [level])
+            return
+        level = _CONFIG_LOOKUP[level]
     if (_log_level != level):
         _log_level = level
         _config.set_value("Logger", "log_level", level)
